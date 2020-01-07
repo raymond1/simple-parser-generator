@@ -1,0 +1,378 @@
+<html>
+<head>
+<title>Test</title>
+
+</head>
+<body>
+
+
+<script src='parser.js'></script>
+<script>
+class ParseViewer{
+  constructor(debugArea, treeNode, completedOperations){
+    this.debugArea = debugArea
+    this.debugArea.innerHTML = ' '
+
+    this.rootTreeNode = treeNode
+    this.viewingIndex = -1
+    this.currentTreeNode = null
+    this.completedOperations = completedOperations
+
+    let button = document.createElement('button')
+    button.setAttribute('type', 'button')
+    let text = document.createTextNode('Highlight Next')
+    button.appendChild(text)
+    button.addEventListener('click', this.next.bind(this))
+    treeNode.domElement.parentNode.insertBefore(button, treeNode.domElement.nextSibling)
+
+    document.addEventListener('keydown', (event) =>{ 
+      if (event.keyCode == 78){//n
+        this.next()
+      }
+      else if (event.keyCode == 77){//m
+        this.nextMatch()
+      }
+      else if (event.keyCode == 82){//r
+        this.viewingIndex = -1
+      }
+    })
+  }
+
+  getTreeNodeWithId(baseTreeNode = this.rootTreeNode, id){
+    let treeNodeToReturn = null
+    let treeNodeToReturn2
+    if (baseTreeNode.node.id == id){
+      treeNodeToReturn = baseTreeNode
+    }else{
+      //is it one of the descendants?
+      let children = baseTreeNode.getChildren()
+      if (children.length > 0){
+        for (let i = 0; i < children.length; i++){
+          treeNodeToReturn2 = this.getTreeNodeWithId(children[i], id)
+          if (treeNodeToReturn2){
+            treeNodeToReturn = treeNodeToReturn2
+            break
+          }
+        }
+      }
+    }
+    return treeNodeToReturn
+  }
+
+  next(){
+    //unhighlight if necessary
+    if (this.currentTreeNode){
+      this.currentTreeNode.unhighlight()
+    }
+
+    this.viewingIndex = this.viewingIndex+1
+    if (this.viewingIndex > this.completedOperations.length){
+      this.viewingIndex = -1
+    }else{
+      let completedOperation = this.completedOperations[this.viewingIndex]
+
+      let nodeId
+      if (typeof completedOperation == 'object'){
+        nodeId = completedOperation.id
+        this.debugArea.innerHTML = JSON.stringify(completedOperation) + "|this.viewingIndex:" + this.viewingIndex
+      }else if (typeof completedOperation == 'string'||typeof completedOperation == 'number'){
+        nodeId = this.completedOperations[this.viewingIndex]
+      }else{
+        console.log
+      }
+
+      this.currentTreeNode=this.getTreeNodeWithId(this.rootTreeNode, nodeId)
+      if (this.currentTreeNode){
+        this.currentTreeNode.highlight()
+      }
+    }
+  }
+
+
+  nextMatch(){
+    if (this.currentTreeNode){
+      this.currentTreeNode.unhighlight()
+    }
+    for (let i = this.viewingIndex; i < this.completedOperations.length; i++){
+      if (typeof this.completedOperations[i] == 'object'){
+        if (this.completedOperations[i].matchFound == true){
+          let completedOperation = this.completedOperations[i]
+          let nodeId = completedOperation.id
+
+          this.currentTreeNode=this.getTreeNodeWithId(this.rootTreeNode, nodeId)
+          if (this.currentTreeNode){
+            this.currentTreeNode.highlight()
+          }
+          break
+        }
+      }
+    }
+  }
+}
+
+class TreeViewer{
+  constructor(root, parentElement){
+    this.root = root
+    this.parentElement = parentElement
+    this.domElement = document.createElement('pre')
+    this.parentElement.appendChild(this.domElement)
+  }
+
+  getOutputString(metadata){
+    let outputString = '  '.repeat(metadata['depth']) + '*****************************\n'
+
+    let keys = Object.keys(metadata)
+    for(let i = 0; i < keys.length; i++){
+      let keyValue = metadata[keys[i]]
+      if (typeof keyValue == 'object'){
+        if (keyValue !== null){
+          if (Array.isArray(keyValue)){
+            for (let j = 0; j < keyValue.length; j++){
+              outputString += this.getOutputString(keyValue[j])
+            }
+          }else{
+            outputString += this.getOutputString(keyValue)
+          }
+        }
+      }else{
+        outputString += '  '.repeat(metadata['depth']) + keys[i] + ":" + keyValue + '\n'
+      }
+    }
+    return outputString
+  }
+  
+  display(metadata){
+    let outputString = ''
+    if (typeof metadata == 'undefined'){
+      metadata = this.root
+    }
+    outputString = this.getOutputString(metadata)
+    let outputTextNode = document.createTextNode(outputString)
+    this.domElement.appendChild(outputTextNode)
+  }
+}
+
+//Treenode connects nodes with domElements
+//A Treenode is not the node data it contains
+//A Treenode is not the domElement that is clicked on
+class TreeNode{
+  constructor(node, parentElement){
+    this.children = []
+    this.node = node
+    this.parentElement = parentElement
+    this.expanded = false
+
+    let ul = document.createElement('ul')
+    this.domElement = ul
+    this.parentElement.appendChild(ul)
+
+    ul.style.border = '4px black solid'
+    ul.style.width = '100%'
+    ul.style.background = '#fff'
+    let li = document.createElement('li')
+    li.style.width = '100%'
+    li.style.background = '#fff'
+
+    let nodeType = node.constructor.name
+    let nodeTypeTextNode = document.createTextNode(nodeType)
+    li.appendChild(nodeTypeTextNode)
+    ul.appendChild(li)
+
+
+    if (node.attributes.length > 0){
+      let attributeList = document.createElement('ul')
+      li.appendChild(attributeList)
+
+      //For each node attribute display it
+      for (let i = 0; i < node.attributes.length; i++){
+        let attribute = document.createElement('li')
+        attributeList.appendChild(attribute)
+
+        let attributeText = node.attributes[i] + '=' + node[node.attributes[i]]
+        //if node[node.attributes[i]] is an object, it will say 'object'. Instead of showing that, show the name of the attribute instead
+        if (Array.isArray(node[node.attributes[i]])||typeof node[node.attributes[i]] == 'object'){
+          attributeText = node.attributes[i]
+        }
+
+        let attributeTextNode = document.createTextNode(attributeText)
+
+        attribute.appendChild(attributeTextNode)
+        if (Array.isArray(node[node.attributes[i]])){
+          for (let j = 0; j < node[node.attributes[i]].length; j++){
+              this.children.push(new TreeNode(node[node.attributes[i]][j], attribute))
+          }
+        }else if (typeof node[node.attributes[i]] == 'object'){
+          this.children.push(new TreeNode(node[node.attributes[i]], attribute))
+        }
+
+      }
+    }
+
+
+  }
+
+  highlight(){
+    let ul = this.domElement
+    //.getElementsByTagName('ul')[0]
+    //ul.style.border = "thick #ff0 solid"
+    ul.style.backgroundColor = "#ff0"
+    //ul.getElementsByTagName('li')[0].style.backgroundColor = "#ff0"
+  }
+  unhighlight(){
+    let ul = this.domElement
+    //.getElementsByTagName('ul')[0]
+    //ul.style.border = "thick #000 solid"
+    ul.style.backgroundColor = "#fff"
+//    ul.getElementsByTagName('li')[0].style.backgroundColor = "#fff"
+  }
+  getChildren(){
+    return this.children
+  }
+}
+
+class ParseTreeNode{
+  constructor(node, parentElement){
+
+  }
+}
+var grammar =
+
+`
+RULE_LIST = 
+MULTIPLE[
+  RULE
+]
+
+RULE = SEQUENCE[
+  WS_ALLOW_BOTH[RULE_NAME],
+  '=',
+  WS_ALLOW_BOTH[PATTERN]
+]
+
+PATTERN_LIST = OR[
+  SEQUENCE[
+    WS_ALLOW_BOTH[PATTERN],
+    MULTIPLE[
+      SEQUENCE
+      [
+        ',',
+        WS_ALLOW_BOTH[PATTERN]
+      ]
+    ]
+  ]
+  ,
+  PATTERN
+]
+
+PATTERN = OR[
+  QUOTED_STRING,
+  OR,
+  SEQUENCE,
+  RULE_NAME,
+  WS_ALLOW_BOTH,
+  MULTIPLE,
+  CHARACTER_CLASS
+]
+
+QUOTED_STRING= OR[
+  'L_SQUARE_BRACKET',
+  'R_SQUARE_BRACKET',
+  'S_QUOTE',
+  'COMMA',
+  SEQUENCE[S_QUOTE, STRING, S_QUOTE]
+]
+
+OR = [
+  SEQUENCE[L_SQUARE_BRACKET, PATTERN_LIST, R_SQUARE_BRACKET],
+  SEQUENCE['OR', L_SQUARE_BRACKET, PATTERN_LIST, R_SQUARE_BRACKET]
+]
+
+SEQUENCE = SEQUENCE[
+  'SEQUENCE', L_SQUARE_BRACKET, PATTERN_LIST, R_SQUARE_BRACKET
+]
+
+MULTIPLE=SEQUENCE[
+  'MULTIPLE', L_SQUARE_BRACKET, PATTERN, R_SQUARE_BRACKET
+]
+
+CHARACTER_CLASS=[
+  'CHARACTER_CLASS', L_SQUARE_BRACKET, QUOTED_STRING, R_SQUARE_BRACKET
+]
+
+STRING = MULTIPLE[STRING_CHARACTER]
+
+STRING_CHARACTER = OR[
+  'A', 'B', 'C', 'D', 'E', 'F', 'G','H','I', 'J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+  'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+  '0','1','2','3','4','5','6','7','8','9',
+  '_',
+  ' ',
+  ',',
+  '(',
+  ')'
+]
+
+RULE_NAME_CHARACTER = OR[
+  'A', 'B', 'C', 'D', 'E', 'F', 'G','H','I', 'J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+  'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+  '0','1','2','3','4','5','6','7','8','9',
+  '_',
+]
+
+RULE_NAME = MULTIPLE[RULE_NAME_CHARACTER]
+
+WS_ALLOW_BOTH = [
+  SEQUENCE[
+    WHITESPACE,
+    PATTERN,
+    WHITESPACE
+  ],
+  SEQUENCE[
+    WHITESPACE,
+    PATTERN
+  ],
+  SEQUENCE[
+    PATTERN,
+    WHITESPACE
+  ],
+  PATTERN
+]
+
+WHITESPACE=[
+  ' ', '\n', '\t'
+]
+`
+
+//built-ins: WS_ALLOW_BOTH
+//left and right angle brackets
+//COMMA
+//empty
+
+var test_parser = new Parser(grammar)
+
+let tree = new TreeNode(test_parser.runningGrammar, document.querySelector('#test'))
+
+let endUserCode = `
+POINT_LIST=[
+  POINT,
+  SEQUENCE[POINT,POINT_LIST]
+]
+
+POINT=SEQUENCE[
+  'POINT(',
+  NUMBER,
+  ',',
+  NUMBER,
+  ',',
+  NUMBER,
+  ')'
+]
+
+`
+
+let tree2 = test_parser.parse(endUserCode)
+let treeViewer = new TreeViewer(tree2, document.querySelector('#test2'))
+treeViewer.display()
+</script>
+</body>
+</html>

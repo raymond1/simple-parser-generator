@@ -1,12 +1,13 @@
-<html>
+<html lang="en">
 <head>
 <title>Test</title>
 
 </head>
 <body>
+<div id='test'></div>
+<div id='test2'></div>
 
-
-<script src='parser.js'></script>
+<script src='../../parser.js'></script>
 <script>
 class ParseViewer{
   constructor(debugArea, treeNode, completedOperations){
@@ -348,7 +349,8 @@ WHITESPACE=[
 //COMMA
 //empty
 
-var test_parser = new Parser(grammar)
+var test_parser = new Parser()
+test_parser.setGrammar(grammar)
 
 let tree = new TreeNode(test_parser.runningGrammar, document.querySelector('#test'))
 

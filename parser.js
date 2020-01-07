@@ -335,19 +335,26 @@ class CharacterClass extends Node{
 }
 
 
-//Usage: let parser = new Parser(grammar_string)
+//Usage: let parser = new Parser()
+//parser.setGrammar(grammarDefinitionString)
 //parser.parse(input_string)
 //In other words, the grammar that the parser needs to parse is passed into the constructor during the creation on the Parser object
 //Then, the parse function is run, taking in an input_string representing a small set of data given in the language specified by the language loaded by the Parser object during its construction
 class Parser{
-  constructor(grammarString){
+  constructor(){
     this.validStringCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_= \n\t,()'
     this.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
-    this.runningGrammar = this.grammarize(grammarString)
-    this.rules = this.getRules(this.runningGrammar)
-    this.nodeCreator = new NodeCreator()
     this.matchRecorder = [] //collects the names of the classes whose match functions were run
     this.idCounter = 0
+  }
+
+  setGrammar(grammarString){
+    this.runningGrammar = this.grammarize(grammarString)
+    this.rules = this.getRules(this.runningGrammar)
+  }
+
+  getGrammarAST(){
+    return this.runningGrammar
   }
 
   getId(){
@@ -924,3 +931,122 @@ class Parser{
     return matchInformation
   }
 }
+
+//For string functions
+function Strings(){}
+
+//Takes in a list of strings(array_of_needles), matches them one by one with the string haystack starting at offset index
+//Finds the longest match, or returns 'match found' as false if no match was found
+Strings.get_longest_matching_string_at_index = function(array_of_needles, haystack, index){
+  var matched_needles = []
+  var j = 0
+  for (var i = 0; i < array_of_needles.length; i++){
+    if (haystack.indexOf(array_of_needles[i] == index)){
+      matched_needles[j] = array_of_needles[i]
+      j++
+    }
+  }
+  if (j == 0){
+    //no matches
+    return {'match found': false}
+  }
+
+  var longest_match = Strings.get_longest_string(matched_needles)['longest string']
+
+  return {'match found': true, 'longest match': longest_match}
+}
+
+Strings.is_alphabetical = function(input_string){
+  if (Strings.contains_only(input_string, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')){
+    return true
+  }
+  return false
+}
+
+//Goes through the list of needles, and searches for their position in haystack.
+//Returns the earliest needle position, if any
+//If found, returns found as true, and the location
+//If none found, returns found as false, and the location is -1
+//{'found': true/false, 'location': location found}
+Strings.find_earliest_matching_string_index = function(haystack, list_of_needles){
+
+  //assumes there is at least one needle
+  var found_index = -1
+  var found = false
+
+  for (var i = 0; i < list_of_needles.length; i++){
+    var index_of_needle = haystack.indexOf(list_of_needles[i])
+
+    if (found == false){
+      if (index_of_needle > 0){
+        found = true
+        found_index = index_of_needle
+      }
+    }
+    else{
+      if (index_of_needle < found_index){
+        found_index = index_of_needle
+      }
+    }
+  }
+
+  return {'found': found, 'location': found_index}
+}
+
+
+Strings.whitespace_characters = ' \n\t'
+
+//Returns true if input_string consists only of characters from the allowed_characters string
+Strings.contains_only = function(input_string, allowed_characters){
+  for (var i = 0; i < input_string.length; i++){
+    if (allowed_characters.indexOf(input_string.charAt(i)) < 0){
+      return false
+    }
+  }
+  return true
+}
+
+//Counts the number of occurrences of character in input_string
+Strings.count_occurrences = function(input_string, character){
+  var count = 0
+
+  for (var i = 0; i < input_string.length; i++){
+    var current_character = input_string.charAt(i)
+    if (current_character == character) count++
+  }
+
+  return count
+}
+
+//operates in two modes, depending on the type of JavaScript object passed in as the variable conditionOrString
+//Mode 1, when conditionOrString is a string:
+//Returns the longest substring starting at index 0 of input_string whose characters belong to conditionOrString
+//For example, if input_string is 'test', and character list is 'et', then the string 'te' is returned because
+//the first two letters of test are found within the character list
+
+//Mode 2, when conditionOrString is a function
+//
+Strings.headMatch = function(input_string, conditionOrString){
+  let i = 0;
+  let returnString = ''
+  for (i = 1; i < input_string.length + 1; i++){
+    let tempString = input_string.substring(0, i)
+    if (typeof conditionOrString == 'string'){
+      if (Strings.contains_only(tempString, conditionOrString)){
+        returnString = tempString
+      }
+      else{
+        break
+      }
+    }else if (typeof conditionOrString == 'function'){
+      if (conditionOrString(tempString)){
+        returnString = tempString
+      }
+      else{
+        break
+      }
+    }
+  }
+  return returnString  
+}
+

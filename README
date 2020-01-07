@@ -1,1 +1,15 @@
-This is a parser generator. It takes in a parsing specification written the Simple language.
+This is a parser generator. It takes in a parsing specification written the Simple language. It generates a JavaScript parser that detects tokens. 
+
+All the code for the parser generator comes from one file, parser.js. You can use this in your browser by including the code in a script tag near the end of your body tag. (<script src="parser.js"></script>)
+
+After you have included the script, you will be able to use the parser in your JavaScript code by creating a new Parser object. The basic usage of this object is show below:
+
+
+Summary of usage:
+let parser = new Parser()
+let grammarDefinitionString = ... (grammarDefinitionString is a string that defines the grammar for your language. The definitions are defined using the Simple language syntax.)
+parser.setGrammar(grammarDefinitionString)
+
+let endUserProgram = ...(endUserProgram is a string that contains an example program written in the language defined by your grammar.)
+parseResults = parser.parse(endUserProgram)
+

@@ -62,8 +62,9 @@ class RuleList extends Node{
           break
         }
       }
+      internalMatches.push(matchInformation)
+
       if (ruleMatched){
-        internalMatches.push(matchInformation)
         tempString = tempString.substring(matchInformation.matchLength)
       }else{
         break
@@ -78,7 +79,7 @@ class RuleList extends Node{
       matchFound = true
     }
 
-    let returnValue = {type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), internalMatches}
+    let returnValue = {type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), internalMatches: internalMatches}
 
     this.saveData(returnValue)
     return returnValue
@@ -98,7 +99,7 @@ class Rule extends Node{
     let matchLength = matchInfo.matchLength
     let internalMatches = matchInfo
 
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, internalMatches}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, internalMatches: [internalMatches]}
 
     this.saveData(returnValue)
     return returnValue
@@ -124,6 +125,30 @@ class RuleName extends Node{
     let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), value: this.value, internalMatches: matchInfo}
 
     this.saveData(returnValue)
+    return returnValue
+  }
+}
+
+//untested
+class Not extends Node{
+  constructor(parser,pattern){
+    super(parser)
+    this.setAttribute('pattern', pattern)
+    this.setAttribute('friendly node type name', 'not')
+  }
+
+  match(string,metadata){
+    let innerMatchInfo = this['pattern'].match(string,{depth: metadata.depth + 1, parentId: this.id})
+
+    let matchLength = 0
+    let matchFound = !innerMatchInfo.matchFound
+    if (matchFound){
+      matchLength = string.length
+    }
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), internalMatches: innerMatchInfo}
+
+    this.saveData(returnValue)
+
     return returnValue
   }
 }
@@ -184,39 +209,6 @@ class Or extends Node{
     this.saveData(returnValue)
 
     return returnValue
-  }
-}
-
-
-//WS_ALLOW_BOTH must take a parameter
-//Assumes you are not going to use WS_ALLOW_BOTH on a whitespace character
-class WSAllowBoth extends Node{
-  constructor(parser,innerPattern){
-    super(parser)
-    this.setAttribute('inner pattern', innerPattern)
-    this.setAttribute('friendly node type name', 'ws allow both')
-  }
-
-  match(string,metadata){
-    let matchLength = 0
-    let leadingWhitespace = Strings.headMatch(string, Strings.whitespace_characters)
-
-    let remainderString = string.substring(leadingWhitespace.length)
-    let matchInfo = this['inner pattern'].match(remainderString,{depth: metadata.depth + 1, parentId: this.id})
-    if (matchInfo.matchFound){
-      let afterInnerPattern = remainderString.substring(matchInfo.matchLength)
-      let trailingWhitespace = Strings.headMatch(afterInnerPattern, Strings.whitespace_characters)
-      matchLength = leadingWhitespace.length + matchInfo.matchLength + trailingWhitespace.length
-    }
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), internalMatches: matchInfo}
-    this.saveData(returnValue)
-
-    return returnValue
-    
-    //is it just the pattern with no white space at the front?
-    //is there whitespace in the front?
-    //If yes, is it followed by the pattern?
-    //If yes, is it followed by whitespace?
   }
 }
 
@@ -292,7 +284,7 @@ class QuotedString extends Node{
     if (matchFound){
       matchLength = internalString.length
     }
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), internalMatches: null}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), string: this.string, internalMatches: null}
 
     this.saveData(returnValue)
 
@@ -400,10 +392,9 @@ class Parser{
     return this.headMatchXWithBrackets(string, 'SEQUENCE')
   }
 
-  headMatchWSAllowBoth(string){
-    return this.headMatchXWithBrackets(string, 'WS_ALLOW_BOTH')
+  headMatchNot(string){
+    return this.headMatchXWithBrackets(string, 'NOT')
   }
-
 
   headMatchRuleName(string){
     let ruleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
@@ -522,11 +513,6 @@ class Parser{
       return patternString
     }
 
-    patternString = this.headMatchWSAllowBoth(string)
-    if (patternString){
-      return patternString
-    }
-
     patternString = this.headMatchMultiple(string)
     if (patternString){
       return patternString
@@ -546,7 +532,7 @@ class Parser{
   }
 
   //A pattern list is a set of comma-separated patterns
-  //RULE_NAME1,RULE_NAME2, OR[...], SEQUENCE[], WS_ALLOW_BOTH[...], [...]
+  //RULE_NAME1,RULE_NAME2, OR[...], SEQUENCE[]
   //PATTERN
   //PATTERN, PATTERN_LIST
   //There are actually two types of pattern lists: or and sequence.
@@ -684,34 +670,35 @@ class Parser{
     return new_node
   }
 
-  //WS_ALLOW_BOTH[PATTERN]
-  grammarize_WS_ALLOW_BOTH(input_string){
-    var trimmed_input_string = input_string.trim()
-    var location_of_first_left_square_bracket = trimmed_input_string.indexOf('[')
-    if (location_of_first_left_square_bracket < 0) return null
-
-    var string_before_first_left_square_bracket = trimmed_input_string.substring(0, location_of_first_left_square_bracket)
-    if (string_before_first_left_square_bracket.trim() != 'WS_ALLOW_BOTH') return null
-
-    var location_of_matching_right_square_bracket = this.get_matching_right_square_bracket(trimmed_input_string, location_of_first_left_square_bracket)
-    if (location_of_matching_right_square_bracket < 0){
+  grammarize_NOT(string){
+    var trimmed_string = string.trim()
+ 
+    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'NOT'.length)
+    if (first_few_characters_of_trimmed_string !== 'NOT')
+    {
       return null
     }
 
-    if (location_of_matching_right_square_bracket + 1 != trimmed_input_string.length) return null
-    var string_between_two_square_brackets = trimmed_input_string.substring(location_of_first_left_square_bracket + 1, location_of_matching_right_square_bracket)
+    var location_of_first_left_bracket = trimmed_string.indexOf('[')
+    if (location_of_first_left_bracket < 0) return null
 
-    var inner_pattern = this.grammarize_PATTERN(string_between_two_square_brackets)
-    if (inner_pattern != null){
-      var new_node = new WSAllowBoth(this,inner_pattern)
+    var location_of_last_right_bracket = this.get_matching_right_square_bracket(trimmed_string,location_of_first_left_bracket)
+    if (location_of_last_right_bracket < 0) return null
+    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
+    
+    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
+
+    var pattern = this.grammarize_PATTERN(string_in_between_square_brackets)
+    if (pattern != null){
+      var new_node = new Not(this,pattern)
       return new_node
     }
 
     return null
   }
-
-  grammarize_MULTIPLE(input_string){
-    var trimmed_string = input_string.trim()
+  
+  grammarize_MULTIPLE(string){
+    var trimmed_string = string.trim()
  
     var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'MULTIPLE'.length)
     if (first_few_characters_of_trimmed_string !== 'MULTIPLE')
@@ -773,7 +760,13 @@ class Parser{
       if (quoted_string != null){
         return quoted_string
       }  
-    }else if (this.headMatchOr(trimmed_input_string)){
+    }else if (this.headMatchNot(trimmed_input_string)){
+      var not_construct = this.grammarize_NOT(trimmed_input_string)
+      if (not_construct != null){
+        return not_construct
+      }
+    }
+    else if (this.headMatchOr(trimmed_input_string)){
       var or_construct = this.grammarize_OR(trimmed_input_string)
       if (or_construct != null){
         return or_construct
@@ -782,11 +775,6 @@ class Parser{
       var sequence_construct = this.grammarize_SEQUENCE(trimmed_input_string)
       if (sequence_construct != null){
         return sequence_construct
-      }  
-    }else if (this.headMatchWSAllowBoth(trimmed_input_string)){
-      var ws_allow_both = this.grammarize_WS_ALLOW_BOTH(trimmed_input_string)
-      if (ws_allow_both != null){
-        return ws_allow_both
       }  
     }else if (this.headMatchMultiple(trimmed_input_string)){
       var multiple = this.grammarize_MULTIPLE(trimmed_input_string)
@@ -809,13 +797,6 @@ class Parser{
     return null
   }
 
-
-  //RULE = SEQUENCE[\n WS_ALLOW_BOTH[RULE_NAME],\n '=',\n WS_ALLOW_BOTH[PATTERN]\n]
-  //RULE = SEQUENCE[
-  //WS_ALLOW_BOTH[RULE_NAME],
-  //'=',
-  //WS_ALLOW_BOTH[RULE_NAME]
-  //]
   //If input_string is a valid rule, return a rule node
   //If not valid, return null
   grammarize_RULE(input_string){
@@ -838,25 +819,6 @@ class Parser{
     var return_node = new Rule(this,pattern_node, name_node.value)
 
     return return_node
-  }
-
-  //location_of_left_bracket is the bracket you want to match in input_string
-  get_matching_right_square_bracket(input_string, location_of_left_bracket){
-    //[dfgfgdsfasdfa[][][[]]]
-
-    var number_of_unmatched_left_square_brackets = 0
-    for (var i = location_of_left_bracket; i < input_string.length; i++){
-      if (input_string.charAt(i) == '['){
-        number_of_unmatched_left_square_brackets++
-      }
-
-      if (input_string.charAt(i) == ']'){
-        number_of_unmatched_left_square_brackets--
-      }
-
-      if (number_of_unmatched_left_square_brackets == 0) return i
-    }
-    return -1
   }
 
   //If inputString is a valid rule list, return a rule list node, and its corresponding children
@@ -889,6 +851,25 @@ class Parser{
       console.log('Grammar is empty or there was an error in your grammar. Or, there is an error in this parser.')
     }
     return return_node
+  }
+
+  //location_of_left_bracket is the bracket you want to match in input_string
+  get_matching_right_square_bracket(input_string, location_of_left_bracket){
+    //[dfgfgdsfasdfa[][][[]]]
+
+    var number_of_unmatched_left_square_brackets = 0
+    for (var i = location_of_left_bracket; i < input_string.length; i++){
+      if (input_string.charAt(i) == '['){
+        number_of_unmatched_left_square_brackets++
+      }
+
+      if (input_string.charAt(i) == ']'){
+        number_of_unmatched_left_square_brackets--
+      }
+
+      if (number_of_unmatched_left_square_brackets == 0) return i
+    }
+    return -1
   }
 
   //Gets all nodes of type rule that are descendants of the current node

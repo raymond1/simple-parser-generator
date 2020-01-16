@@ -341,7 +341,7 @@ class Parser{
   }
 
   setGrammar(grammarString){
-    this.runningGrammar = this.grammarize(grammarString)
+    this.runningGrammar = this.generateParser(grammarString)
     this.rules = this.getRules(this.runningGrammar)
   }
 
@@ -843,8 +843,9 @@ class Parser{
     return return_node
   }
 
-  //Takes in a string representation of a grammar, and returns a root node of an in-memory representation of the grammar in tree form
-  grammarize(input_string){
+  //Takes in a string representation of a grammar, and returns a parser
+  //The parser is an in-memory tree structure representation of the grammar
+  generateParser(input_string){
     var return_node = this.grammarize_RULE_LIST(input_string)
 
     if (return_node == null){

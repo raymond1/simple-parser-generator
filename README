@@ -1,15 +1,29 @@
-This is a parser generator. It takes in a parsing specification written the Simple language. It generates a JavaScript parser that detects tokens. 
+The Simple Parser Generator has been designed to be an easy to use and understand tool for creating programming language parsers. It takes in a parsing specification written the Simple language and generates a parser that can analyze a string and produce from it a tree of tokens and the higher order expressions that the tokens taken together construct, based on the originally specified parsing specification. 
 
-All the code for the parser generator comes from one file, parser.js. You can use this in your browser by including the code in a script tag near the end of your body tag. (<script src="parser.js"></script>)
+All the code for the parser generator comes from one file, parser.js. You can use this in your browser by including the code in a script tag near the end of your body tag. (<script src="parser_generator.js"></script>)
 
-After you have included the script, you will be able to use the parser in your JavaScript code by creating a new Parser object. The basic usage of this object is show below:
+After you have included the script, you will be able to use the parser in your JavaScript code by creating a new ParserGenerator object. The basic usage of this object is show below:
 
+Summary of typical usage:
 
-Summary of usage:
-let parser = new Parser()
-let grammarDefinitionString = ... (grammarDefinitionString is a string that defines the grammar for your language. The definitions are defined using the Simple language syntax.)
-parser.setGrammar(grammarDefinitionString)
+//1) First, create the generic parser object. At this point, the parser is dumb and doesn't do anything.
+let parser = new ParserGenerator()
 
-let endUserProgram = ...(endUserProgram is a string that contains an example program written in the language defined by your grammar.)
-parseResults = parser.parse(endUserProgram)
+//2)Create a parsing specification consisting of rules that teach the parser what is a valid program and what is an invalid program
+let parsingSpecification = 
+`
+A_OR_B_STRING = MULTIPLE[A_OR_B_CHARACTERS]
 
+A_OR_B_CHARACTERS = ['a','b']
+`
+
+//3)Pass the teaching grammar into your parser
+parser.setGrammar(parsingSpecification)
+
+//4)Specify a string containing a program written in the language defined by the parsing specification.
+let programString = 'aababbaaaababaababaaabaabaababababa'
+
+//5)Feed the program that you have written into your parser to see if it is a valid program or not
+let outputFromParsing = parser.parse(programString)
+
+//6)outputFromParsing will be a tree 

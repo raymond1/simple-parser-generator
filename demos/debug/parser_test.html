@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
 <title>Test</title>
-
+<meta charset="utf-8"/>
 </head>
 <body>
 <div id='test'></div>
@@ -344,13 +344,12 @@ WHITESPACE=[
 ]
 `
 
-//built-ins: WS_ALLOW_BOTH
-//left and right angle brackets
-//COMMA
-//empty
+let grammar2 = `
+STRING=NOT['cat']
+`
 
-var test_parser = new Parser()
-test_parser.setGrammar(grammar)
+var test_parser = new ParserGenerator()
+test_parser.setGrammar(grammar2)
 
 let tree = new TreeNode(test_parser.runningGrammar, document.querySelector('#test'))
 
@@ -372,7 +371,9 @@ POINT=SEQUENCE[
 
 `
 
-let tree2 = test_parser.parse(endUserCode)
+let endUserCode2 = 'cat'
+debugger
+let tree2 = test_parser.parse(endUserCode2)
 let treeViewer = new TreeViewer(tree2, document.querySelector('#test2'))
 treeViewer.display()
 </script>

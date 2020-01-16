@@ -111,48 +111,6 @@ class ParseViewer{
   }
 }
 
-class TreeViewer{
-  constructor(root, parentElement){
-    this.root = root
-    this.parentElement = parentElement
-    this.domElement = document.createElement('pre')
-    this.parentElement.appendChild(this.domElement)
-  }
-
-  getOutputString(metadata){
-    let outputString = '  '.repeat(metadata['depth']) + '*****************************\n'
-
-    let keys = Object.keys(metadata)
-    for(let i = 0; i < keys.length; i++){
-      let keyValue = metadata[keys[i]]
-      if (typeof keyValue == 'object'){
-        if (keyValue !== null){
-          if (Array.isArray(keyValue)){
-            for (let j = 0; j < keyValue.length; j++){
-              outputString += this.getOutputString(keyValue[j])
-            }
-          }else{
-            outputString += this.getOutputString(keyValue)
-          }
-        }
-      }else{
-        outputString += '  '.repeat(metadata['depth']) + keys[i] + ":" + keyValue + '\n'
-      }
-    }
-    return outputString
-  }
-  
-  display(metadata){
-    let outputString = ''
-    if (typeof metadata == 'undefined'){
-      metadata = this.root
-    }
-    outputString = this.getOutputString(metadata)
-    let outputTextNode = document.createTextNode(outputString)
-    this.domElement.appendChild(outputTextNode)
-  }
-}
-
 //Treenode connects nodes with domElements
 //A Treenode is not the node data it contains
 //A Treenode is not the domElement that is clicked on
@@ -348,7 +306,7 @@ let grammar2 = `
 STRING=NOT['cat']
 `
 
-var test_parser = new ParserGenerator()
+var test_parser = new Parser()
 test_parser.setGrammar(grammar2)
 
 let tree = new TreeNode(test_parser.runningGrammar, document.querySelector('#test'))

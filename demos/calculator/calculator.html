@@ -1,0 +1,44 @@
+<html lang="en">
+<head>
+<title>Test</title>
+<meta charset="utf-8"/>
+</head>
+<body>
+<div id='test'></div>
+
+<script src='../../releases/parser.js'></script>
+<script>
+let grammar = `
+
+EXPRESSION = OR[
+	ADDITION_EXPRESSION,
+	SUBTRACTION_EXPRESSION,
+	INTEGER
+]
+
+INTEGER = CHARACTER_CLASS['0123456789']
+
+ADDITION_EXPRESSION = SEQUENCE[
+	INTEGER,
+	'+',
+	EXPRESSION
+]
+
+SUBTRACTION_EXPRESSION = SEQUENCE[
+	INTEGER,
+	'-',
+	EXPRESSION
+]
+`
+
+let parser = new Parser()
+parser.setGrammar(grammar)
+
+let input = '100-1'
+let output = parser.parse(input)
+
+let treeViewer = new TreeViewer(output, document.querySelector('#test'))
+treeViewer.display()
+</script>
+</body>
+</html>

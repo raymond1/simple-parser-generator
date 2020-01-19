@@ -47,6 +47,7 @@ class RuleList extends Node{
   
   //produces rule nodes as long as they are found
   match(string, metadata = {depth: 0, parentId: null}){
+    debugger
     let matchFound = false //indicates if rulelist is valid
     let ruleMatched = false //used in the do loop to determine if any of the rules match
     let tempString = string
@@ -117,10 +118,7 @@ class RuleName extends Node{
 
   match(string,metadata){
     let rule = this.parser.getRule(this.value)
-    let matchInfo 
-    if (rule != null){
-      matchInfo = rule.match(string,{depth: metadata.depth + 1, parentId: this.id})
-    }
+    let matchInfo = rule.match(string,{depth: metadata.depth + 1, parentId: this.id})
 
     let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), value: this.value, internalMatches: matchInfo}
 
@@ -437,7 +435,7 @@ class Parser{
     }
 
     let stringAfterFirstQuote = string.substring(1)
-    let stringCharacters = Strings.headMatch(stringAfterFirstQuote, this.validStringCharacters)
+    let stringCharacters = Strings.headMatchUntilDelimiter(stringAfterFirstQuote, '\'')
     if (stringCharacters.length < 1){
       return ''
     }
@@ -859,9 +857,9 @@ class Parser{
 
   //location_of_left_bracket is the bracket you want to match in input_string
   get_matching_right_square_bracket(input_string, location_of_left_bracket){
-    //[dfgfgdsfasdfa[][][[]]]
+    //[dfgfgdsfasdfa['[']][][[]]] //How to deal with this case?
 
-    var number_of_unmatched_left_square_brackets = 0
+    let number_of_unmatched_left_square_brackets = 0
     for (var i = location_of_left_bracket; i < input_string.length; i++){
       if (input_string.charAt(i) == '['){
         number_of_unmatched_left_square_brackets++
@@ -903,8 +901,7 @@ class Parser{
         return this.rules[i]
       }
     }
-    console.log('Unrecognized rule name:' + ruleName)
-    return null
+    throw 'Error: Unrecognized rule name:' + ruleName
   }
 
   //Below here lies the code for parsing using the running grammar
@@ -1035,6 +1032,15 @@ Strings.headMatch = function(input_string, conditionOrString){
   return returnString  
 }
 
+//returns all strings up to but not including the delimiter; or the empty string if a delimiter is not found.
+Strings.headMatchUntilDelimiter = function(string, delimiter){
+  for (let i = 0; i < string.length; i++){
+    if (string.substring(i, i + delimiter.length) == delimiter){
+      return string.substring(0, i)
+    }
+  }
+  return ''
+}
 
 class TreeViewer{
   constructor(root, parentElement){
@@ -1075,7 +1081,7 @@ class TreeViewer{
       metadata = this.root
     }
     outputString = this.getOutputString(metadata)
-    this.parentElement = null
+
     if (!this.parentElement){
       console.log(outputString)
     }else{

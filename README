@@ -1288,3 +1288,8 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:b
 basic_usage.html:37:9
+
+Build instructions:
+Go into the code directory and type in "make" from the terminal. This will copy parser.js into the releases folder and create the parser_commonjs.js files(for CommonJS require('simple-parser-generator') type usage) as well as parser_module.js for the newer "import Parser from './simple-parser-generator'" type import statements.
+
+

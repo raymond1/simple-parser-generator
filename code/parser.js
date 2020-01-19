@@ -342,6 +342,9 @@ class Parser{
 
   setGrammar(grammarString){
     this.runningGrammar = this.generateParser(grammarString)
+    if(!this.runningGrammar){
+      throw "Error: invalid grammar specification."
+    }
     this.rules = this.getRules(this.runningGrammar)
   }
 
@@ -856,9 +859,9 @@ class Parser{
 
   //location_of_left_bracket is the bracket you want to match in input_string
   get_matching_right_square_bracket(input_string, location_of_left_bracket){
-    //[dfgfgdsfasdfa[][][[]]]
+    //[dfgfgdsfasdfa['[']][][[]]] //How to deal with this case?
 
-    var number_of_unmatched_left_square_brackets = 0
+    let number_of_unmatched_left_square_brackets = 0
     for (var i = location_of_left_bracket; i < input_string.length; i++){
       if (input_string.charAt(i) == '['){
         number_of_unmatched_left_square_brackets++
@@ -1082,5 +1085,3 @@ class TreeViewer{
   }
 }
 
-export {Node,RuleList,Rule,RuleName,Not,Sequence,Or,Multiple,Pattern,QuotedString,CharacterClass}
-export default Parser

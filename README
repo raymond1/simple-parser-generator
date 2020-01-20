@@ -1,8 +1,8 @@
 The Simple Parser Generator has been designed to be an easy to use and understand tool for creating programming language parsers. It takes in a parsing specification written the Simple language and generates a parser that can analyze a string and produce from it a tree of tokens and the higher order expressions that the tokens taken together construct, based on the originally specified parsing specification. 
 
-All the code for the parser generator comes from one file, parser.js. You can use this in your browser by including the code in a script tag near the end of your body tag. (<script src="parser_generator.js"></script>)
+All the code for the parser generator comes from one file, parser.js. You can use this in your browser by including the code in a script tag near the end of your body tag. (<script src="parser.js"></script>). Alternatively, you may also use the ES6 import statement or the require statement if you are using NodeJS.
 
-After you have included the script, you will be able to use the parser in your JavaScript code by creating a new ParserGenerator object. The basic usage of this object is show below:
+After you have connected the script to your program, you will be able to use the parser in your JavaScript code by creating a new Parser object. The basic usage of this object is show below:
 
 Summary of typical usage:
 
@@ -1292,4 +1292,110 @@ basic_usage.html:37:9
 Build instructions:
 Go into the code directory and type in "make" from the terminal. This will copy parser.js into the releases folder and create the parser_commonjs.js files(for CommonJS require('simple-parser-generator') type usage) as well as parser_module.js for the newer "import Parser from './simple-parser-generator'" type import statements.
 
+Simple Language:
 
+A program specified using the Simple program specification language consists of a series of rules. Each rule takes on the following form of a rule name followed by the '=' sign, followed by a matching pattern:
+
+RULE_NAME = PATTERN[...pattern parameters...]
+
+Here is an example rule:
+
+BINARY_STRING = CHARACTER_CLASS['01']
+
+This rule specifies that a BINARY_STRING consists of strings that contain only the characters '0' and '1'. If you pass in the above specification to the simple parser generator, you will get a parser, which is an object that understands whether a given input string is a valid program, according to the Simple program specification you used to create the parser. Then, you can pass in strings to the parser, and it will tell you whether or not the string that was passed in is a valid program or an invalid program.
+
+There are some examples of programs inside the demos folder. The patterns that can be used for the Simple program specification are described below:
+
+List of Simple program specification language patterns and their description:
+
+OR[] pattern:
+-------------
+
+Usage example:
+
+DIGIT = OR['1','2','3', '4','5', '6','7', '8', '9', '0']
+
+Here, the DIGIT rule would match any one of the strings '1', '2', '3', ... etc. Strings in the Simple language consist of a single quote followed by one or more letters, followed by an end quote. If you happen to need the single quote as a character, you can use the symbol S_QUOTE. For example:
+
+QUOTES = OR['"', S_QUOTE]
+
+The input to OR can be either a rule name or another pattern.
+
+SEQUENCE[] pattern:
+-------------------
+
+Usage example:
+
+WORD_CAT = SEQUENCE['ca', 't']
+
+Here, the rule WORD_CAT matches the string 'cat' because the SEQUENCE construct matches anything that specifies all of the patterns inside of it. Each pattern inside the square brackets of the sequence construct is separated by a comma.
+
+You can combine OR and SEQUENCE constructs to make up rules. For example:
+
+SUPERPERSON = SEQUENCE['SUPER', OR['MAN','WOMAN']]
+
+The above rule would match either the string 'SUPERMAN' or 'SUPERWOMAN'.
+
+NOT[] pattern:
+--------------
+Usage example:
+
+NOT_SIDNEY = NOT['Sidney']
+
+This rule would match any string except for the string 'Sidney'. Note that the string 'Sidneys' would match because although it starts with the string 'Sidney', it is different from it due to the extra trailing s.
+
+WS_ALLOW_BOTH[]:
+----------------
+Usage example:
+
+FUZZY_CANARY = WS_ALLOW_BOTH['canary']
+
+The above rule would match '   canary', 'canary  ', 'canary', 'canary ', and any other string with 'canary' in it with either spaces, tabs, or newlines to the left and right of the string, in any combination.
+
+MULTIPLE[]:
+-----------
+Usage example:
+
+BINARY_STRING = MULTIPLE[OR['0', '1']]
+
+This would match strings that start with 1 or more characters which are either 0 or 1. For example, '01001001' would match. 'a0000' would not match.
+
+MULTIPLE indicates that for a string to match, the inner pattern must be matched 1 or more times. In the above example, the inner pattern is OR['0','1']. Any string consisting of multiple consecutive inner patterns will be matched by the MULTIPLE pattern.
+
+CHARACTER_CLASS[]:
+
+Usage example:
+ALPHABET = CHARACTER_CLASS['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ']
+
+This would match any string consisting only of magiscule or miniscule letters of the alphabet. For example, 'dfasfasdfa' would match. 'dsfads1' would not match.
+
+rule name pattern:
+------------------
+Usage example:
+
+RULE_1 = 'SOCKET'
+
+RULE_2 = 'WRENCH'
+
+RULE_3 = SEQUENCE[RULE_1,RULE_2]
+
+RULE_4 = RULE_3
+
+RULE_3 above would match the string 'SOCKETWRENCH'. RULE_4, because it is defined to be equal to RULE_3, would also match 'SOCKETWRENCH'. In other words, you can refer to the names of the rules you have defined by name.
+
+quoted string pattern:
+----------------------
+Usage example:
+
+CLING_WORD = 'cling'
+
+The above rule would match the string 'cling'. 
+
+
+By combining multiple rules and patterns together, you can end up with some expressions which are useful.
+
+This software is still in its early phases, and I am aware of some bugs but it has been released into the wild because I feel it might be very useful. Be free, my software, and go where you need to go! I'll support you! Grow! Grow!
+
+If you have trouble using my software, you can send me an email at
+
+raymondleon@raymondleon.ca

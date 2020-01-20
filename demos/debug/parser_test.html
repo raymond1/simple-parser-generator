@@ -120,7 +120,7 @@ class TreeNode{
     this.node = node
     this.parentElement = parentElement
     this.expanded = false
-
+    
     let ul = document.createElement('ul')
     this.domElement = ul
     this.parentElement.appendChild(ul)
@@ -138,36 +138,36 @@ class TreeNode{
     ul.appendChild(li)
 
 
-    if (node.attributes.length > 0){
+    //For each node attribute display it
+    for (let attribute of node.attributes){
       let attributeList = document.createElement('ul')
       li.appendChild(attributeList)
 
-      //For each node attribute display it
-      for (let i = 0; i < node.attributes.length; i++){
-        let attribute = document.createElement('li')
-        attributeList.appendChild(attribute)
+      let attributeDOMElement = document.createElement('li')
+      attributeList.appendChild(attributeDOMElement)
 
-        let attributeText = node.attributes[i] + '=' + node[node.attributes[i]]
-        //if node[node.attributes[i]] is an object, it will say 'object'. Instead of showing that, show the name of the attribute instead
-        if (Array.isArray(node[node.attributes[i]])||typeof node[node.attributes[i]] == 'object'){
-          attributeText = node.attributes[i]
-        }
+      let attributeValue = node[attribute]
+      let attributeText = attribute + '=' + attributeValue
 
-        let attributeTextNode = document.createTextNode(attributeText)
-
-        attribute.appendChild(attributeTextNode)
-        if (Array.isArray(node[node.attributes[i]])){
-          for (let j = 0; j < node[node.attributes[i]].length; j++){
-              this.children.push(new TreeNode(node[node.attributes[i]][j], attribute))
-          }
-        }else if (typeof node[node.attributes[i]] == 'object'){
-          this.children.push(new TreeNode(node[node.attributes[i]], attribute))
-        }
-
+      //if node[node.attributes[i]] is an object, it will say 'object'. Instead of showing that, show the name of the attribute instead
+      if (Array.isArray(attributeValue)||typeof attributeValue == 'object'){
+        attributeText = attribute
       }
+
+      let attributeTextNode = document.createTextNode(attributeText)
+
+      attributeDOMElement.appendChild(attributeTextNode)
+      if (Array.isArray(attributeValue)){
+        //attributeValue in this block is an array
+        for (let j = 0; j < attributeValue.length; j++){
+              this.children.push(new TreeNode(attributeValue[j], attributeDOMElement))
+        }
+      }else if (typeof attributeValue == 'object'){
+debugger
+        this.children.push(new TreeNode(attributeValue, attributeDOMElement))
+      }
+
     }
-
-
   }
 
   highlight(){
@@ -189,11 +189,6 @@ class TreeNode{
   }
 }
 
-class ParseTreeNode{
-  constructor(node, parentElement){
-
-  }
-}
 var grammar =
 
 `
@@ -241,7 +236,7 @@ QUOTED_STRING= OR[
   SEQUENCE[S_QUOTE, STRING, S_QUOTE]
 ]
 
-OR = [
+OR = OR[
   SEQUENCE[L_SQUARE_BRACKET, PATTERN_LIST, R_SQUARE_BRACKET],
   SEQUENCE['OR', L_SQUARE_BRACKET, PATTERN_LIST, R_SQUARE_BRACKET]
 ]
@@ -254,7 +249,7 @@ MULTIPLE=SEQUENCE[
   'MULTIPLE', L_SQUARE_BRACKET, PATTERN, R_SQUARE_BRACKET
 ]
 
-CHARACTER_CLASS=[
+CHARACTER_CLASS=OR[
   'CHARACTER_CLASS', L_SQUARE_BRACKET, QUOTED_STRING, R_SQUARE_BRACKET
 ]
 
@@ -280,7 +275,7 @@ RULE_NAME_CHARACTER = OR[
 
 RULE_NAME = MULTIPLE[RULE_NAME_CHARACTER]
 
-WS_ALLOW_BOTH = [
+WS_ALLOW_BOTH = OR[
   SEQUENCE[
     WHITESPACE,
     PATTERN,
@@ -297,7 +292,7 @@ WS_ALLOW_BOTH = [
   PATTERN
 ]
 
-WHITESPACE=[
+WHITESPACE=OR[
   ' ', '\n', '\t'
 ]
 `
@@ -330,7 +325,6 @@ POINT=SEQUENCE[
 `
 
 let endUserCode2 = 'cat'
-debugger
 let tree2 = test_parser.parse(endUserCode)
 let treeViewer = new TreeViewer(tree2, document.querySelector('#test2'))
 treeViewer.display()

@@ -1,9 +1,29 @@
 class Node{
   constructor(parser){
+    this.attributes = []
     if (parser){
       this.parser = parser
       this.id = this.parser.getId()
     }
+  }
+
+  //If attribute exists, overwrite it
+  //If attribute does not exist, create it
+  setAttribute(attributeName, value = null){
+    //While it may seem like you can avoid using the setAttribute function, using it actually simplifies things when you are debugging because
+    //you can iterate through the relevant details without handling the fact that some attributes, such as parser and id are not intended to be used in the abstracted concept of a node
+
+    if (this.attributes.indexOf(attributeName) > -1){
+      
+    }else{
+      this.attributes.push(attributeName)
+    }
+
+    this[attributeName] = value
+  }
+
+  getAttributes(){
+    return this.attributes
   }
 
   getChildren(){
@@ -32,8 +52,8 @@ class Node{
 class RuleList extends Node{
   constructor(parser, rulesArray){
     super(parser)
-    this['rules'] = rulesArray
-    this['friendly node type name'] = 'rule list'
+    this.setAttribute('rules', rulesArray)
+    this.setAttribute('friendly node type name', 'rule list')
   }
   
   //produces rule nodes as long as they are found
@@ -80,9 +100,9 @@ class RuleList extends Node{
 class Rule extends Node{
   constructor(parser, pattern, name){
     super(parser)
-    this['friendly node type name'] = 'rule'
-    this['pattern'] = pattern
-    this['name'] = name
+    this.setAttribute('friendly node type name', 'rule')
+    this.setAttribute('pattern',pattern)
+    this.setAttribute('name',name)
   }
 
   match(string,metadata){
@@ -102,8 +122,8 @@ class Rule extends Node{
 class RuleName extends Node{
   constructor(parser, name){
     super(parser)
-    this['value']=name
-    this['friendly node type name']='rule name'
+    this.setAttribute('value',name)
+    this.setAttribute('friendly node type name','rule name')
   }
 
   match(string,metadata){
@@ -121,8 +141,8 @@ class RuleName extends Node{
 class Not extends Node{
   constructor(parser,pattern){
     super(parser)
-    this['pattern']=pattern
-    this['friendly node type name']='not'
+    this.setAttribute('pattern',pattern)
+    this.setAttribute('friendly node type name','not')
   }
 
   match(string,metadata){
@@ -146,8 +166,8 @@ class Not extends Node{
 class WSAllowBoth extends Node{
   constructor(parser,innerPattern){
     super(parser)
-    this['inner pattern']=innerPattern
-    this['friendly node type name']='ws allow both'
+    this.setAttribute('inner pattern',innerPattern)
+    this.setAttribute('friendly node type name','ws allow both')
   }
 
   match(string,metadata){
@@ -176,8 +196,8 @@ class WSAllowBoth extends Node{
 class Sequence extends Node{
   constructor(parser,patterns){
     super(parser)
-    this['patterns']=patterns
-    this['friendly node type name']='sequence'
+    this.setAttribute('patterns',patterns)
+    this.setAttribute('friendly node type name','sequence')
   }
 
   match(string,metadata){
@@ -209,8 +229,8 @@ class Or extends Node{
   //patternList is an array
   constructor(parser,patterns){
     super(parser)
-    this['patterns']=patterns
-    this['friendly node type name']='or'
+    this.setAttribute('patterns',patterns)
+    this.setAttribute('friendly node type name','or')
   }
 
   match(string,metadata){
@@ -235,8 +255,8 @@ class Or extends Node{
 class Multiple extends Node{
   constructor(parser,pattern){
     super(parser)
-    this['pattern']=pattern
-    this['friendly node type name']='multiple'
+    this.setAttribute('pattern',pattern)
+    this.setAttribute('friendly node type name','multiple')
   }
 
   match(string,metadata){
@@ -268,8 +288,8 @@ class Multiple extends Node{
 class Pattern extends Node{
   constructor(parser,innerPattern){
     super(parser)
-    this['friendly node type name']='pattern'
-    this['inner pattern']=innerPattern//is it a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'?
+    this.setAttribute('friendly node type name','pattern')
+    this.setAttribute('inner pattern',innerPattern)//The inner pattern is something like a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'
   }
 
   match(string,metadata){
@@ -288,8 +308,8 @@ class Pattern extends Node{
 class QuotedString extends Node{
   constructor(parser,string){
     super(parser)
-    this['string']=string
-    this['friendly node type name']='quoted string'
+    this.setAttribute('string',string)
+    this.setAttribute('friendly node type name','quoted string')
   }
 
   match(string,metadata){
@@ -316,8 +336,8 @@ class QuotedString extends Node{
 class CharacterClass extends Node{
   constructor(parser,quotedString){
     super(parser)
-    this['friendly node type name']='character class'
-    this['string']=quotedString.string//is it a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'?
+    this.setAttribute('friendly node type name','character class')
+    this.setAttribute('string',quotedString.string)
   }
 
   match(string,metadata){
@@ -675,7 +695,7 @@ class Parser{
     if (location_of_matching_right_bracket != trimmed_string.length - 1) return null
 
     var string_before_first_left_bracket = trimmed_string.substring(0,location_of_first_left_bracket).trim()
-    if (string_before_first_left_bracket != 'OR' && string_before_first_left_bracket != '') return null
+    if (string_before_first_left_bracket != 'OR') return null
 
     var string_in_between_two_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_matching_right_bracket)
 

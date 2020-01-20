@@ -3,13 +3,16 @@ class Node{
     this.attributes = []
     if (parser){
       this.parser = parser
-      this.id, this.parser.getId()
+      this.id = this.parser.getId()
     }
   }
 
   //If attribute exists, overwrite it
   //If attribute does not exist, create it
   setAttribute(attributeName, value = null){
+    //While it may seem like you can avoid using the setAttribute function, using it actually simplifies things when you are debugging because
+    //you can iterate through the relevant details without handling the fact that some attributes, such as parser and id are not intended to be used in the abstracted concept of a node
+
     if (this.attributes.indexOf(attributeName) > -1){
       
     }else{
@@ -19,14 +22,19 @@ class Node{
     this[attributeName] = value
   }
 
+  getAttributes(){
+    return this.attributes
+  }
+
   getChildren(){
     let children = []
-    for (let i = 0; i < this.attributes.length; i++){
-      if (typeof this[attributes[i]] == 'object'){
-        children.push(this[attributes[i]])
-      }else if (typeof this[attributes[i]] == 'array'){
-        for (let j = 0; j < this[attributes[i]].length; j++){
-          children.push(this[attributes[i]][j])
+    for (let attribute in this){
+      let value = this[attribute]
+      if (typeof value == 'object'){
+        children.push(value)
+      }else if (typeof value == 'array'){
+        for (let j = 0; j < value.length; j++){
+          children.push(value[j])
         }
       }
     }
@@ -93,8 +101,8 @@ class Rule extends Node{
   constructor(parser, pattern, name){
     super(parser)
     this.setAttribute('friendly node type name', 'rule')
-    this.setAttribute('pattern', pattern)
-    this.setAttribute('name', name)
+    this.setAttribute('pattern',pattern)
+    this.setAttribute('name',name)
   }
 
   match(string,metadata){
@@ -102,7 +110,7 @@ class Rule extends Node{
     let matchLength = matchInfo.matchLength
     let internalMatches = matchInfo
 
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, internalMatches: [internalMatches]}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, internalMatches: internalMatches}
 
     this.saveData(returnValue)
     return returnValue
@@ -114,8 +122,8 @@ class Rule extends Node{
 class RuleName extends Node{
   constructor(parser, name){
     super(parser)
-    this.setAttribute('value', name)
-    this.setAttribute('friendly node type name', 'rule name')
+    this.setAttribute('value',name)
+    this.setAttribute('friendly node type name','rule name')
   }
 
   match(string,metadata){
@@ -133,8 +141,8 @@ class RuleName extends Node{
 class Not extends Node{
   constructor(parser,pattern){
     super(parser)
-    this.setAttribute('pattern', pattern)
-    this.setAttribute('friendly node type name', 'not')
+    this.setAttribute('pattern',pattern)
+    this.setAttribute('friendly node type name','not')
   }
 
   match(string,metadata){
@@ -153,11 +161,43 @@ class Not extends Node{
   }
 }
 
+//WS_ALLOW_BOTH must take a parameter
+//Assumes you are not going to use WS_ALLOW_BOTH on a whitespace character
+class WSAllowBoth extends Node{
+  constructor(parser,innerPattern){
+    super(parser)
+    this.setAttribute('inner pattern',innerPattern)
+    this.setAttribute('friendly node type name','ws allow both')
+  }
+
+  match(string,metadata){
+    let matchLength = 0
+    let leadingWhitespace = Strings.headMatch(string, Strings.whitespace_characters)
+
+    let remainderString = string.substring(leadingWhitespace.length)
+    let matchInfo = this['inner pattern'].match(remainderString,{depth: metadata.depth + 1, parentId: this.id})
+    if (matchInfo.matchFound){
+      let afterInnerPattern = remainderString.substring(matchInfo.matchLength)
+      let trailingWhitespace = Strings.headMatch(afterInnerPattern, Strings.whitespace_characters)
+      matchLength = leadingWhitespace.length + matchInfo.matchLength + trailingWhitespace.length
+    }
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), internalMatches: matchInfo}
+    this.saveData(returnValue)
+
+    return returnValue
+    
+    //is it just the pattern with no white space at the front?
+    //is there whitespace in the front?
+    //If yes, is it followed by the pattern?
+    //If yes, is it followed by whitespace?
+  }
+}
+
 class Sequence extends Node{
   constructor(parser,patterns){
     super(parser)
-    this.setAttribute('patterns', patterns)
-    this.setAttribute('friendly node type name', 'sequence')
+    this.setAttribute('patterns',patterns)
+    this.setAttribute('friendly node type name','sequence')
   }
 
   match(string,metadata){
@@ -189,8 +229,8 @@ class Or extends Node{
   //patternList is an array
   constructor(parser,patterns){
     super(parser)
-    this.setAttribute('patterns', patterns)
-    this.setAttribute('friendly node type name', 'or')
+    this.setAttribute('patterns',patterns)
+    this.setAttribute('friendly node type name','or')
   }
 
   match(string,metadata){
@@ -215,8 +255,8 @@ class Or extends Node{
 class Multiple extends Node{
   constructor(parser,pattern){
     super(parser)
-    this.setAttribute('pattern', pattern)
-    this.setAttribute('friendly node type name', 'multiple')
+    this.setAttribute('pattern',pattern)
+    this.setAttribute('friendly node type name','multiple')
   }
 
   match(string,metadata){
@@ -248,8 +288,8 @@ class Multiple extends Node{
 class Pattern extends Node{
   constructor(parser,innerPattern){
     super(parser)
-    this.setAttribute('friendly node type name', 'pattern')
-    this.setAttribute('inner pattern', innerPattern)//is it a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'?
+    this.setAttribute('friendly node type name','pattern')
+    this.setAttribute('inner pattern',innerPattern)//The inner pattern is something like a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'
   }
 
   match(string,metadata){
@@ -268,8 +308,8 @@ class Pattern extends Node{
 class QuotedString extends Node{
   constructor(parser,string){
     super(parser)
-    this.setAttribute('string', string)
-    this.setAttribute('friendly node type name', 'quoted string')
+    this.setAttribute('string',string)
+    this.setAttribute('friendly node type name','quoted string')
   }
 
   match(string,metadata){
@@ -296,8 +336,8 @@ class QuotedString extends Node{
 class CharacterClass extends Node{
   constructor(parser,quotedString){
     super(parser)
-    this.setAttribute('friendly node type name', 'character class')
-    this.setAttribute('string', quotedString.string)//is it a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'?
+    this.setAttribute('friendly node type name','character class')
+    this.setAttribute('string',quotedString.string)
   }
 
   match(string,metadata){
@@ -334,7 +374,6 @@ class CharacterClass extends Node{
 //Then, the parse function is run, taking in an input_string representing a small set of data given in the language specified by the language loaded by the Parser object during its construction
 class Parser{
   constructor(){
-    this.validStringCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_= \n\t,()'
     this.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
     this.matchRecorder = [] //collects the names of the classes whose match functions were run
     this.idCounter = 0
@@ -497,6 +536,11 @@ class Parser{
     return this.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
   }
 
+  //checks if string matches the pattern CHARACTER_CLASS[] and returns the matching string
+  headMatchWSAllowBoth(string){
+    return this.headMatchXWithBrackets(string, 'WS_ALLOW_BOTH')
+  }
+  
   //If the string starts with one of the pattern strings for or, sequence, quoted string, ws allow both or rule name,
   //return the string containing up to the first pattern string
   //Returns '' if no valid next pattern string is found
@@ -526,6 +570,11 @@ class Parser{
       return patternString
     }
 
+    patternString = this.headMatchWSAllowBoth(string)
+    if (patternString){
+      return patternString
+    }
+
     patternString = this.headMatchRuleName(string)
     if (patternString){
       return patternString
@@ -534,6 +583,32 @@ class Parser{
     return ''
   }
 
+  //WS_ALLOW_BOTH[PATTERN]
+  grammarize_WS_ALLOW_BOTH(input_string){
+    var trimmed_input_string = input_string.trim()
+    var location_of_first_left_square_bracket = trimmed_input_string.indexOf('[')
+    if (location_of_first_left_square_bracket < 0) return null
+
+    var string_before_first_left_square_bracket = trimmed_input_string.substring(0, location_of_first_left_square_bracket)
+    if (string_before_first_left_square_bracket.trim() != 'WS_ALLOW_BOTH') return null
+
+    var location_of_matching_right_square_bracket = this.get_matching_right_square_bracket(trimmed_input_string, location_of_first_left_square_bracket)
+    if (location_of_matching_right_square_bracket < 0){
+      return null
+    }
+
+    if (location_of_matching_right_square_bracket + 1 != trimmed_input_string.length) return null
+    var string_between_two_square_brackets = trimmed_input_string.substring(location_of_first_left_square_bracket + 1, location_of_matching_right_square_bracket)
+
+    var inner_pattern = this.grammarize_PATTERN(string_between_two_square_brackets)
+    if (inner_pattern != null){
+      var new_node = new WSAllowBoth(this,inner_pattern)
+      return new_node
+    }
+
+    return null
+  }
+  
   //A pattern list is a set of comma-separated patterns
   //RULE_NAME1,RULE_NAME2, OR[...], SEQUENCE[]
   //PATTERN
@@ -620,7 +695,7 @@ class Parser{
     if (location_of_matching_right_bracket != trimmed_string.length - 1) return null
 
     var string_before_first_left_bracket = trimmed_string.substring(0,location_of_first_left_bracket).trim()
-    if (string_before_first_left_bracket != 'OR' && string_before_first_left_bracket != '') return null
+    if (string_before_first_left_bracket != 'OR') return null
 
     var string_in_between_two_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_matching_right_bracket)
 
@@ -788,6 +863,11 @@ class Parser{
       let characterClass = this.grammarize_CHARACTER_CLASS(trimmed_input_string)
       if (characterClass){
         return characterClass
+      }
+    }else if (this.headMatchWSAllowBoth(trimmed_input_string)){
+      var ws_allow_both_construct = this.grammarize_WS_ALLOW_BOTH(trimmed_input_string)
+      if (ws_allow_both_construct != null){
+        return ws_allow_both_construct
       }
     }
     else if (this.headMatchRuleName(trimmed_input_string)){
@@ -1055,6 +1135,9 @@ class TreeViewer{
   }
 
   getOutputString(metadata){
+    if (metadata == null){
+      return ''
+    }
     let outputString = '  '.repeat(metadata['depth']) + '*****************************\n'
 
     let keys = Object.keys(metadata)

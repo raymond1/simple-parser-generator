@@ -37,29 +37,31 @@ class TreeProcessor{
 		this.ast = ast
 	}
 
-	//
+	//Generates a tree consisting only of the matched user defined rules
+	getRuleMatchesOnly(){
+
+	}
+
+	//matches are guaranteed to be contiguous
 	getMatchesOnly(ast){
-//debugger
 		let newNode = null
-//		if (typeof ast == 'object'){
-			if (ast.matchFound == true){
-				newNode = this.shallowCopy(ast)
-				newNode.internalMatches = []
-				if (ast.internalMatches){
-					if (Array.isArray(ast.internalMatches)){
-						for (let internalMatch of ast.internalMatches){
-							if (internalMatch.matchFound == true){
-								newNode.internalMatches.push(this.getMatchesOnly(internalMatch))
-							}
+		if (ast.matchFound == true){
+			newNode = this.shallowCopy(ast)
+			newNode.internalMatches = []
+			if (ast.internalMatches){
+				if (Array.isArray(ast.internalMatches)){
+					for (let internalMatch of ast.internalMatches){
+						if (internalMatch.matchFound == true){
+							newNode.internalMatches.push(this.getMatchesOnly(internalMatch))
 						}
 					}
-					else {
-						//assume that ast.internalMatches is an object
-						newNode.internalMatches.push(this.getMatchesOnly(ast.internalMatches))
-					}
+				}
+				else {
+					//assume that ast.internalMatches is an object
+					newNode.internalMatches.push(this.getMatchesOnly(ast.internalMatches))
 				}
 			}
-//		}
+		}
 		
 		return newNode
 	}
@@ -69,11 +71,8 @@ class TreeProcessor{
 	shallowCopy(ast){
 		let newNode = new Node()
 		for (let attribute in ast){
-			if (attribute != 'internalMatches' && attribute != 'attributes'){
+			if (!Array.isArray(ast[attribute])){
 				newNode[attribute]=ast[attribute]
-			}
-			else{
-
 			}
 		}
 		return newNode

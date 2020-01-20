@@ -38,18 +38,28 @@ class TreeProcessor{
 	}
 
 	//
-	getMatchesOnly(){
-		debugger
+	getMatchesOnly(ast){
+//debugger
 		let newNode = null
-		if (this.ast.matchFound == true){
-			newNode = this.shallowCopy(this.ast)
-			newNode.internalMatches = []
-			for (let internalMatch of this.ast.internalMatches){
-				if (internalMatch.matchFound == true){
-					newNode.internalMatches.push(internalMatch)
+//		if (typeof ast == 'object'){
+			if (ast.matchFound == true){
+				newNode = this.shallowCopy(ast)
+				newNode.internalMatches = []
+				if (ast.internalMatches){
+					if (Array.isArray(ast.internalMatches)){
+						for (let internalMatch of ast.internalMatches){
+							if (internalMatch.matchFound == true){
+								newNode.internalMatches.push(this.getMatchesOnly(internalMatch))
+							}
+						}
+					}
+					else {
+						//assume that ast.internalMatches is an object
+						newNode.internalMatches.push(this.getMatchesOnly(ast.internalMatches))
+					}
 				}
 			}
-		}
+//		}
 		
 		return newNode
 	}
@@ -60,7 +70,7 @@ class TreeProcessor{
 		let newNode = new Node()
 		for (let attribute in ast){
 			if (attribute != 'internalMatches' && attribute != 'attributes'){
-				newNode.setAttribute(attribute, ast[attribute])
+				newNode[attribute]=ast[attribute]
 			}
 			else{
 

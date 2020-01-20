@@ -1,32 +1,20 @@
 class Node{
   constructor(parser){
-    this.attributes = []
     if (parser){
       this.parser = parser
       this.id = this.parser.getId()
     }
   }
 
-  //If attribute exists, overwrite it
-  //If attribute does not exist, create it
-  setAttribute(attributeName, value = null){
-    if (this.attributes.indexOf(attributeName) > -1){
-      
-    }else{
-      this.attributes.push(attributeName)
-    }
-
-    this[attributeName] = value
-  }
-
   getChildren(){
     let children = []
-    for (let i = 0; i < this.attributes.length; i++){
-      if (typeof this[attributes[i]] == 'object'){
-        children.push(this[attributes[i]])
-      }else if (typeof this[attributes[i]] == 'array'){
-        for (let j = 0; j < this[attributes[i]].length; j++){
-          children.push(this[attributes[i]][j])
+    for (let attribute in this){
+      let value = this[attribute]
+      if (typeof value == 'object'){
+        children.push(value)
+      }else if (typeof value == 'array'){
+        for (let j = 0; j < value.length; j++){
+          children.push(value[j])
         }
       }
     }
@@ -44,8 +32,8 @@ class Node{
 class RuleList extends Node{
   constructor(parser, rulesArray){
     super(parser)
-    this.setAttribute('rules', rulesArray)
-    this.setAttribute('friendly node type name', 'rule list')
+    this['rules'] = rulesArray
+    this['friendly node type name'] = 'rule list'
   }
   
   //produces rule nodes as long as they are found
@@ -92,9 +80,9 @@ class RuleList extends Node{
 class Rule extends Node{
   constructor(parser, pattern, name){
     super(parser)
-    this.setAttribute('friendly node type name', 'rule')
-    this.setAttribute('pattern', pattern)
-    this.setAttribute('name', name)
+    this['friendly node type name'] = 'rule'
+    this['pattern'] = pattern
+    this['name'] = name
   }
 
   match(string,metadata){
@@ -102,7 +90,7 @@ class Rule extends Node{
     let matchLength = matchInfo.matchLength
     let internalMatches = matchInfo
 
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, internalMatches: [internalMatches]}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, internalMatches: internalMatches}
 
     this.saveData(returnValue)
     return returnValue
@@ -114,8 +102,8 @@ class Rule extends Node{
 class RuleName extends Node{
   constructor(parser, name){
     super(parser)
-    this.setAttribute('value', name)
-    this.setAttribute('friendly node type name', 'rule name')
+    this['value']=name
+    this['friendly node type name']='rule name'
   }
 
   match(string,metadata){
@@ -133,8 +121,8 @@ class RuleName extends Node{
 class Not extends Node{
   constructor(parser,pattern){
     super(parser)
-    this.setAttribute('pattern', pattern)
-    this.setAttribute('friendly node type name', 'not')
+    this['pattern']=pattern
+    this['friendly node type name']='not'
   }
 
   match(string,metadata){
@@ -158,8 +146,8 @@ class Not extends Node{
 class WSAllowBoth extends Node{
   constructor(parser,innerPattern){
     super(parser)
-    this.setAttribute('inner pattern', innerPattern)
-    this.setAttribute('friendly node type name', 'ws allow both')
+    this['inner pattern']=innerPattern
+    this['friendly node type name']='ws allow both'
   }
 
   match(string,metadata){
@@ -188,8 +176,8 @@ class WSAllowBoth extends Node{
 class Sequence extends Node{
   constructor(parser,patterns){
     super(parser)
-    this.setAttribute('patterns', patterns)
-    this.setAttribute('friendly node type name', 'sequence')
+    this['patterns']=patterns
+    this['friendly node type name']='sequence'
   }
 
   match(string,metadata){
@@ -221,8 +209,8 @@ class Or extends Node{
   //patternList is an array
   constructor(parser,patterns){
     super(parser)
-    this.setAttribute('patterns', patterns)
-    this.setAttribute('friendly node type name', 'or')
+    this['patterns']=patterns
+    this['friendly node type name']='or'
   }
 
   match(string,metadata){
@@ -247,8 +235,8 @@ class Or extends Node{
 class Multiple extends Node{
   constructor(parser,pattern){
     super(parser)
-    this.setAttribute('pattern', pattern)
-    this.setAttribute('friendly node type name', 'multiple')
+    this['pattern']=pattern
+    this['friendly node type name']='multiple'
   }
 
   match(string,metadata){
@@ -280,8 +268,8 @@ class Multiple extends Node{
 class Pattern extends Node{
   constructor(parser,innerPattern){
     super(parser)
-    this.setAttribute('friendly node type name', 'pattern')
-    this.setAttribute('inner pattern', innerPattern)//is it a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'?
+    this['friendly node type name']='pattern'
+    this['inner pattern']=innerPattern//is it a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'?
   }
 
   match(string,metadata){
@@ -300,8 +288,8 @@ class Pattern extends Node{
 class QuotedString extends Node{
   constructor(parser,string){
     super(parser)
-    this.setAttribute('string', string)
-    this.setAttribute('friendly node type name', 'quoted string')
+    this['string']=string
+    this['friendly node type name']='quoted string'
   }
 
   match(string,metadata){
@@ -328,8 +316,8 @@ class QuotedString extends Node{
 class CharacterClass extends Node{
   constructor(parser,quotedString){
     super(parser)
-    this.setAttribute('friendly node type name', 'character class')
-    this.setAttribute('string', quotedString.string)//is it a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'?
+    this['friendly node type name']='character class'
+    this['string']=quotedString.string//is it a 'quoted string', an 'or', a 'sequence', a 'rule name', or a 'ws allow both'?
   }
 
   match(string,metadata){
@@ -366,7 +354,6 @@ class CharacterClass extends Node{
 //Then, the parse function is run, taking in an input_string representing a small set of data given in the language specified by the language loaded by the Parser object during its construction
 class Parser{
   constructor(){
-    this.validStringCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_= \n\t,()'
     this.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
     this.matchRecorder = [] //collects the names of the classes whose match functions were run
     this.idCounter = 0
@@ -1128,6 +1115,9 @@ class TreeViewer{
   }
 
   getOutputString(metadata){
+    if (metadata == null){
+      return ''
+    }
     let outputString = '  '.repeat(metadata['depth']) + '*****************************\n'
 
     let keys = Object.keys(metadata)

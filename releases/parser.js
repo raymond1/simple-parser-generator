@@ -153,6 +153,38 @@ class Not extends Node{
   }
 }
 
+//WS_ALLOW_BOTH must take a parameter
+//Assumes you are not going to use WS_ALLOW_BOTH on a whitespace character
+class WSAllowBoth extends Node{
+  constructor(parser,innerPattern){
+    super(parser)
+    this.setAttribute('inner pattern', innerPattern)
+    this.setAttribute('friendly node type name', 'ws allow both')
+  }
+
+  match(string,metadata){
+    let matchLength = 0
+    let leadingWhitespace = Strings.headMatch(string, Strings.whitespace_characters)
+
+    let remainderString = string.substring(leadingWhitespace.length)
+    let matchInfo = this['inner pattern'].match(remainderString,{depth: metadata.depth + 1, parentId: this.id})
+    if (matchInfo.matchFound){
+      let afterInnerPattern = remainderString.substring(matchInfo.matchLength)
+      let trailingWhitespace = Strings.headMatch(afterInnerPattern, Strings.whitespace_characters)
+      matchLength = leadingWhitespace.length + matchInfo.matchLength + trailingWhitespace.length
+    }
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), internalMatches: matchInfo}
+    this.saveData(returnValue)
+
+    return returnValue
+    
+    //is it just the pattern with no white space at the front?
+    //is there whitespace in the front?
+    //If yes, is it followed by the pattern?
+    //If yes, is it followed by whitespace?
+  }
+}
+
 class Sequence extends Node{
   constructor(parser,patterns){
     super(parser)
@@ -273,7 +305,6 @@ class QuotedString extends Node{
   }
 
   match(string,metadata){
-    
     let internalString = this['string']
     
     let matchFound = false
@@ -498,6 +529,11 @@ class Parser{
     return this.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
   }
 
+  //checks if string matches the pattern CHARACTER_CLASS[] and returns the matching string
+  headMatchWSAllowBoth(string){
+    return this.headMatchXWithBrackets(string, 'WS_ALLOW_BOTH')
+  }
+  
   //If the string starts with one of the pattern strings for or, sequence, quoted string, ws allow both or rule name,
   //return the string containing up to the first pattern string
   //Returns '' if no valid next pattern string is found
@@ -527,6 +563,11 @@ class Parser{
       return patternString
     }
 
+    patternString = this.headMatchWSAllowBoth(string)
+    if (patternString){
+      return patternString
+    }
+
     patternString = this.headMatchRuleName(string)
     if (patternString){
       return patternString
@@ -535,6 +576,32 @@ class Parser{
     return ''
   }
 
+  //WS_ALLOW_BOTH[PATTERN]
+  grammarize_WS_ALLOW_BOTH(input_string){
+    var trimmed_input_string = input_string.trim()
+    var location_of_first_left_square_bracket = trimmed_input_string.indexOf('[')
+    if (location_of_first_left_square_bracket < 0) return null
+
+    var string_before_first_left_square_bracket = trimmed_input_string.substring(0, location_of_first_left_square_bracket)
+    if (string_before_first_left_square_bracket.trim() != 'WS_ALLOW_BOTH') return null
+
+    var location_of_matching_right_square_bracket = this.get_matching_right_square_bracket(trimmed_input_string, location_of_first_left_square_bracket)
+    if (location_of_matching_right_square_bracket < 0){
+      return null
+    }
+
+    if (location_of_matching_right_square_bracket + 1 != trimmed_input_string.length) return null
+    var string_between_two_square_brackets = trimmed_input_string.substring(location_of_first_left_square_bracket + 1, location_of_matching_right_square_bracket)
+
+    var inner_pattern = this.grammarize_PATTERN(string_between_two_square_brackets)
+    if (inner_pattern != null){
+      var new_node = new WSAllowBoth(this,inner_pattern)
+      return new_node
+    }
+
+    return null
+  }
+  
   //A pattern list is a set of comma-separated patterns
   //RULE_NAME1,RULE_NAME2, OR[...], SEQUENCE[]
   //PATTERN
@@ -789,6 +856,11 @@ class Parser{
       let characterClass = this.grammarize_CHARACTER_CLASS(trimmed_input_string)
       if (characterClass){
         return characterClass
+      }
+    }else if (this.headMatchWSAllowBoth(trimmed_input_string)){
+      var ws_allow_both_construct = this.grammarize_WS_ALLOW_BOTH(trimmed_input_string)
+      if (ws_allow_both_construct != null){
+        return ws_allow_both_construct
       }
     }
     else if (this.headMatchRuleName(trimmed_input_string)){

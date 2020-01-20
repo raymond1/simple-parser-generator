@@ -1,11 +1,12 @@
 <html lang="en">
 <head>
-<title>Test</title>
+<title>Calculator</title>
 <meta charset="utf-8"/>
 </head>
 <body>
 <div id='test'></div>
-
+<div id="output"></div>
+<button type='button' onclick='evaluateExpression()'></button>
 <script src='../../releases/parser.js'></script>
 <script>
 let grammar = `
@@ -31,14 +32,61 @@ SUBTRACTION_EXPRESSION = SEQUENCE[
 ]
 `
 
+class TreeProcessor{
+	constructor(ast){
+		this.ast = ast
+	}
+
+	//
+	getMatchesOnly(){
+		debugger
+		let newNode = null
+		if (this.ast.matchFound == true){
+			newNode = this.shallowCopy(this.ast)
+			newNode.internalMatches = []
+			for (let internalMatch of this.ast.internalMatches){
+				if (internalMatch.matchFound == true){
+					newNode.internalMatches.push(internalMatch)
+				}
+			}
+		}
+		
+		return newNode
+	}
+
+	//This is a helper method to getMatchesOnly
+	//copies all attributes one node, except for internalMatches
+	shallowCopy(ast){
+		let newNode = new Node()
+		for (let attribute in ast){
+			if (attribute != 'internalMatches' && attribute != 'attributes'){
+				newNode.setAttribute(attribute, ast[attribute])
+			}
+			else{
+
+			}
+		}
+		return newNode
+	}
+}
+
 let parser = new Parser()
 parser.setGrammar(grammar)
 
 let input = '100-1'
 let output = parser.parse(input)
 
-let treeViewer = new TreeViewer(output, document.querySelector('#test'))
+let treeProcessor = new TreeProcessor(output)
+
+let matchesOnly = treeProcessor.getMatchesOnly(output)
+debugger
+let treeViewer = new TreeViewer(matchesOnly, document.querySelector('#test'))
 treeViewer.display()
+
+/*
+let evaluateExpression = function(expressionTree){
+
+}*/
 </script>
 </body>
 </html>

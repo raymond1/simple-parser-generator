@@ -1,8 +1,10 @@
 class Node{
   constructor(parser){
-    this.parser = parser
     this.attributes = []
-    this.setAttribute('id', this.parser.getId())
+    if (parser){
+      this.parser = parser
+      this.id, this.parser.getId()
+    }
   }
 
   //If attribute exists, overwrite it
@@ -31,6 +33,7 @@ class Node{
     return children
   }
 
+  //Originally used for debugging purposes
   saveData(object){
     object.id = this.id
     this.parser.matchRecorder.push(object)
@@ -47,7 +50,6 @@ class RuleList extends Node{
   
   //produces rule nodes as long as they are found
   match(string, metadata = {depth: 0, parentId: null}){
-    debugger
     let matchFound = false //indicates if rulelist is valid
     let ruleMatched = false //used in the do loop to determine if any of the rules match
     let tempString = string

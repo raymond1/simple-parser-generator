@@ -63,9 +63,12 @@ class TreeProcessor{
 	//Create a new AST tree such that for each node, add a parent property if possible
 	cloneAndAddParent(ast, parentNode = null){
 		let clonedNode = this.shallowCopy(ast)
+		clonedNode.parentNode = parentNode
+		clonedNode.internalMatches = []
 		if (clonedNode != null){
-			if (newNode.internalMatches){
-				
+			for (let internalMatch of ast.internalMatches){
+				internalMatch.parent = clonedNode
+				clonedNode.internalMatches.push(internalMatch)
 			}
 		}
 		return clonedNode
@@ -122,6 +125,8 @@ let output = parser.parse(input)
 let treeProcessor = new TreeProcessor(output)
 
 let matchesOnly = treeProcessor.getMatchesOnly(output)
+
+let cloneWithParents = treeProcessor.cloneAndAddParent()
 debugger
 let treeViewer = new TreeViewer(matchesOnly, document.querySelector('#test'))
 treeViewer.display()

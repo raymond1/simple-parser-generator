@@ -64,7 +64,7 @@ class RuleList extends Node{
     let ruleMatched = false //used in the do loop to determine if any of the rules match
     let tempString = string
 
-    let internalMatches = [] //internalMatches refers to the rules that are matched while matching a rule list
+    let matches = [] //matches refers to the rules that are matched while matching a rule list
     do{
       ruleMatched = false
       let matchInformation = null
@@ -75,7 +75,7 @@ class RuleList extends Node{
           break
         }
       }
-      internalMatches.push(matchInformation)
+      matches.push(matchInformation)
 
       if (ruleMatched){
         tempString = tempString.substring(matchInformation.matchLength)
@@ -86,13 +86,13 @@ class RuleList extends Node{
 
     let totalLength = 0
     if (ruleMatched){
-      for (let i = 0; i < internalMatches.length; i++){
-        totalLength = totalLength + internalMatches[i].matchLength
+      for (let i = 0; i < matches.length; i++){
+        totalLength = totalLength + matches[i].matchLength
       }
       matchFound = true
     }
 
-    let returnValue = {type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), internalMatches: internalMatches}
+    let returnValue = {type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), matches: matches}
 
     this.saveData(returnValue)
     return returnValue
@@ -110,9 +110,9 @@ class Rule extends Node{
   match(string,metadata){
     let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parentId: this.id})
     let matchLength = matchInfo.matchLength
-    let internalMatches = [matchInfo]
+    let matches = [matchInfo]
 
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, internalMatches: internalMatches}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, matches: matches}
 
     this.saveData(returnValue)
     return returnValue
@@ -133,7 +133,7 @@ class RuleName extends Node{
     let rule = this.parser.getRule(this.value)
     let matchInfo = rule.match(string,{depth: metadata.depth + 1, parentId: this.id})
     
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), value: this.value, internalMatches: [matchInfo]}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), value: this.value, matches: [matchInfo]}
     
     this.saveData(returnValue)
     return returnValue
@@ -150,14 +150,14 @@ class Not extends Node{
   }
   
   match(string,metadata){
-    let innerMatchInfo = this['pattern'].match(string,{depth: metadata.depth + 1, parentId: this.id})
+    let matchInfo = this['pattern'].match(string,{depth: metadata.depth + 1, parentId: this.id})
 
     let matchLength = 0
-    let matchFound = !innerMatchInfo.matchFound
+    let matchFound = !matchInfo.matchFound
     if (matchFound){
       matchLength = string.length
     }
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), internalMatches: innerMatchInfo}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), matches: [matchInfo]}
 
     this.saveData(returnValue)
 
@@ -185,7 +185,7 @@ class WSAllowBoth extends Node{
       let trailingWhitespace = Strings.headMatch(afterInnerPattern, Strings.whitespace_characters)
       matchLength = leadingWhitespace.length + matchInfo.matchLength + trailingWhitespace.length
     }
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), internalMatches: matchInfo}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), matches: matchInfo}
     this.saveData(returnValue)
 
     return returnValue
@@ -208,11 +208,11 @@ class Sequence extends Node{
     let tempString = string
     let totalMatchLength = 0
 
-    let matchInfoList = []
+    let matches = []
     let matchInfo
     for (let i = 0; i < this['patterns'].length; i++){
       matchInfo = this['patterns'][i].match(tempString,{depth: metadata.depth + 1, parentId: this.id})
-      matchInfoList.push(matchInfo)
+      matches.push(matchInfo)
       if (!matchInfo.matchFound){
         break;
       }else{
@@ -221,7 +221,7 @@ class Sequence extends Node{
       }
     }
 
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: totalMatchLength, matchString: string.substring(0, totalMatchLength), internalMatches: matchInfoList}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: totalMatchLength, matchString: string.substring(0, totalMatchLength), matches: matches}
 
     this.saveData(returnValue)
 
@@ -238,17 +238,17 @@ class Or extends Node{
   }
 
   match(string,metadata){
-    let matchInfoList = []
+    let matches = []
     let matchInfo
     for (let i = 0; i < this.patterns.length; i++){
       matchInfo = this['patterns'][i].match(string,{depth: metadata.depth + 1, parentId: this.id})
-      matchInfoList.push(matchInfo)
+      matches.push(matchInfo)
       if (matchInfo.matchFound){
         break
       }
     }
 
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), internalMatches: matchInfoList}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), matches: matches}
 
     this.saveData(returnValue)
 
@@ -267,22 +267,22 @@ class Multiple extends Node{
     let tempString = string
     let totalMatchLength = 0
 
-    let matchInfoList = []
+    let matches = []
     let matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parentId: this.id})
     if (matchInfo.matchFound){
-      matchInfoList.push(matchInfo)
+      matches.push(matchInfo)
     }
     while(matchInfo.matchFound){
       totalMatchLength = totalMatchLength + matchInfo.matchLength
       tempString = tempString.substring(matchInfo.matchLength)
       matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parentId: this.id})
-      matchInfoList.push(matchInfo)
+      matches.push(matchInfo)
     }
     let matchFound = false
-    if (matchInfoList.length > 0){
+    if (matches.length > 0){
       matchFound = true
     }
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound, matchLength: totalMatchLength, matchString: string.substring(0, totalMatchLength), internalMatches: matchInfoList}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound, matchLength: totalMatchLength, matchString: string.substring(0, totalMatchLength), matches: matches}
     this.saveData(returnValue)
     return returnValue
   }
@@ -298,7 +298,7 @@ class Pattern extends Node{
 
   match(string,metadata){
     let matchInfo = this['inner pattern'].match(string,{depth: metatdata.depth + 1, parentId: this.id})
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), internalMatches: matchInfo}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), matches: [matchInfo]}
     this.saveData(returnValue)
 
     return matchInfo
@@ -328,7 +328,7 @@ class QuotedString extends Node{
     if (matchFound){
       matchLength = internalString.length
     }
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), string: this.string, internalMatches: null}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), string: this.string, matches: []}
 
     this.saveData(returnValue)
 
@@ -362,7 +362,7 @@ class CharacterClass extends Node{
       matchFound = true
     }
 
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength: matchingString.length, matchString: string.substring(0, matchingString.length), internalMatches: null}
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength: matchingString.length, matchString: string.substring(0, matchingString.length), matches: []}
     this.saveData(returnValue)
 
     return returnValue
@@ -1171,6 +1171,7 @@ class TreeViewer{
     }
     outputString = this.getOutputString(metadata)
 
+    //There are two display modes: to display in the console, or to display in the DOM on the browser
     if (!this.parentElement){
       console.log(outputString)
     }else{

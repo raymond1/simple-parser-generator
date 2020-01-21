@@ -37,9 +37,45 @@ class TreeProcessor{
 		this.ast = ast
 	}
 
-	//Generates a tree consisting only of the matched user defined rules
-	getRuleMatchesOnly(){
+	//Removes a node from a tree and rejoins it
+    //          root
+	//           |
+	//           A
+	//          / \
+    //          B C
+	//         /| |\
+	//        / | | \
+	//       D  E F  G
+	//       |
+    //       H
+	//       |
+	//       I
+	//
+	//I assume the root cannot be removed. All other nodes can be removed
+	//If A is removed, then B and C will be children of the root.
+	//If C is removed, then F and G become children of A
+	//If D is removed, then H and I become children of B
+	//If E is removed, no additional healing of the tree will take place
+	removeAndHeal(node){
 
+	}
+
+	//Create a new AST tree such that for each node, add a parent property if possible
+	cloneAndAddParent(ast, parentNode = null){
+		let clonedNode = this.shallowCopy(ast)
+		if (clonedNode != null){
+			if (newNode.internalMatches){
+				
+			}
+		}
+		return clonedNode
+	}
+
+	//Generates a tree consisting only of the matched user defined rules
+	getRuleMatchesOnly(ast){
+		//Step 1: add parent property to the ast
+		let newAst = this.addParentForChildren(ast)
+		let newNode = null
 	}
 
 	//matches are guaranteed to be contiguous
@@ -49,16 +85,10 @@ class TreeProcessor{
 			newNode = this.shallowCopy(ast)
 			newNode.internalMatches = []
 			if (ast.internalMatches){
-				if (Array.isArray(ast.internalMatches)){
-					for (let internalMatch of ast.internalMatches){
-						if (internalMatch.matchFound == true){
-							newNode.internalMatches.push(this.getMatchesOnly(internalMatch))
-						}
+				for (let internalMatch of ast.internalMatches){
+					if (internalMatch.matchFound == true){
+						newNode.internalMatches.push(this.getMatchesOnly(internalMatch))
 					}
-				}
-				else {
-					//assume that ast.internalMatches is an object
-					newNode.internalMatches.push(this.getMatchesOnly(ast.internalMatches))
 				}
 			}
 		}
@@ -69,6 +99,10 @@ class TreeProcessor{
 	//This is a helper method to getMatchesOnly
 	//copies all attributes one node, except for internalMatches
 	shallowCopy(ast){
+		if (ast == null){
+			return null
+		}
+
 		let newNode = new Node()
 		for (let attribute in ast){
 			if (!Array.isArray(ast[attribute])){

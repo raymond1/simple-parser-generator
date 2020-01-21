@@ -1,11 +1,13 @@
 class Node{
   constructor(parser){
     this.attributes = []
+    this.parent = null
     if (parser){
       this.parser = parser
       this.id = this.parser.getId()
     }
   }
+
 
   //If attribute exists, overwrite it
   //If attribute does not exist, create it
@@ -108,7 +110,7 @@ class Rule extends Node{
   match(string,metadata){
     let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parentId: this.id})
     let matchLength = matchInfo.matchLength
-    let internalMatches = matchInfo
+    let internalMatches = [matchInfo]
 
     let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, internalMatches: internalMatches}
 
@@ -124,14 +126,15 @@ class RuleName extends Node{
     super(parser)
     this.setAttribute('value',name)
     this.setAttribute('friendly node type name','rule name')
+    // AppendAttribute
   }
-
+  
   match(string,metadata){
     let rule = this.parser.getRule(this.value)
     let matchInfo = rule.match(string,{depth: metadata.depth + 1, parentId: this.id})
-
-    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), value: this.value, internalMatches: matchInfo}
-
+    
+    let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), value: this.value, internalMatches: [matchInfo]}
+    
     this.saveData(returnValue)
     return returnValue
   }
@@ -143,8 +146,9 @@ class Not extends Node{
     super(parser)
     this.setAttribute('pattern',pattern)
     this.setAttribute('friendly node type name','not')
+    //
   }
-
+  
   match(string,metadata){
     let innerMatchInfo = this['pattern'].match(string,{depth: metadata.depth + 1, parentId: this.id})
 

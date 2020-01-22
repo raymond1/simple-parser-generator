@@ -59,22 +59,23 @@ class RuleList extends Node{
   }
   
   //produces rule nodes as long as they are found
-  match(string, metadata = {depth: 0, parentId: null}){
+  match(string, metadata = {depth: 0, parent: null}){
     let matchFound = false //indicates if rulelist is valid
     let ruleMatched = false //used in the do loop to determine if any of the rules match
     let tempString = string
 
-    let matches = [] //matches refers to the rules that are matched while matching a rule list
+    let matches = []
     do{
       ruleMatched = false
       let matchInformation = null
       for (let i = 0; i < this.rules.length; i++){
-        matchInformation = this.rules[i].match(tempString, {depth: 1, parentId: this.id})
+        matchInformation = this.rules[i].match(tempString, {depth: 1, parent: this})
         if (matchInformation.matchFound){
           ruleMatched = true
           break
         }
       }
+
       matches.push(matchInformation)
 
       if (ruleMatched){
@@ -108,7 +109,7 @@ class Rule extends Node{
   }
 
   match(string,metadata){
-    let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parentId: this.id})
+    let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parent: this})
     let matchLength = matchInfo.matchLength
     let matches = [matchInfo]
 
@@ -131,7 +132,7 @@ class RuleName extends Node{
   
   match(string,metadata){
     let rule = this.parser.getRule(this.value)
-    let matchInfo = rule.match(string,{depth: metadata.depth + 1, parentId: this.id})
+    let matchInfo = rule.match(string,{depth: metadata.depth + 1, parent: this})
     
     let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), value: this.value, matches: [matchInfo]}
     
@@ -150,7 +151,7 @@ class Not extends Node{
   }
   
   match(string,metadata){
-    let matchInfo = this['pattern'].match(string,{depth: metadata.depth + 1, parentId: this.id})
+    let matchInfo = this['pattern'].match(string,{depth: metadata.depth + 1, parent: this})
 
     let matchLength = 0
     let matchFound = !matchInfo.matchFound
@@ -179,7 +180,7 @@ class WSAllowBoth extends Node{
     let leadingWhitespace = Strings.headMatch(string, Strings.whitespace_characters)
 
     let remainderString = string.substring(leadingWhitespace.length)
-    let matchInfo = this['inner pattern'].match(remainderString,{depth: metadata.depth + 1, parentId: this.id})
+    let matchInfo = this['inner pattern'].match(remainderString,{depth: metadata.depth + 1, parent: this})
     if (matchInfo.matchFound){
       let afterInnerPattern = remainderString.substring(matchInfo.matchLength)
       let trailingWhitespace = Strings.headMatch(afterInnerPattern, Strings.whitespace_characters)
@@ -211,7 +212,7 @@ class Sequence extends Node{
     let matches = []
     let matchInfo
     for (let i = 0; i < this['patterns'].length; i++){
-      matchInfo = this['patterns'][i].match(tempString,{depth: metadata.depth + 1, parentId: this.id})
+      matchInfo = this['patterns'][i].match(tempString,{depth: metadata.depth + 1, parent: this})
       matches.push(matchInfo)
       if (!matchInfo.matchFound){
         break;
@@ -241,7 +242,7 @@ class Or extends Node{
     let matches = []
     let matchInfo
     for (let i = 0; i < this.patterns.length; i++){
-      matchInfo = this['patterns'][i].match(string,{depth: metadata.depth + 1, parentId: this.id})
+      matchInfo = this['patterns'][i].match(string,{depth: metadata.depth + 1, parent: this})
       matches.push(matchInfo)
       if (matchInfo.matchFound){
         break
@@ -268,14 +269,14 @@ class Multiple extends Node{
     let totalMatchLength = 0
 
     let matches = []
-    let matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parentId: this.id})
+    let matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parent: this})
     if (matchInfo.matchFound){
       matches.push(matchInfo)
     }
     while(matchInfo.matchFound){
       totalMatchLength = totalMatchLength + matchInfo.matchLength
       tempString = tempString.substring(matchInfo.matchLength)
-      matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parentId: this.id})
+      matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parent: this})
       matches.push(matchInfo)
     }
     let matchFound = false
@@ -297,7 +298,7 @@ class Pattern extends Node{
   }
 
   match(string,metadata){
-    let matchInfo = this['inner pattern'].match(string,{depth: metatdata.depth + 1, parentId: this.id})
+    let matchInfo = this['inner pattern'].match(string,{depth: metatdata.depth + 1, parent: this})
     let returnValue = {type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), matches: [matchInfo]}
     this.saveData(returnValue)
 
@@ -1140,9 +1141,24 @@ class TreeViewer{
 
   getOutputString(metadata){
     if (metadata == null){
-      return ''
+      return '(null)\n'
     }
-    let outputString = '  '.repeat(metadata['depth']) + '*****************************\n'
+
+    let starIndent = 0
+    if (metadata){
+      if (metadata['depth']){
+        starIndent = metadata['depth']
+      }
+    }
+    let outputString = '  '.repeat(starIndent) + '*****************************\n'
+
+    if (Array.isArray(metadata)){
+      outputString += "(array begin)\n"
+    }
+
+    if (typeof metadata == 'undefined'){
+      outputString += "(undefined)\n"
+    }
 
     let keys = Object.keys(metadata)
     for(let i = 0; i < keys.length; i++){
@@ -1158,9 +1174,14 @@ class TreeViewer{
           }
         }
       }else{
-        outputString += '  '.repeat(metadata['depth']) + keys[i] + ":" + keyValue + '\n'
+        outputString += '  '.repeat(starIndent) + keys[i] + ":" + keyValue + '\n'
       }
     }
+
+    if (Array.isArray(metadata)){
+      outputString += "(array end)\n"
+    }
+
     return outputString
   }
   

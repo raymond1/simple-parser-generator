@@ -33,8 +33,31 @@ SUBTRACTION_EXPRESSION = SEQUENCE[
 `
 
 class TreeProcessor{
-	constructor(ast){
-		this.ast = ast
+	constructor(){
+	}
+
+	//returns all nodes in a list
+	//Test is a function you can pass in to return only certain nodes
+	//If test is passed in and is not null, then 
+	returnAllNodes(ast, test = null){
+
+		//The default test always returns true, in effect returning all nodes
+		if (test == null){
+			test = function(){
+				return true
+			}
+		}
+
+		let nodesToReturn = []
+		if (test(ast)){
+			nodesToReturn.push(this.shallowCopy(ast))
+		}
+
+		for (let match of ast.matches){
+			let childNodes = this.returnAllNodes(match, test)
+			nodesToReturn = nodesToReturn.concat(childNodes)
+		}
+		return nodesToReturn
 	}
 
 	//Removes a node from a tree and rejoins it
@@ -56,22 +79,33 @@ class TreeProcessor{
 	//If C is removed, then F and G become children of A
 	//If D is removed, then H and I become children of B
 	//If E is removed, no additional healing of the tree will take place
-	removeAndHeal(node){
+	removeAndHeal(ast){
+		if (ast){
+			let parent = ast.parent
 
-	}
+			//If ast node has a parent that is not null, then the current node must be removed from its matches list
+			if (parent){
+				for (let i = 0; i < parent.matches.length; i++){
+					if (parent.matches[i] == ast){
+						parent.matches.splice(i,1)
+						break
+					}
+				}
+			}
 
-	//Create a new AST tree such that for each node, add a parent property if possible
-	cloneAndAddParent(ast, parentNode = null){
-		let clonedNode = this.shallowCopy(ast)
-		clonedNode.parentNode = parentNode
-		clonedNode.internalMatches = []
-		if (clonedNode != null){
-			for (let internalMatch of ast.internalMatches){
-				internalMatch.parent = clonedNode
-				clonedNode.internalMatches.push(internalMatch)
+			//For each match in the current node, if there is a parent, then the parent must add the matches to its matches list
+			for (match in ast.matches){
+				if (ast.parent){
+					ast.parent.matches.push(match)
+					match.parent = ast.parent
+				}
+			}
+
+			//All the children must set their parent to the parent of ast
+			for (match in ast.matches){
+				match.parent = parent
 			}
 		}
-		return clonedNode
 	}
 
 	//Generates a tree consisting only of the matched user defined rules
@@ -86,11 +120,11 @@ class TreeProcessor{
 		let newNode = null
 		if (ast.matchFound == true){
 			newNode = this.shallowCopy(ast)
-			newNode.internalMatches = []
-			if (ast.internalMatches){
-				for (let internalMatch of ast.internalMatches){
-					if (internalMatch.matchFound == true){
-						newNode.internalMatches.push(this.getMatchesOnly(internalMatch))
+			newNode.matches = []
+			if (ast.matches){
+				for (let match of ast.matches){
+					if (match.matchFound == true){
+						newNode.matches.push(this.getMatchesOnly(match))
 					}
 				}
 			}
@@ -100,7 +134,7 @@ class TreeProcessor{
 	}
 
 	//This is a helper method to getMatchesOnly
-	//copies all attributes one node, except for internalMatches
+	//copies all attributes one node, except for matches
 	shallowCopy(ast){
 		if (ast == null){
 			return null
@@ -126,9 +160,25 @@ let treeProcessor = new TreeProcessor(output)
 
 let matchesOnly = treeProcessor.getMatchesOnly(output)
 
-let cloneWithParents = treeProcessor.cloneAndAddParent()
-debugger
-let treeViewer = new TreeViewer(matchesOnly, document.querySelector('#test'))
+let ruleNodes = treeProcessor.returnAllNodes(matchesOnly, (ast)=>{ return ast.type == 'rule'})
+
+let ruleIds = []
+for (let ruleNode of ruleNodes){
+	ruleIds.push(ruleNode.id)
+}
+
+let testClosure = (function(){
+	var _ruleIds = ruleIds
+	var innerFunction = function(ast){
+		return _ruleIds.includes(ast.id)
+	}
+	return innerFunction
+})()
+
+//Why am I getting doubles?
+let nodesToDelete = treeProcessor.returnAllNodes(output, testClosure)
+
+let treeViewer = new TreeViewer(nodesToDelete, document.querySelector('#test'))
 treeViewer.display()
 
 /*

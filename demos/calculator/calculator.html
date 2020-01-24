@@ -32,6 +32,7 @@ SUBTRACTION_EXPRESSION = SEQUENCE[
 ]
 `
 
+//Usage: let a = new TreeProcessor()
 class TreeProcessor{
 	constructor(){
 	}
@@ -39,7 +40,7 @@ class TreeProcessor{
 	//returns all nodes in a list
 	//Test is a function you can pass in to return only certain nodes
 	//If test is passed in and is not null, then 
-	returnAllNodes(ast, test = null){
+	returnAllNodes(matchTree, test = null){
 
 		//The default test always returns true, in effect returning all nodes
 		if (test == null){
@@ -49,11 +50,11 @@ class TreeProcessor{
 		}
 
 		let nodesToReturn = []
-		if (test(ast)){
-			nodesToReturn.push(this.shallowCopy(ast))
+		if (test(matchTree)){
+			nodesToReturn.push(matchTree)
 		}
 
-		for (let match of ast.matches){
+		for (let match of matchTree.matches){
 			let childNodes = this.returnAllNodes(match, test)
 			nodesToReturn = nodesToReturn.concat(childNodes)
 		}
@@ -79,58 +80,71 @@ class TreeProcessor{
 	//If C is removed, then F and G become children of A
 	//If D is removed, then H and I become children of B
 	//If E is removed, no additional healing of the tree will take place
-	removeAndHeal(ast){
-		if (ast){
-			let parent = ast.parent
+	removeItemAndHeal(itemToRemove, matchTree){
+		if (itemToRemove == null){
+			throw "Cannot remove null from a tree."
+		}
+		if (matchTree == null){
+			throw "Cannot remove an item from an empty tree."
+		}
 
-			//If ast node has a parent that is not null, then the current node must be removed from its matches list
-			if (parent){
-				for (let i = 0; i < parent.matches.length; i++){
-					if (parent.matches[i] == ast){
-						parent.matches.splice(i,1)
+		if (matchTree === itemToRemove){
+			//If matchTree node has a parent that is not null, then the current node must be removed from its matches list
+			if (matchTree.parent){
+				if (!matchTree.parent.matches){
+					debugger
+				}
+				for (let i = 0; i < matchTree.parent.matches.length; i++){
+					if (matchTree.parent.matches[i] == matchTree){
+						matchTree.parent.matches.splice(i,1)
 						break
 					}
 				}
 			}
 
 			//For each match in the current node, if there is a parent, then the parent must add the matches to its matches list
-			for (match in ast.matches){
-				if (ast.parent){
-					ast.parent.matches.push(match)
-					match.parent = ast.parent
+			for (let match of matchTree.matches){
+				if (matchTree.parent){
+					matchTree.parent.matches.push(match)
+					match.parent = matchTree.parent
 				}
 			}
 
-			//All the children must set their parent to the parent of ast
-			for (match in ast.matches){
-				match.parent = parent
+			//All the children must set their parent to the parent of matchTree
+			for (let match of matchTree.matches){
+				match.parent = matchTree.parent
+			}
+		}else{
+			//check if children need to be removed
+			//All the children must set their parent to the parent of matchTree
+			for (let match of matchTree.matches){
+				this.removeItemAndHeal(itemToRemove,match)
 			}
 		}
 	}
 
-	//Generates a tree consisting only of the matched user defined rules
-	getRuleMatchesOnly(ast){
-		//Step 1: add parent property to the ast
-		let newAst = this.addParentForChildren(ast)
-		let newNode = null
-	}
 
 	//matches are guaranteed to be contiguous
-	getMatchesOnly(ast){
-		let newNode = null
-		if (ast.matchFound == true){
-			newNode = this.shallowCopy(ast)
-			newNode.matches = []
-			if (ast.matches){
-				for (let match of ast.matches){
+	getRuleMatchesOnly(matchTree){
+		return this.returnAllNodes(matchTree, (matchTreeNode)=>{return matchTreeNode.matchFound&&matchTreeNode.type == 'rule'})
+	}
+
+	//clones scalar attributes(not arrays)
+	imperfectClone(matchTree){
+		let newMatchTree = null
+		if (matchTree.matchFound == true){
+			newMatchTree = this.shallowCopy(matchTree)
+			newMatchTree.matches = []
+			if (matchTree.matches){
+				for (let match of matchTree.matches){
 					if (match.matchFound == true){
-						newNode.matches.push(this.getMatchesOnly(match))
+						newMatchTree.matches.push(this.imperfectClone(match))
 					}
 				}
 			}
 		}
 		
-		return newNode
+		return newMatchTree
 	}
 
 	//This is a helper method to getMatchesOnly
@@ -140,13 +154,26 @@ class TreeProcessor{
 			return null
 		}
 
-		let newNode = new Node()
+		let newNode = {}
 		for (let attribute in ast){
 			if (!Array.isArray(ast[attribute])){
 				newNode[attribute]=ast[attribute]
 			}
 		}
 		return newNode
+	}
+
+	//performs a shallow operation on all nodes that match selectionTest and are not null
+	recursiveApply(matchNode, operation, selectionTest){
+		if (matchNode){
+			if (selectionTest(matchNode)){
+				operation(matchNode)
+			}
+
+			for (let match of matchNode.matches){
+				this.recursiveApply(match,operation,selectionTest)
+			}
+		}
 	}
 }
 
@@ -156,29 +183,50 @@ parser.setGrammar(grammar)
 let input = '100-1'
 let output = parser.parse(input)
 
-let treeProcessor = new TreeProcessor(output)
 
-let matchesOnly = treeProcessor.getMatchesOnly(output)
+let treeProcessor = new TreeProcessor()
+let matchesOnly = treeProcessor.getRuleMatchesOnly(output)
 
+debugger
+for (let match of matchesOnly){
+	treeProcessor.removeItemAndHeal(match, output)
+}
+
+//treeProcessor.recursiveApply(output, (matchNode)=>{matchNode.shallowDisplay()}, ()=>{return true})
+/*
+let matchesOnly = treeProcessor.getRuleMatchesOnly(output)
+
+for (let i = 0; i < matchesOnly.length; i++){
+
+}
+//let imperfect
 let ruleNodes = treeProcessor.returnAllNodes(matchesOnly, (ast)=>{ return ast.type == 'rule'})
 
-let ruleIds = []
+for (ruleNode of ruleNodes){
+	ruleNode.shallowDisplay()
+}
+*/
+/*
+let match_serial_numbers = []
 for (let ruleNode of ruleNodes){
-	ruleIds.push(ruleNode.id)
+	match_serial_numbers.push(ruleNode.serial_number)
 }
 
 let testClosure = (function(){
-	var _ruleIds = ruleIds
+	var _match_serial_numbers = match_serial_numbers
 	var innerFunction = function(ast){
-		return _ruleIds.includes(ast.id)
+		return !_match_serial_numbers.includes(ast.id)
 	}
 	return innerFunction
 })()
 
-//Why am I getting doubles?
-let nodesToDelete = treeProcessor.returnAllNodes(output, testClosure)
 
-let treeViewer = new TreeViewer(nodesToDelete, document.querySelector('#test'))
+let nodesToDelete = treeProcessor.returnAllNodes(output, testClosure)
+let idsOfNodesToDelete = nodesToDelete.map((astNode)=>astNode.serial_number)
+*/
+
+//let treeViewer = new TreeViewer(nodesToDelete, document.querySelector('#test'))
+let treeViewer = new TreeViewer(output, document.querySelector('#test'))
 treeViewer.display()
 
 /*

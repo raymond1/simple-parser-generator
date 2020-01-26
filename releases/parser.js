@@ -61,57 +61,34 @@ class Node{
     }
     return children
   }
-}
 
-class RuleList extends Node{
-  constructor(parser, rulesArray){
-    super(parser)
-    this.setAttribute('rules', rulesArray)
-    this.setAttribute('friendly node type name', 'rule list')
-  }
-  
-  //produces rule nodes as long as they are found
-  //metadata is a set of information that is passed around from one match operation to another
   match(string, metadata = {depth: 0, parent: null}){
     let newMatchNode = new MatchNode()
-    let matchFound = false //indicates if rulelist is valid
-    let ruleMatched = false //used in the do loop to determine if any of the rules match
-    let tempString = string
 
-    let matches = []
+    switch(this['friendly node type name']){
+      case 'rule list':
+        //newMatchNode will be used as the parent node for all matches that are initiated by the current node
+        //It is referred to at the end of the function
+        let matchInfo = this.rules[0].match(string, {depth: 1, parent: newMatchNode})
+        let totalLength = matchInfo.matchLength
 
-    //newMatchNode will be used as the parent node for all matches that are initiated by the current node
-    //It is referred to at the end of the function
-/*
-    do{
-      ruleMatched = false
-      let matchInformation = null
-      for (let i = 0; i < this.rules.length; i++){
-        matchInformation = this.rules[i].match(tempString, {depth: 1, parent: newMatchNode})
-        if (matchInformation.matchFound){
-          ruleMatched = true
-          break
-        }
-      }
-
-      matches.push(matchInformation)
-
-      if (ruleMatched){
-        tempString = tempString.substring(matchInformation.matchLength)
-      }else{
+        newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound:matchInfo.matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), matches:[matchInfo]})
         break
-      }
-    }while(ruleMatched&&tempString != '')
-*/
-    let matchInformation = this.rules[0].match(tempString, {depth: 1, parent: newMatchNode})
-    let totalLength = matchInformation.matchLength
-
-    newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound:matchInformation.matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), matches:[matchInformation]})
+      case 'rule':
+        {
+        let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parent: newMatchNode})
+        let matchLength = matchInfo.matchLength
+        let matches = [matchInfo]
+    
+        newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, matches: matches})
+        }
+        break
+    }
 
     return newMatchNode
   }
 }
-
+/*
 class Rule extends Node{
   constructor(parser, pattern, name){
     super(parser)
@@ -130,7 +107,7 @@ class Rule extends Node{
 
     return newMatchNode
   }
-}
+}*/
 
 //When matching a rule name, it has to match with an entry in the rule table...
 //So... I need a rule table first...
@@ -198,7 +175,7 @@ class WSAllowBoth extends Node{
       let trailingWhitespace = Strings.headMatch(afterInnerPattern, Strings.whitespace_characters)
       matchLength = leadingWhitespace.length + matchInfo.matchLength + trailingWhitespace.length
     }
-    newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), matches: matchInfo})
+    newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), matches: [matchInfo]})
 
     return newMatchNode
     
@@ -427,9 +404,9 @@ class CharacterClass extends Node{
 
 //Usage: let parser = new Parser()
 //parser.setGrammar(grammarDefinitionString)
-//parser.parse(input_string)
+//parser.parse(string)
 //In other words, the grammar that the parser needs to parse is passed into the constructor during the creation on the Parser object
-//Then, the parse function is run, taking in an input_string representing a small set of data given in the language specified by the language loaded by the Parser object during its construction
+//Then, the parse function is run, taking in an string representing a small set of data given in the language specified by the language loaded by the Parser object during its construction
 class Parser{
   constructor(){
     this.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
@@ -648,21 +625,21 @@ class Parser{
   }
 
   //WS_ALLOW_BOTH[PATTERN]
-  grammarize_WS_ALLOW_BOTH(input_string){
-    var trimmed_input_string = input_string.trim()
-    var location_of_first_left_square_bracket = trimmed_input_string.indexOf('[')
+  grammarize_WS_ALLOW_BOTH(string){
+    var trimmed_string = string.trim()
+    var location_of_first_left_square_bracket = trimmed_string.indexOf('[')
     if (location_of_first_left_square_bracket < 0) return null
 
-    var string_before_first_left_square_bracket = trimmed_input_string.substring(0, location_of_first_left_square_bracket)
+    var string_before_first_left_square_bracket = trimmed_string.substring(0, location_of_first_left_square_bracket)
     if (string_before_first_left_square_bracket.trim() != 'WS_ALLOW_BOTH') return null
 
-    var location_of_matching_right_square_bracket = this.get_matching_right_square_bracket(trimmed_input_string, location_of_first_left_square_bracket)
+    var location_of_matching_right_square_bracket = this.get_matching_right_square_bracket(trimmed_string, location_of_first_left_square_bracket)
     if (location_of_matching_right_square_bracket < 0){
       return null
     }
 
-    if (location_of_matching_right_square_bracket + 1 != trimmed_input_string.length) return null
-    var string_between_two_square_brackets = trimmed_input_string.substring(location_of_first_left_square_bracket + 1, location_of_matching_right_square_bracket)
+    if (location_of_matching_right_square_bracket + 1 != trimmed_string.length) return null
+    var string_between_two_square_brackets = trimmed_string.substring(location_of_first_left_square_bracket + 1, location_of_matching_right_square_bracket)
 
     var inner_pattern = this.grammarize_PATTERN(string_between_two_square_brackets)
     if (inner_pattern != null){
@@ -712,8 +689,8 @@ class Parser{
     return null
   }
 
-  grammarize_SEQUENCE(input_string){
-    var trimmed_string = input_string.trim()
+  grammarize_SEQUENCE(string){
+    var trimmed_string = string.trim()
     if (trimmed_string.length < 'SEQUENCE[]'.length) return null
 
     var first_few_characters_of_trimmed_string = trimmed_string.substring(0,8)
@@ -866,8 +843,8 @@ class Parser{
     return null
   }
 
-  grammarize_CHARACTER_CLASS(input_string){
-    var trimmed_string = input_string.trim()
+  grammarize_CHARACTER_CLASS(string){
+    var trimmed_string = string.trim()
 
     var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'CHARACTER_CLASS'.length)
     if (first_few_characters_of_trimmed_string !== 'CHARACTER_CLASS')
@@ -893,49 +870,49 @@ class Parser{
     return null   
   }
 
-  grammarize_PATTERN(input_string){
-    var trimmed_input_string = input_string.trim()
-    if (this.headMatchQuotedString(trimmed_input_string)){
+  grammarize_PATTERN(string){
+    var trimmed_string = string.trim()
+    if (this.headMatchQuotedString(trimmed_string)){
       //The quoted string needs to be matched first because of the exceptions
       //L_SQUARE_BRACKET, R_SQUARE_BRACKET, COMMA, S_QUOTE
-      var quoted_string = this.grammarize_QUOTED_STRING(trimmed_input_string)
+      var quoted_string = this.grammarize_QUOTED_STRING(trimmed_string)
       if (quoted_string != null){
         return quoted_string
       }  
-    }else if (this.headMatchNot(trimmed_input_string)){
-      var not_construct = this.grammarize_NOT(trimmed_input_string)
+    }else if (this.headMatchNot(trimmed_string)){
+      var not_construct = this.grammarize_NOT(trimmed_string)
       if (not_construct != null){
         return not_construct
       }
     }
-    else if (this.headMatchOr(trimmed_input_string)){
-      var or_construct = this.grammarize_OR(trimmed_input_string)
+    else if (this.headMatchOr(trimmed_string)){
+      var or_construct = this.grammarize_OR(trimmed_string)
       if (or_construct != null){
         return or_construct
       }  
-    }else if (this.headMatchSequence(trimmed_input_string)){
-      var sequence_construct = this.grammarize_SEQUENCE(trimmed_input_string)
+    }else if (this.headMatchSequence(trimmed_string)){
+      var sequence_construct = this.grammarize_SEQUENCE(trimmed_string)
       if (sequence_construct != null){
         return sequence_construct
       }  
-    }else if (this.headMatchMultiple(trimmed_input_string)){
-      var multiple = this.grammarize_MULTIPLE(trimmed_input_string)
+    }else if (this.headMatchMultiple(trimmed_string)){
+      var multiple = this.grammarize_MULTIPLE(trimmed_string)
       if (multiple != null){
         return multiple
       }  
-    }else if (this.headMatchCharacterClass(trimmed_input_string)){
-      let characterClass = this.grammarize_CHARACTER_CLASS(trimmed_input_string)
+    }else if (this.headMatchCharacterClass(trimmed_string)){
+      let characterClass = this.grammarize_CHARACTER_CLASS(trimmed_string)
       if (characterClass){
         return characterClass
       }
-    }else if (this.headMatchWSAllowBoth(trimmed_input_string)){
-      var ws_allow_both_construct = this.grammarize_WS_ALLOW_BOTH(trimmed_input_string)
+    }else if (this.headMatchWSAllowBoth(trimmed_string)){
+      var ws_allow_both_construct = this.grammarize_WS_ALLOW_BOTH(trimmed_string)
       if (ws_allow_both_construct != null){
         return ws_allow_both_construct
       }
     }
-    else if (this.headMatchRuleName(trimmed_input_string)){
-      var rule_name = this.grammarize_RULE_NAME(trimmed_input_string)
+    else if (this.headMatchRuleName(trimmed_string)){
+      var rule_name = this.grammarize_RULE_NAME(trimmed_string)
       if (rule_name != null){
         return rule_name
       }  
@@ -944,16 +921,16 @@ class Parser{
     return null
   }
 
-  //If input_string is a valid rule, return a rule node
+  //If string is a valid rule, return a rule node
   //If not valid, return null
-  grammarize_RULE(input_string){
-    if (!input_string) return null
+  grammarize_RULE(string){
+    if (!string) return null
 
-    var index_of_equals_sign = input_string.indexOf('=') 
+    var index_of_equals_sign = string.indexOf('=') 
     if (index_of_equals_sign < 0) return null
 
-    var left_of_equals = input_string.substring(0, index_of_equals_sign)
-    var right_of_equals = input_string.substring(index_of_equals_sign + 1, input_string.length)
+    var left_of_equals = string.substring(0, index_of_equals_sign)
+    var right_of_equals = string.substring(index_of_equals_sign + 1, string.length)
 
     if (left_of_equals.length < 1) return null
     if (right_of_equals.length < 1) return null
@@ -963,9 +940,12 @@ class Parser{
 
     if (name_node == null || pattern_node == null) return null
 
-    var return_node = new Rule(this,pattern_node, name_node.value)
+    var returnNode = new Node(this)
+    returnNode.setAttribute('friendly node type name', 'rule')
+    returnNode.setAttribute('pattern',pattern_node)
+    returnNode.setAttribute('name',name_node.value)
 
-    return return_node
+    return returnNode
   }
 
   //If inputString is a valid rule list, return a rule list node, and its corresponding children
@@ -986,14 +966,17 @@ class Parser{
         return null //no valid rule list
       }
     }
-    var return_node = new RuleList(this,rules)
+    var return_node = new Node(this)
+    return_node.setAttribute('rules', rules)
+    return_node.setAttribute('friendly node type name', 'rule list')
+
     return return_node
   }
 
   //Takes in a string representation of a grammar, and returns a parser
   //The parser is an in-memory tree structure representation of the grammar
-  generateParser(input_string){
-    var return_node = this.grammarize_RULE_LIST(input_string)
+  generateParser(string){
+    var return_node = this.grammarize_RULE_LIST(string)
 
     if (return_node == null){
       console.log('Grammar is empty or there was an error in your grammar. Or, there is an error in this parser.')
@@ -1001,17 +984,17 @@ class Parser{
     return return_node
   }
 
-  //location_of_left_bracket is the bracket you want to match in input_string
-  get_matching_right_square_bracket(input_string, location_of_left_bracket){
+  //location_of_left_bracket is the bracket you want to match in string
+  get_matching_right_square_bracket(string, location_of_left_bracket){
     //[dfgfgdsfasdfa['[']][][[]]] //How to deal with this case?
 
     let number_of_unmatched_left_square_brackets = 0
-    for (var i = location_of_left_bracket; i < input_string.length; i++){
-      if (input_string.charAt(i) == '['){
+    for (var i = location_of_left_bracket; i < string.length; i++){
+      if (string.charAt(i) == '['){
         number_of_unmatched_left_square_brackets++
       }
 
-      if (input_string.charAt(i) == ']'){
+      if (string.charAt(i) == ']'){
         number_of_unmatched_left_square_brackets--
       }
 
@@ -1161,6 +1144,7 @@ class Tree{
 	//matches are guaranteed to be contiguous
 	getRuleMatchesOnly(){
     let clonedTree = this.clone(this)
+
     let ruleNodes = clonedTree.returnAllNodes(clonedTree.root, (_matchTreeNode)=>{return _matchTreeNode.matchFound&&_matchTreeNode.type == 'rule'})
     let notRuleNodes = clonedTree.treeInvert(ruleNodes)
     for (let ruleToRemove of notRuleNodes){
@@ -1173,6 +1157,10 @@ class Tree{
   }
   
   resetDepth(treeNode,depth){
+    if(!treeNode){
+      //In case treeNode is null or undefined
+      return
+    }
     treeNode.depth = depth
     for (let match of treeNode.matches){
       this.resetDepth(match, depth + 1)
@@ -1201,12 +1189,13 @@ class Tree{
 		let newTreeNode = this.shallowCopy(matchTreeNode)
     newTreeNode.matches = []
     if (matchTreeNode.matches){
+      if (!Array.isArray(matchTreeNode.matches)){
+        debugger
+      }
       for (let match of matchTreeNode.matches){
-        if (match.matchFound == true){
-          let matchClone = this.innerClone(match)
-          newTreeNode.matches.push(matchClone)
-          matchClone.parent = newTreeNode
-        }
+        let matchClone = this.innerClone(match)
+        newTreeNode.matches.push(matchClone)
+        matchClone.parent = newTreeNode
       }
     }
 
@@ -1268,8 +1257,8 @@ Strings.get_longest_matching_string_at_index = function(array_of_needles, haysta
   return {'match found': true, 'longest match': longest_match}
 }
 
-Strings.is_alphabetical = function(input_string){
-  if (Strings.contains_only(input_string, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')){
+Strings.is_alphabetical = function(string){
+  if (Strings.contains_only(string, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')){
     return true
   }
   return false
@@ -1308,22 +1297,22 @@ Strings.find_earliest_matching_string_index = function(haystack, list_of_needles
 
 Strings.whitespace_characters = ' \n\t'
 
-//Returns true if input_string consists only of characters from the allowed_characters string
-Strings.contains_only = function(input_string, allowed_characters){
-  for (var i = 0; i < input_string.length; i++){
-    if (allowed_characters.indexOf(input_string.charAt(i)) < 0){
+//Returns true if string consists only of characters from the allowed_characters string
+Strings.contains_only = function(string, allowed_characters){
+  for (var i = 0; i < string.length; i++){
+    if (allowed_characters.indexOf(string.charAt(i)) < 0){
       return false
     }
   }
   return true
 }
 
-//Counts the number of occurrences of character in input_string
-Strings.count_occurrences = function(input_string, character){
+//Counts the number of occurrences of character in string
+Strings.count_occurrences = function(string, character){
   var count = 0
 
-  for (var i = 0; i < input_string.length; i++){
-    var current_character = input_string.charAt(i)
+  for (var i = 0; i < string.length; i++){
+    var current_character = string.charAt(i)
     if (current_character == character) count++
   }
 
@@ -1332,17 +1321,17 @@ Strings.count_occurrences = function(input_string, character){
 
 //operates in two modes, depending on the type of JavaScript object passed in as the variable conditionOrString
 //Mode 1, when conditionOrString is a string:
-//Returns the longest substring starting at index 0 of input_string whose characters belong to conditionOrString
-//For example, if input_string is 'test', and character list is 'et', then the string 'te' is returned because
+//Returns the longest substring starting at index 0 of string whose characters belong to conditionOrString
+//For example, if string is 'test', and character list is 'et', then the string 'te' is returned because
 //the first two letters of test are found within the character list
 
 //Mode 2, when conditionOrString is a function
 //
-Strings.headMatch = function(input_string, conditionOrString){
+Strings.headMatch = function(string, conditionOrString){
   let i = 0;
   let returnString = ''
-  for (i = 1; i < input_string.length + 1; i++){
-    let tempString = input_string.substring(0, i)
+  for (i = 1; i < string.length + 1; i++){
+    let tempString = string.substring(0, i)
     if (typeof conditionOrString == 'string'){
       if (Strings.contains_only(tempString, conditionOrString)){
         returnString = tempString

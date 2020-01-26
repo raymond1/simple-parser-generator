@@ -1,3 +1,4 @@
+
 //This is the type of object that is emitted during the parsing operation by the parser
 class MatchNode{
   constructor(){
@@ -82,7 +83,7 @@ class RuleList extends Node{
 
     //newMatchNode will be used as the parent node for all matches that are initiated by the current node
     //It is referred to at the end of the function
-
+/*
     do{
       ruleMatched = false
       let matchInformation = null
@@ -102,16 +103,11 @@ class RuleList extends Node{
         break
       }
     }while(ruleMatched&&tempString != '')
+*/
+    let matchInformation = this.rules[0].match(tempString, {depth: 1, parent: newMatchNode})
+    let totalLength = matchInformation.matchLength
 
-    let totalLength = 0
-    if (ruleMatched){
-      for (let i = 0; i < matches.length; i++){
-        totalLength = totalLength + matches[i].matchLength
-      }
-      matchFound = true
-    }
-
-    newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), matches})
+    newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound:matchInformation.matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), matches:[matchInformation]})
 
     return newMatchNode
   }
@@ -1060,9 +1056,10 @@ class Parser{
   //takes in a string and returns an abstract syntax tree, according to previously loaded grammar
   //Assumes there is only one top-level construct
   parse(inputString){
-debugger
-    let matchInformation = this.runningGrammar.match(inputString)
-    return new Tree(matchInformation)
+    let matchInformationNodes = this.runningGrammar.match(inputString)
+    let matchInformationTree = new Tree(matchInformationNodes)
+    let ruleMatchesTree = matchInformationTree.getRuleMatchesOnly()
+    return ruleMatchesTree
   }
 }
 
@@ -1074,7 +1071,7 @@ class Tree{
 	//Test is a function you can pass in to return only certain nodes
 	//If test is passed in and is not null, then if the test function, when it takes matchTree as a parameter evaluates to true, then
 	//matchTree will be returned as part of the result set
-	returnAllNodes(matchTree = this.root, test = null){
+	returnAllNodes(treeNode, test = null){
 
 		//The default test always returns true, in effect returning all nodes
 		if (test == null){
@@ -1084,11 +1081,11 @@ class Tree{
 		}
 
 		let nodesToReturn = []
-		if (test(matchTree)){
-			nodesToReturn.push(matchTree)
+		if (test(treeNode)){
+			nodesToReturn.push(treeNode)
 		}
 
-		for (let match of matchTree.matches){
+		for (let match of treeNode.matches){
 			let childNodes = this.returnAllNodes(match, test)
 			nodesToReturn = nodesToReturn.concat(childNodes)
 		}
@@ -1134,7 +1131,7 @@ class Tree{
 			}
 
 			//If matchTreeNode node has a parent that is not null, then the current node must be removed from its matches list
-				if (matchTreeNode.parent){
+      if (matchTreeNode.parent){
 				for (let i = 0; i < matchTreeNode.parent.matches.length; i++){
 					if (matchTreeNode.parent.matches[i] == matchTreeNode){
 						matchTreeNode.parent.matches.splice(i,1)
@@ -1143,7 +1140,8 @@ class Tree{
 				}
 			}else{
 				//If matchTreeNode.parent is null, then
-				//matchTreeNode = df
+        //matchTreeNode = df
+        this.root = matchTreeNode.matches[0]
 			}
 
 		}else{
@@ -1157,39 +1155,65 @@ class Tree{
 	}
 
 
+  //returns a tree consisting only of the rules matched in the user-specified grammar
 	//matches are guaranteed to be contiguous
-	getRuleMatchesOnly(matchTreeNode = this.root){
-		return this.returnAllNodes(matchTreeNode, (_matchTreeNode)=>{return _matchTreeNode.matchFound&&_matchTreeNode.type == 'rule'})
-	}
+	getRuleMatchesOnly(){
+    debugger
+    let clonedTree = this.clone(this)
+    let returnValue = clonedTree
+    /*
+    let ruleNodes = clonedTree.returnAllNodes(clonedTree.root, (_matchTreeNode)=>{return _matchTreeNode.matchFound&&_matchTreeNode.type == 'rule'})
+    let notRuleNodes = clonedTree.treeInvert(ruleNodes)
+    for (let ruleToRemove of notRuleNodes){
+      clonedTree.removeItemAndHeal(ruleToRemove)
+    }
+
+    let returnValue = new Tree(clonedTree.root)*/
+    returnValue.resetDepth(returnValue.root, 0)
+    return returnValue
+  }
+  
+  resetDepth(treeNode,depth){
+    treeNode.depth = depth
+    for (let match of treeNode.matches){
+      this.resetDepth(match, depth + 1)
+    }
+  }
 
 	//Given a set of nodes in a list, this function returns all elements in domain which are not in the list of nodes passed in
-	treeInvert(selectedNodeList, matchTreeNode){
+	treeInvert(selectedNodeList, matchTreeNode = this.root){
 		let test = this.returnAllNodes(matchTreeNode, (_matchTreeNode)=>{
 			let booleanValue = selectedNodeList.includes(_matchTreeNode)
 			return !booleanValue
 		})
 		return test
+  }
+  
+  //Returns a tree which is a copy of the passed in tree
+  clone(tree){
+    let treeNodesCopy = this.innerClone(tree.root)
+    let newTree = new Tree(treeNodesCopy)
+    return newTree
+  }
+
+  //clones scalar attributes(not arrays)
+  //updates the parent element to refer to the clone tree rather than the parent tree
+	innerClone(matchTreeNode){
+		let newTreeNode = this.shallowCopy(matchTreeNode)
+    newTreeNode.matches = []
+    if (matchTreeNode.matches){
+      for (let match of matchTreeNode.matches){
+        if (match.matchFound == true){
+          let matchClone = this.innerClone(match)
+          newTreeNode.matches.push(matchClone)
+          matchClone.parent = newTreeNode
+        }
+      }
+    }
+
+		return newTreeNode
 	}
 
-	//clones scalar attributes(not arrays)
-	imperfectClone(matchTree = this.root){
-		let newMatchTree = null
-		if (matchTree.matchFound == true){
-			newMatchTree = this.shallowCopy(matchTree)
-			newMatchTree.matches = []
-			if (matchTree.matches){
-				for (let match of matchTree.matches){
-					if (match.matchFound == true){
-						newMatchTree.matches.push(this.imperfectClone(match))
-					}
-				}
-			}
-		}
-		
-		return Tree(newMatchTree)
-	}
-
-	//This is a helper method to getMatchesOnly
 	//copies all attributes one node, except for matches
 	shallowCopy(treeNode){
 		if (treeNode == null){
@@ -1201,10 +1225,11 @@ class Tree{
 			if (!Array.isArray(treeNode[attribute])){
 				newNode[attribute]=treeNode[attribute]
 			}
-		}
-		return newNode
-	}
+    }
 
+		return newNode
+  }
+/*
 	//performs a shallow operation on all nodes that match selectionTest and are not null
 	recursiveApply(matchNode = this.root, operation, selectionTest){
 		if (matchNode){
@@ -1217,7 +1242,7 @@ class Tree{
 			}
 		}
   }
-  
+  */
 }
 
 //For string functions

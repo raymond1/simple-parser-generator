@@ -82,7 +82,7 @@ class RuleList extends Node{
 
     //newMatchNode will be used as the parent node for all matches that are initiated by the current node
     //It is referred to at the end of the function
-
+/*
     do{
       ruleMatched = false
       let matchInformation = null
@@ -102,16 +102,11 @@ class RuleList extends Node{
         break
       }
     }while(ruleMatched&&tempString != '')
+*/
+    let matchInformation = this.rules[0].match(tempString, {depth: 1, parent: newMatchNode})
+    let totalLength = matchInformation.matchLength
 
-    let totalLength = 0
-    if (ruleMatched){
-      for (let i = 0; i < matches.length; i++){
-        totalLength = totalLength + matches[i].matchLength
-      }
-      matchFound = true
-    }
-
-    newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), matches})
+    newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound:matchInformation.matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), matches:[matchInformation]})
 
     return newMatchNode
   }
@@ -1089,7 +1084,7 @@ class Tree{
 			nodesToReturn.push(treeNode)
 		}
 
-		for (let match of treeNode  .matches){
+		for (let match of treeNode.matches){
 			let childNodes = this.returnAllNodes(match, test)
 			nodesToReturn = nodesToReturn.concat(childNodes)
 		}
@@ -1158,6 +1153,9 @@ class Tree{
 		}
 	}
 
+  extractAndHealExtraction(){
+
+  }
 
   //returns a tree consisting only of the rules matched in the user-specified grammar
 	//matches are guaranteed to be contiguous

@@ -43,6 +43,8 @@ INTEGER = CHARACTER_CLASS['0123456789']
 	//CHARACTER_CLASS['0123456789'] matches 100+3, but is this the best behaviour? Should it be called STARTS_WITH?
 	//STARTS_WITH[MULTIPLE[CHARACTER_CLASS]]
 	//ability to filter a tree by node type
+	//Match ANYTHING
+	//Refactor depth away
 let grammar = `
 
 EXPRESSION = OR[
@@ -66,8 +68,9 @@ SUBTRACTION_OPERATION = SEQUENCE['-', INTEGER]
 
 INTEGER = CHARACTER_CLASS['0123456789']
 
+WHITESPACE = MULTIPLE[' \n\t']
 `
-//WHITESPACE = MULTIPLE[' \n\t']
+
 
 let parser = new Parser()
 parser.setGrammar(grammar)

@@ -341,6 +341,10 @@ class Parser{
     return this.headMatchXWithBrackets(string, 'NOT')
   }
 
+  headMatchOptional(string){
+    return this.headMatchXWithBrackets(string, 'OPTIONAL')
+  }
+
   headMatchRuleName(string){
     let ruleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
     let length = 0
@@ -663,7 +667,7 @@ class Parser{
   }
 
   grammarize_QUOTED_STRING(string){
-    //First, handle the exceptions
+    //First, handle the special cases
     switch(string){
       case 'S_QUOTE':
       case 'L_SQUARE_BRACKET':
@@ -1264,6 +1268,7 @@ Strings.headMatchUntilDelimiter = function(string, delimiter){
   return ''
 }
 
+
 class TreeViewer{
   constructor(tree, parentElement){
     this.tree = tree
@@ -1335,4 +1340,3 @@ class TreeViewer{
     }
   }
 }
-

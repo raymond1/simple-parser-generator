@@ -69,51 +69,54 @@ class Node{
   }
 
   match(string, metadata = {depth: 0, parent: null}){
-    let newMatchNode = new MatchNode()
-
+    var newMatchNode = new MatchNode()
+    var matches = []
+    var matchFound = false
+    var matchLength = 0
     switch(this['friendly node type name']){
       case 'rule list':
         {
           //newMatchNode will be used as the parent node for all matches that are initiated by the current node
           //It is referred to at the end of the function
           let matchInfo = this.rules[0].match(string, {depth: 1, parent: newMatchNode})
-          let totalLength = matchInfo.matchLength
-
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'],id: this.id, depth: metadata.depth, matchFound:matchInfo.matchFound, matchLength: totalLength, matchString: string.substring(0, totalLength), matches:[matchInfo]})
+          matchLength = matchInfo.matchLength
+          matches = [matchInfo]
+          matchFound = matchInfo.matchFound
         }
         break
       case 'rule':
         {
           let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parent: newMatchNode})
-          let matchLength = matchInfo.matchLength
-          let matches = [matchInfo]
-      
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), name: this.name, matches: matches})
+          matchLength = matchInfo.matchLength
+          matches = [matchInfo]
+          matchFound = matchInfo.matchFound
+
+          newMatchNode.setProperties({name: this.name})
         }
         break
       case 'rule name':
         {
           let rule = this.parser.getRule(this.value)
           let matchInfo = rule.match(string,{depth: metadata.depth + 1, parent: newMatchNode})
-          
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), value: this.value, matches: [matchInfo]})
+          matches = [matchInfo]
+          matchFound = matchInfo.matchFound
+          matchLength = matchInfo.matchLength
+          newMatchNode.setProperties({value: this.value})
         }
         break
       case 'not':
         {
           let matchInfo = this['pattern'].match(string,{depth: metadata.depth + 1, parent: newMatchNode})
       
-          let matchLength = 0
-          let matchFound = !matchInfo.matchFound
+          matchFound = !matchInfo.matchFound
           if (matchFound){
             matchLength = string.length
           }
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), matches: [matchInfo]})
+          matches = [matchInfo]
         }
         break
       case 'ws allow both':
         {
-          let matchLength = 0
           let leadingWhitespace = Strings.headMatch(string, Strings.whitespace_characters)
       
           let remainderString = string.substring(leadingWhitespace.length)
@@ -123,8 +126,8 @@ class Node{
             let trailingWhitespace = Strings.headMatch(afterInnerPattern, Strings.whitespace_characters)
             matchLength = leadingWhitespace.length + matchInfo.matchLength + trailingWhitespace.length
           }
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength, matchString: string.substring(0, matchLength), matches: [matchInfo]})
-      
+          matches = [matchInfo]
+          matchFound = matchInfo.matchFound
         }
         break
       case 'sequence':
@@ -132,7 +135,6 @@ class Node{
           let tempString = string
           let totalMatchLength = 0
       
-          let matches = []
           let matchInfo
           for (let i = 0; i < this['patterns'].length; i++){
             matchInfo = this['patterns'][i].match(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -144,13 +146,12 @@ class Node{
               tempString = tempString.substring(matchInfo.matchLength)
             }
           }
-      
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: totalMatchLength, matchString: string.substring(0, totalMatchLength), matches: matches})
+          matchFound = matchInfo.matchFound
+          matchLength = totalMatchLength
         }
         break
       case 'or':
         {
-          let matches = []
           let matchInfo
           for (let i = 0; i < this.patterns.length; i++){
             matchInfo = this['patterns'][i].match(string,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -159,17 +160,15 @@ class Node{
               break
             }
           }
-      
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchInfo.matchFound, matchLength: matchInfo.matchLength, matchString: string.substring(0, matchInfo.matchLength), matches: matches})
+          matchFound = matchInfo.matchFound
+          matchLength = matchInfo.matchLength
         }
         break
       case 'and':
         {
-          let matches = []
           let matchInfo
           let andDetected = true
       
-          let matchLength = 0
           for (let i = 0; i < this.patterns.length; i++){
             matchInfo = this['patterns'][i].match(string,{depth: metadata.depth + 1, parent: newMatchNode})
             matches.push(matchInfo)
@@ -190,8 +189,7 @@ class Node{
               }
             }
           }
-      
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: andDetected, matchLength, matchString: string.substring(0, matchLength), matches: matches})
+          matchFound = andDetected
         }
         break
       case 'multiple':
@@ -199,7 +197,6 @@ class Node{
           let tempString = string
           let totalMatchLength = 0
       
-          let matches = []
           let matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
           if (matchInfo.matchFound){
             matches.push(matchInfo)
@@ -210,27 +207,25 @@ class Node{
             matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parent: this})
             matches.push(matchInfo)
           }
-          let matchFound = false
+
           if (matches.length > 0){
             matchFound = true
           }
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound, matchLength: totalMatchLength, matchString: string.substring(0, totalMatchLength), matches: matches})      
+          matchLength = totalMatchLength
         }
         break
       case 'quoted string':
         {
           let internalString = this['string']
     
-          let matchFound = false
           if (string.substring(0, internalString.length) == internalString){
             matchFound = true
           }
       
-          let matchLength = 0
           if (matchFound){
             matchLength = internalString.length
           }
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength, matchString: string.substring(0, matchLength), string: this.string, matches: []})      
+          newMatchNode.setProperties({string: this.string})
         }
         break
       case 'character class':
@@ -247,16 +242,15 @@ class Node{
             }
           }
       
-          let matchFound = false
           if (matchingString.length > 0){
             matchFound = true
           }
-      
-          newMatchNode.setProperties({parent: metadata.parent, serial_number: this.parser.getMatchCount(), type: this['friendly node type name'], id: this.id, depth: metadata.depth, matchFound: matchFound, matchLength: matchingString.length, matchString: string.substring(0, matchingString.length), matches: []})
+          matchLength = matchingString.length
         }
         break
     }
-
+    let matchString = string.substring(0, matchLength)
+    newMatchNode.setProperties({parent: metadata.parent, type: this['friendly node type name'], id: this.id, depth: metadata.depth, matches, matchFound, matchLength, matchString})
     return newMatchNode
   }
 }
@@ -283,7 +277,7 @@ class Parser{
     //They are meant to be abstracted away
     node['id'] = this.getId()
     node['parser'] = this
-
+    node['serial number'] = this.getMatchCount()
     return node
   }
 
@@ -662,7 +656,6 @@ class Parser{
     if (string == 'S_QUOTE'||string == 'L_SQUARE_BRACKET'||string=='R_SQUARE_BRACKET') return null
 
     if (Strings.contains_only(string, this.validRuleNameCharacters)){
-      debugger
       let ruleNameNode = this.createNode({'friendly node type name':'rule name', 'value':string})
       return ruleNameNode
     }

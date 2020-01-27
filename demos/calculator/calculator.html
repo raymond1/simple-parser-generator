@@ -44,6 +44,9 @@ INTEGER = CHARACTER_CLASS['0123456789']
 	//STARTS_WITH[MULTIPLE[CHARACTER_CLASS]]
 	//ability to filter a tree by node type
 	//Go beyond the current 128 recursion limit
+	//fix getmatchingsquarebracket
+	//and is not working
+	//Should make startwith work...
 let grammar = `
 
 EXPRESSION = OR[
@@ -106,7 +109,7 @@ function evaluate(expressionTreeNode){
 			break
 	}
 }
-console.log(evaluate(output.root))
+console.log('The final answer is:' + evaluate(output.root))
 
 let treeViewer = new TreeViewer(output, document.querySelector('#test'))
 

@@ -299,11 +299,11 @@ WHITESPACE=OR[
 let grammar2 = `
 
 EXPRESSION = OR[
-  INTEGER_WITH_OPERATION_LIST,
-  INTEGER
+	INTEGER_WITH_OPERATION_LIST,
+	INTEGER
 ]
 
-INTEGER_WITH_OPERATION_LIST = SEQUENCE[INTEGER, OPERATION_LIST]
+INTEGER_WITH_OPERATION_LIST = SEQUENCE[INTEGER, OPTIONAL[WHITESPACE], OPERATION_LIST]
 
 OPERATION_LIST = MULTIPLE[
 	OR[
@@ -312,17 +312,19 @@ OPERATION_LIST = MULTIPLE[
 	]
 ]
 
-ADDITION_OPERATION = SEQUENCE['+', INTEGER]
+ADDITION_OPERATION = SEQUENCE['+', OPTIONAL[WHITESPACE], INTEGER]
 
 
-SUBTRACTION_OPERATION = SEQUENCE['-', INTEGER]
+SUBTRACTION_OPERATION = SEQUENCE['-', OPTIONAL[WHITESPACE], INTEGER]
 
 INTEGER = CHARACTER_CLASS['0123456789']
 
+WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 `
 
+
 var test_parser = new Parser()
-test_parser.setGrammar(grammar)
+test_parser.setGrammar(grammar2)
 
 let tree = new DOMTreeNode(test_parser.runningGrammar, document.querySelector('#test'))
 
@@ -344,10 +346,10 @@ POINT=SEQUENCE[
 
 `
 
-let endUserCode2 = `100-2-3+2-5-7+1`
+let endUserCode2 = `100 -2-3+2-5-7+1`
 
 //let endUserCode2 = 'cat'
-let tree2 = test_parser.parse(endUserCode)
+let tree2 = test_parser.parse(endUserCode2)
 let treeViewer = new TreeViewer(tree2, document.querySelector('#test2'))
 treeViewer.display()
 </script>

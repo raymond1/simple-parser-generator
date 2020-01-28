@@ -1,0 +1,34 @@
+	//comments
+	//match until
+	//Match except
+/*	let grammar2 = `
+
+EXPRESSION = OR[
+  INTEGER_WITH_OPERATION_LIST,
+  INTEGER
+]
+
+INTEGER_WITH_OPERATION_LIST = SEQUENCE[INTEGER, OPERATION_LIST]
+
+OPERATION_LIST = MULTIPLE[
+	OR[
+		ADDITION_OPERATION,
+		SUBTRACTION_OPERATION
+	]
+]
+
+ADDITION_OPERATION = SEQUENCE['+', INTEGER]
+
+
+SUBTRACTION_OPERATION = SEQUENCE['-', INTEGER]
+
+INTEGER = CHARACTER_CLASS['0123456789']
+
+There is an issue with MULTIPLE, CHARACTER_CLASS and partial matches
+`*/
+	//Maybe OR should be renamed to MATCH_FIRST_OF
+	//CHARACTER_CLASS['0123456789'] matches 100+3, but is this the best behaviour? Should it be called STARTS_WITH?
+	//STARTS_WITH[MULTIPLE[CHARACTER_CLASS]]
+	//ability to filter a tree by node type
+	//Match ANYTHING
+	//Refactor depth away

@@ -2,11 +2,12 @@ class Tree{
   constructor(treeNode){
     this.root = treeNode
   }
-  	//returns all nodes in a list
-	//Test is a function you can pass in to return only certain nodes
-	//If test is passed in and is not null, then if the test function, when it takes matchTree as a parameter evaluates to true, then
-	//matchTree will be returned as part of the result set
-	returnAllNodes(treeNode, test = null){
+
+  //returns all nodes in a list
+  //Test is a function you can pass in to return only certain nodes
+  //If test is passed in and is not null, then if the test function, when it takes matchTree as a parameter evaluates to true, then
+  //matchTree will be returned as part of the result set
+  returnAllNodes(treeNode, test = null){
 
 		//The default test always returns true, in effect returning all nodes
 		if (test == null){
@@ -68,7 +69,8 @@ class Tree{
 			//If matchTreeNode node has a parent that is not null, then the current node must be removed from its matches list
       if (matchTreeNode.parent){
 				for (let i = 0; i < matchTreeNode.parent.matches.length; i++){
-					if (matchTreeNode.parent.matches[i] == matchTreeNode){
+					//remove the item
+					if (matchTreeNode.parent.matches[i] === matchTreeNode){
 						matchTreeNode.parent.matches.splice(i,1)
 						break
 					}
@@ -89,14 +91,21 @@ class Tree{
 		}
 	}
 
-  extractAndHealExtraction(){
-
-  }
+	//test is a function that sets which nodes to ignore. When test evaluates to true, a node will be ignored from the tree.
+	//This function is meant to get rid of certain nodes
+	//This function returns a new tree with the same nodes as the old tree, except that nodes that match the test function are deleted
+	//Remaining nodes are healed back together
+	pruneNodes(test){
+		let nodesToPrune = this.returnAllNodes(this.root, test)
+		for (let node of nodesToPrune){
+			this.removeItemAndHeal(node, this.root)
+		}
+	}
 
   //returns a tree consisting only of the rules matched in the user-specified grammar
 	//matches are guaranteed to be contiguous
-	getRuleMatchesOnly(){
-    let clonedTree = this.clone(this)
+  getRuleMatchesOnly(){
+    let clonedTree = this.clone()
 
     let ruleNodes = clonedTree.returnAllNodes(clonedTree.root, (_matchTreeNode)=>{return _matchTreeNode.matchFound&&_matchTreeNode.type == 'rule'})
     let notRuleNodes = clonedTree.treeInvert(ruleNodes)
@@ -130,8 +139,8 @@ class Tree{
   }
   
   //Returns a tree which is a copy of the passed in tree
-  clone(tree){
-    let treeNodesCopy = this.innerClone(tree.root)
+  clone(){
+    let treeNodesCopy = this.innerClone(this.root)
     let newTree = new Tree(treeNodesCopy)
     return newTree
   }
@@ -142,9 +151,6 @@ class Tree{
 		let newTreeNode = this.shallowCopy(matchTreeNode)
     newTreeNode.matches = []
     if (matchTreeNode.matches){
-      if (!Array.isArray(matchTreeNode.matches)){
-        debugger
-      }
       for (let match of matchTreeNode.matches){
         let matchClone = this.innerClone(match)
         newTreeNode.matches.push(matchClone)

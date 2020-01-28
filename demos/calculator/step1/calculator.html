@@ -4,25 +4,19 @@
 <meta charset="utf-8"/>
 </head>
 <body>
-<div id='test'></div>
-<div id='test2'></div>
-
-<div id="output"></div>
-<button type='button' onclick='evaluateExpression()'></button>
-<script src='../../../releases/parser.js'></script>
-<script>
-	//need optional...
-	//comments
-	//match until
-	//Match except
-/*	let grammar2 = `
-
+<h1>Addition/Subtraction Calculator with Positive Integers Only</h1>
+<p>This demo shows a basic grammar that is used to build a tree that is then processed to evaluate a sequence of addition and subtraction operators.
+The grammar is specified as a series of rules, with the topmost rule being the rule that must be satisfied for the input to the parser to be deemed as valid. Each rule, when matched, 
+generates a match node. After parsing occurs, it is possible to block out unwanted nodes in order to simplify processing of the resulting tree. It is also possible to inspect the raw nodes used by the parser during parsing by referring to the parser.rawMatches property.
+<h2>The input grammar:</h2>
+<code style='background: #faaaa0; display: block;'>
+<pre>
 EXPRESSION = OR[
-  INTEGER_WITH_OPERATION_LIST,
-  INTEGER
+	INTEGER_WITH_OPERATION_LIST,
+	SEQUENCE[OPTIONAL[WHITESPACE], INTEGER, OPTIONAL[WHITESPACE]]
 ]
 
-INTEGER_WITH_OPERATION_LIST = SEQUENCE[INTEGER, OPERATION_LIST]
+INTEGER_WITH_OPERATION_LIST = SEQUENCE[OPTIONAL[WHITESPACE], INTEGER, OPTIONAL[WHITESPACE], OPERATION_LIST]
 
 OPERATION_LIST = MULTIPLE[
 	OR[
@@ -31,28 +25,34 @@ OPERATION_LIST = MULTIPLE[
 	]
 ]
 
-ADDITION_OPERATION = SEQUENCE['+', INTEGER]
+ADDITION_OPERATION = SEQUENCE[OPTIONAL[WHITESPACE], '+', OPTIONAL[WHITESPACE], INTEGER]
 
 
-SUBTRACTION_OPERATION = SEQUENCE['-', INTEGER]
+SUBTRACTION_OPERATION = SEQUENCE[OPTIONAL[WHITESPACE], '-', OPTIONAL[WHITESPACE], INTEGER]
 
 INTEGER = CHARACTER_CLASS['0123456789']
 
-`*/
-	//Maybe OR should be renamed to MATCH_FIRST_OF
-	//CHARACTER_CLASS['0123456789'] matches 100+3, but is this the best behaviour? Should it be called STARTS_WITH?
-	//STARTS_WITH[MULTIPLE[CHARACTER_CLASS]]
-	//ability to filter a tree by node type
-	//Match ANYTHING
-	//Refactor depth away
+WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
+</pre>
+</code>
+<div id="output"></div>
+<input id='expression'>
+<button type='button' onclick='evaluateExpression()'>Evaluate</button>&lt;-- Type in some addition and subtraction commands and press the evaluate button to see what happens! Look in the code to find out how it works.
+<h2>Raw matches(shows parser's internal workings)</h2>
+<div id='test'></div>
+<h2>Matches after pruning</h2>
+<div id='test2'></div>
+
+<script src='../../../releases/parser.js'></script>
+<script>
 let grammar = `
 
 EXPRESSION = OR[
 	INTEGER_WITH_OPERATION_LIST,
-	INTEGER
+	SEQUENCE[OPTIONAL[WHITESPACE], INTEGER, OPTIONAL[WHITESPACE]]
 ]
 
-INTEGER_WITH_OPERATION_LIST = SEQUENCE[INTEGER, OPERATION_LIST]
+INTEGER_WITH_OPERATION_LIST = SEQUENCE[OPTIONAL[WHITESPACE], INTEGER, OPTIONAL[WHITESPACE], OPERATION_LIST]
 
 OPERATION_LIST = MULTIPLE[
 	OR[
@@ -61,24 +61,19 @@ OPERATION_LIST = MULTIPLE[
 	]
 ]
 
-ADDITION_OPERATION = SEQUENCE['+', INTEGER]
+ADDITION_OPERATION = SEQUENCE[OPTIONAL[WHITESPACE], '+', OPTIONAL[WHITESPACE], INTEGER]
 
 
-SUBTRACTION_OPERATION = SEQUENCE['-', INTEGER]
+SUBTRACTION_OPERATION = SEQUENCE[OPTIONAL[WHITESPACE], '-', OPTIONAL[WHITESPACE], INTEGER]
 
 INTEGER = CHARACTER_CLASS['0123456789']
 
-WHITESPACE = MULTIPLE[' \n\t']
+WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 `
 
 
 let parser = new Parser()
 parser.setGrammar(grammar)
-
-let input = '100+5+1-3-4-5+7'
-
-
-let output = parser.parse(input)
 
 
 function evaluate(expressionTreeNode){
@@ -107,14 +102,22 @@ function evaluate(expressionTreeNode){
 			break
 	}
 }
-console.log(evaluate(output.root))
 
-let treeViewer = new TreeViewer(output, document.querySelector('#test'))
+function evaluateExpression(){
+	let input = document.getElementById("expression").value
 
-treeViewer.display()
+	let output = parser.parse(input)
+	output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='WHITESPACE')})
 
-//let tree = new TreeNode(parser.runningGrammar, document.querySelector('#test2'))
+	alert(evaluate(output.root))
 
+	let treeViewer = new TreeViewer(parser.rawMatches, document.querySelector('#test'))
+	treeViewer.display()
+
+	let treeViewer2 = new TreeViewer(output, document.querySelector('#test2'))
+	treeViewer2.display()
+
+}
 </script>
 </body>
 </html>

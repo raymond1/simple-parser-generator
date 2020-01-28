@@ -70,6 +70,8 @@ class Node{
 
   match(string, metadata = {depth: 0, parent: null}){
     var newMatchNode = new MatchNode()
+
+    //matches, matchFound and matchLength need to be set in each case
     var matches = []
     var matchFound = false
     var matchLength = 0
@@ -81,7 +83,7 @@ class Node{
           let matchInfo = this.rules[0].match(string, {depth: 1, parent: newMatchNode})
           matchLength = matchInfo.matchLength
           matches = [matchInfo]
-          matchFound = matchInfo.matchFound
+          matchFound = matchInfo.matchFound //was the root construct found?
         }
         break
       case 'rule':
@@ -248,9 +250,19 @@ class Node{
           matchLength = matchingString.length
         }
         break
+      case 'optional':
+        {
+          //untested
+          let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parent: newMatchNode})
+          matches.push(matchInfo)
+          matchLength = matchInfo.matchLength
+          matchFound = true
+        }
+        break
     }
     let matchString = string.substring(0, matchLength)
-    newMatchNode.setProperties({parent: metadata.parent, type: this['friendly node type name'], id: this.id, depth: metadata.depth, matches, matchFound, matchLength, matchString})
+    newMatchNode.setProperties({parent: metadata.parent, type: this['friendly node type name'], id: this.id, serial: this.parser.getMatchCount(), depth: metadata.depth, matchFound, matchLength, matchString, matches})
+
     return newMatchNode
   }
 }
@@ -272,12 +284,10 @@ class Parser{
   //All nodes should be created through this interface
   createNode(nodeOptions){
     let node = new Node(nodeOptions)
-
     //These two properties are meant to be hidden from regular use
     //They are meant to be abstracted away
     node['id'] = this.getId()
     node['parser'] = this
-    node['serial number'] = this.getMatchCount()
     return node
   }
 
@@ -453,6 +463,11 @@ class Parser{
   //Returns '' if no valid next pattern string is found
   headMatchPattern(string){
     let patternString = this.headMatchQuotedString(string)
+    if (patternString){
+      return patternString
+    }
+
+    patternString = this.headMatchOptional(string)
     if (patternString){
       return patternString
     }
@@ -727,6 +742,33 @@ class Parser{
     return null
   }
   
+  grammarize_OPTIONAL(string){
+    var trimmed_string = string.trim()
+
+    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'OPTIONAL'.length)
+    if (first_few_characters_of_trimmed_string !== 'OPTIONAL')
+    {
+      return null
+    }
+
+    var location_of_first_left_bracket = trimmed_string.indexOf('[')
+    if (location_of_first_left_bracket < 0) return null
+
+    var location_of_last_right_bracket = this.get_matching_right_square_bracket(trimmed_string,location_of_first_left_bracket)
+    if (location_of_last_right_bracket < 0) return null
+    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
+    
+    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
+
+    var pattern = this.grammarize_PATTERN(string_in_between_square_brackets)
+    if (pattern != null){
+      var newOptional = this.createNode({'friendly node type name': 'optional', 'pattern': pattern})
+      return newOptional
+    }
+
+    return null
+  }
+
   grammarize_MULTIPLE(string){
     var trimmed_string = string.trim()
 
@@ -791,7 +833,13 @@ class Parser{
       if (quoted_string != null){
         return quoted_string
       }  
-    }else if (this.headMatchNot(trimmed_string)){
+    }else if (this.headMatchOptional(trimmed_string)){
+        var optional_construct = this.grammarize_OPTIONAL(trimmed_string)
+        if (optional_construct != null){
+          return optional_construct
+        }  
+    }
+    else if (this.headMatchNot(trimmed_string)){
       var not_construct = this.grammarize_NOT(trimmed_string)
       if (not_construct != null){
         return not_construct
@@ -947,8 +995,17 @@ class Parser{
   parse(inputString){
     let matchInformationNodes = this.runningGrammar.match(inputString)
     let matchInformationTree = new Tree(matchInformationNodes)
+    this._rawMatches = matchInformationTree
     let ruleMatchesTree = matchInformationTree.getRuleMatchesOnly()
     return ruleMatchesTree
+  }
+
+  get rawMatches(){
+    return this._rawMatches
+  }
+
+  set rawMatches(value){
+    this._rawMatches = value
   }
 }
 
@@ -956,11 +1013,12 @@ class Tree{
   constructor(treeNode){
     this.root = treeNode
   }
-  	//returns all nodes in a list
-	//Test is a function you can pass in to return only certain nodes
-	//If test is passed in and is not null, then if the test function, when it takes matchTree as a parameter evaluates to true, then
-	//matchTree will be returned as part of the result set
-	returnAllNodes(treeNode, test = null){
+
+  //returns all nodes in a list
+  //Test is a function you can pass in to return only certain nodes
+  //If test is passed in and is not null, then if the test function, when it takes matchTree as a parameter evaluates to true, then
+  //matchTree will be returned as part of the result set
+  returnAllNodes(treeNode, test = null){
 
 		//The default test always returns true, in effect returning all nodes
 		if (test == null){
@@ -1022,7 +1080,8 @@ class Tree{
 			//If matchTreeNode node has a parent that is not null, then the current node must be removed from its matches list
       if (matchTreeNode.parent){
 				for (let i = 0; i < matchTreeNode.parent.matches.length; i++){
-					if (matchTreeNode.parent.matches[i] == matchTreeNode){
+					//remove the item
+					if (matchTreeNode.parent.matches[i] === matchTreeNode){
 						matchTreeNode.parent.matches.splice(i,1)
 						break
 					}
@@ -1043,14 +1102,21 @@ class Tree{
 		}
 	}
 
-  extractAndHealExtraction(){
-
-  }
+	//test is a function that sets which nodes to ignore. When test evaluates to true, a node will be ignored from the tree.
+	//This function is meant to get rid of certain nodes
+	//This function returns a new tree with the same nodes as the old tree, except that nodes that match the test function are deleted
+	//Remaining nodes are healed back together
+	pruneNodes(test){
+		let nodesToPrune = this.returnAllNodes(this.root, test)
+		for (let node of nodesToPrune){
+			this.removeItemAndHeal(node, this.root)
+		}
+	}
 
   //returns a tree consisting only of the rules matched in the user-specified grammar
 	//matches are guaranteed to be contiguous
-	getRuleMatchesOnly(){
-    let clonedTree = this.clone(this)
+  getRuleMatchesOnly(){
+    let clonedTree = this.clone()
 
     let ruleNodes = clonedTree.returnAllNodes(clonedTree.root, (_matchTreeNode)=>{return _matchTreeNode.matchFound&&_matchTreeNode.type == 'rule'})
     let notRuleNodes = clonedTree.treeInvert(ruleNodes)
@@ -1084,8 +1150,8 @@ class Tree{
   }
   
   //Returns a tree which is a copy of the passed in tree
-  clone(tree){
-    let treeNodesCopy = this.innerClone(tree.root)
+  clone(){
+    let treeNodesCopy = this.innerClone(this.root)
     let newTree = new Tree(treeNodesCopy)
     return newTree
   }
@@ -1096,9 +1162,6 @@ class Tree{
 		let newTreeNode = this.shallowCopy(matchTreeNode)
     newTreeNode.matches = []
     if (matchTreeNode.matches){
-      if (!Array.isArray(matchTreeNode.matches)){
-        debugger
-      }
       for (let match of matchTreeNode.matches){
         let matchClone = this.innerClone(match)
         newTreeNode.matches.push(matchClone)

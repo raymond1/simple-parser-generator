@@ -1,4 +1,7 @@
+Use parentheses to change the direction of OR and sequence, perhaps even other things.
+
 	//comments
+  @ operator to suppress display in the tree
 	//match until
 	//Match except
 /*	let grammar2 = `
@@ -24,7 +27,8 @@ SUBTRACTION_OPERATION = SEQUENCE['-', INTEGER]
 
 INTEGER = CHARACTER_CLASS['0123456789']
 
-There is an issue with MULTIPLE, CHARACTER_CLASS and partial matches
+There is an issue with MULTIPLE, CHARACTER_CLASS and partial matches.
+When matching MULTIPLE[SEQUENCE[CHARACTER_CLASS['0123456789'], ]]
 `*/
 	//Maybe OR should be renamed to MATCH_FIRST_OF
 	//CHARACTER_CLASS['0123456789'] matches 100+3, but is this the best behaviour? Should it be called STARTS_WITH?
@@ -32,3 +36,8 @@ There is an issue with MULTIPLE, CHARACTER_CLASS and partial matches
 	//ability to filter a tree by node type
 	//Match ANYTHING
 	//Refactor depth away
+
+
+--Get rid of human-written parser and
+--deal with the case where there are right brackets inside of quotes[]
+--handle the case of left recursion problems

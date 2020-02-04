@@ -1,41 +1,52 @@
+# Simple Parser Generator
+
 The Simple Parser Generator is a JavaScript program that has been designed to be an easy to use and understand tool for creating programming language parsers. It takes in a parsing specification written the Simple language and generates a parser that can analyze a string and produce from it a tree of tokens and the higher order expressions that the tokens taken together construct, based on the originally specified parsing specification. The core parser works, and there are a few demos in the demos folder. 
 
 To see how to use the parser, look in the folder called demos/calculator and open the file 'calculator.html'. It shows an example of the parser in action.
 
 To use the parser generator in your html file, simply put the parser.js file in the same directory as your html file and then refer to it in a script tag. After you have connected the script to your program, you will be able to use the parser in your JavaScript code by creating a new Parser object. The basic usage of this object is show below:
 
-Summary of typical usage:
+## Summary of typical usage:
 
-//1) First, create the generic parser object. At this point, the parser is dumb and doesn't do anything.
+1. First, create the generic parser object. At this point, the parser is dumb and doesn't do anything.
+```
 let parser = new Parser()
+```
 
-//2)Create a parsing specification consisting of rules that teach the parser what is a valid program and what is an invalid program
+2. Create a parsing specification consisting of rules that teach the parser what is a valid program and what is an invalid program
+```
 let parsingSpecification = 
+
 `
 A_OR_B_STRING = MULTIPLE[A_OR_B_CHARACTERS]
 
 A_OR_B_CHARACTERS = ['a','b']
 `
-
-//3)Pass the teaching grammar into your parser
+```
+3. Pass the teaching grammar into your parser
+```
 parser.setGrammar(parsingSpecification)
-
-//4)Specify a string containing a program written in the language defined by the parsing specification.
+```
+4. Specify a string containing a program written in the language defined by the parsing specification.
+```
 let programString = 'aababbaaaababaababaaabaabaababababa'
-
-//5)Feed the program that you have written into your parser to see if it is a valid program or not
+```
+5. Feed the program that you have written into your parser to see if it is a valid program or not
+```
 let outputFromParsing = parser.parse(programString)
+```
+6. outputFromParsing will be a tree. To see the contents of the tree, you can instantiate a new instance of the TreeViewer helper class that outputs the contents of trees.
 
-//6)outputFromParsing will be a tree. To see the contents of the tree, you can instantiate a new instance of the TreeViewer helper class that outputs the contents of trees.
-//To instantiate the class, pass in the output from the parser to the constructor
+To instantiate the class, pass in the output from the parser to the constructor
+```
 let treeviewer = new TreeViewer(outputFromParsing)
-
-//7)Once the TreeViewer has been instantiated, you will be able to obtain a string that details the output from the parse tree by using the getOutputString function
+```
+7. Once the TreeViewer has been instantiated, you will be able to obtain a string that details the output from the parse tree by using the getOutputString function
 let outputString = treeviewer.getOutputString(outputFromParsing)
 
-//8)Display the contents of the output string in your console
+8. Display the contents of the output string in your console
 console.log(outputString)
-
+```
 //At this point, you will see something like the following
 *****************************
 type:rule list
@@ -1288,6 +1299,9 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:b
 basic_usage.html:37:9
+```
+
+
 
 Build instructions:
 Go into the code directory and type in "make" from the terminal. This will copy parser.js into the releases folder and create the parser_commonjs.js files(for CommonJS require('simple-parser-generator') type usage) as well as parser_module.js for the newer "import Parser from './simple-parser-generator'" type import statements.

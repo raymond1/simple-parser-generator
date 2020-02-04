@@ -1378,8 +1378,17 @@ This would match strings that start with 1 or more characters which are either 0
 
 MULTIPLE indicates that for a string to match, the inner pattern must be matched 1 or more times. In the above example, the inner pattern is OR['0','1']. Any string consisting of multiple consecutive inner patterns will be matched by the MULTIPLE pattern.
 
-CHARACTER_CLASS[]:
 
+OPTIONAL[]:
+-----------
+Usage example:
+
+JUDGEMENT = SEQUENCE['JUDG', OPTIONAL['E'], 'MENT']
+
+This would match either the strings 'JUDGMENT' or 'JUDGEMENT'.
+
+CHARACTER_CLASS[]:
+------------------
 Usage example:
 ```
 ALPHABET = CHARACTER_CLASS['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ']

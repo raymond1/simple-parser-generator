@@ -1,8 +1,8 @@
-The Simple Parser Generator has been designed to be an easy to use and understand tool for creating programming language parsers. It takes in a parsing specification written the Simple language and generates a parser that can analyze a string and produce from it a tree of tokens and the higher order expressions that the tokens taken together construct, based on the originally specified parsing specification. The core parser works, but I am currently in the process of improving the documentation, adding examples, figuring out a release process, and adding features. My plan is to add in these improvements and then tag a release.
+The Simple Parser Generator is a JavaScript program that has been designed to be an easy to use and understand tool for creating programming language parsers. It takes in a parsing specification written the Simple language and generates a parser that can analyze a string and produce from it a tree of tokens and the higher order expressions that the tokens taken together construct, based on the originally specified parsing specification. The core parser works, and there are a few demos in the demos folder. 
 
 To see how to use the parser, look in the folder called demos/calculator and open the file 'calculator.html'. It shows an example of the parser in action.
 
-After you have connected the script to your program, you will be able to use the parser in your JavaScript code by creating a new Parser object. The basic usage of this object is show below:
+To use the parser generator in your html file, simply put the parser.js file in the same directory as your html file and then refer to it in a script tag. After you have connected the script to your program, you will be able to use the parser in your JavaScript code by creating a new Parser object. The basic usage of this object is show below:
 
 Summary of typical usage:
 

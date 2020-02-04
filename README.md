@@ -2,6 +2,16 @@
 
 The Simple Parser Generator is a JavaScript program that has been designed to be an easy to use and understand tool for creating programming language parsers. It takes in a parsing specification written the Simple language and generates a parser that can analyze a string and produce from it a tree of tokens and the higher order expressions that the tokens taken together construct, based on the originally specified parsing specification. The core parser works, and there are a few demos in the demos folder. 
 
+## Why Another Parser Generator?
+
+The Simple Parser Generator was created to provide an alternative to the EBNF style syntax of most other parser generators. When I started making thiss parser generator, I thought that I would make something that was easier to learn and more intuitive than other generators. I wanted something that was easy to use, and had an easily-understandable code base. Unfortunately, as I added more features, my Simple language became more complex, until it became not as simple as I had originally envisioned.
+
+Still, this parser generator is extremely portable and is written in an easily-extendable style. It could easily be ported to other languages, such as C or PHP.
+
+I originally wanted a parser generator to make a simple programming language, but I feel that this project works well enough that it should get its own project.
+
+## Demo programs
+ 
 To see how to use the parser, look in the folder called demos/calculator and open the file 'calculator.html'. It shows an example of the parser in action.
 
 To use the parser generator in your html file, simply put the parser.js file in the same directory as your html file and then refer to it in a script tag. After you have connected the script to your program, you will be able to use the parser in your JavaScript code by creating a new Parser object. The basic usage of this object is show below:
@@ -1358,14 +1368,6 @@ NOT_SIDNEY = NOT['Sidney']
 
 This rule would match any string except for the string 'Sidney'. Note that the string 'Sidneys' would match because although it starts with the string 'Sidney', it is different from it due to the extra trailing s.
 
-WS_ALLOW_BOTH[]:
-----------------
-Usage example:
-
-FUZZY_CANARY = WS_ALLOW_BOTH['canary']
-
-The above rule would match '   canary', 'canary  ', 'canary', 'canary ', and any other string with 'canary' in it with either spaces, tabs, or newlines to the left and right of the string, in any combination.
-
 MULTIPLE[]:
 -----------
 Usage example:
@@ -1379,9 +1381,11 @@ MULTIPLE indicates that for a string to match, the inner pattern must be matched
 CHARACTER_CLASS[]:
 
 Usage example:
+```
 ALPHABET = CHARACTER_CLASS['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ']
+```
 
-This would match any string consisting only of magiscule or miniscule letters of the alphabet. For example, 'dfasfasdfa' would match. 'dsfads1' would not match.
+This matches any string that starts with  magiscule or miniscule letters of the alphabet. For example, 'dfasfasdfa' would match. 'dsfads1' would also  match everything up to but not including the '1'.
 
 rule name pattern:
 ------------------
@@ -1403,12 +1407,11 @@ Usage example:
 
 CLING_WORD = 'cling'
 
-The above rule would match the string 'cling'. 
+The above rule would match strings that start with 'cling'. For example, 'clingon' would be a match.
 
+By combining multiple rules and patterns together, you can end up with some really useful expressions.
 
-By combining multiple rules and patterns together, you can end up with some expressions which are useful.
-
-This software is still in its early phases, and I am aware of some bugs but it has been released into the wild because I feel it might be very useful. Be free, my software, and go where you need to go! I'll support you! Grow! Grow!
+This software is still in its early phases, and I am aware of some bugs and problems in the documentation but it has been released into the wild because I feel it has reached a point where it could be very useful. Be free, my software, and go where you need to go! I'll support you! Grow! Grow!
 
 If you have trouble using my software, you can send me an email at
 

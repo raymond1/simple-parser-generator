@@ -276,6 +276,7 @@ class Node{
 class Parser{
   constructor(){
     this.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
+    this.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'WS_ALLOW_BOTH']
     this.idCounter = 0
     this.matchCount = 0 //enumerates the matches
   }
@@ -355,6 +356,20 @@ class Parser{
     return this.headMatchXWithBrackets(string, 'OPTIONAL')
   }
 
+  headMatchMultiple(string){
+    return this.headMatchXWithBrackets(string, 'MULTIPLE')
+  }
+
+  //checks if string matches the pattern CHARACTER_CLASS[] and returns the matching string
+  headMatchCharacterClass(string){
+    return this.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
+  }
+
+  //checks if string matches the pattern CHARACTER_CLASS[] and returns the matching string
+  headMatchWSAllowBoth(string){
+    return this.headMatchXWithBrackets(string, 'WS_ALLOW_BOTH')
+  }
+
   headMatchRuleName(string){
     let ruleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
     let length = 0
@@ -427,7 +442,21 @@ class Parser{
     }
 
     let location_of_first_left_square_bracket = string.indexOf('[')
-    if (location_of_first_left_square_bracket >= 0){ //if first left square bracket was found
+    let string_between_equals_sign_and_first_left_square_bracket = ''
+    let is_keyword = false //is it one of the keywords OR[], AND[], etc.?
+    if (location_of_first_left_square_bracket >= 0){
+      string_between_equals_sign_and_first_left_square_bracket = string.substring(location_of_first_equals_sign + 1, location_of_first_left_square_bracket)
+
+      let trimmed_string_between_equals_sign_and_first_left_square_bracket = string_between_equals_sign_and_first_left_square_bracket.trim()
+
+      if (this.keywords.indexOf(trimmed_string_between_equals_sign_and_first_left_square_bracket) >= 0){
+        //This is one of the keywords
+        is_keyword = true
+      }
+    }
+
+    if (location_of_first_left_square_bracket >= 0 && is_keyword){ //if first left square bracket was found
+
       let location_of_matching_right_square_bracket = this.get_matching_right_square_bracket(string, location_of_first_left_square_bracket)
       if (location_of_matching_right_square_bracket == -1){
         return ''
@@ -436,26 +465,13 @@ class Parser{
       let next_rule_string = string.substring(0, location_of_matching_right_square_bracket + 1)
       return next_rule_string
     }else{
+      //This is a rule name with no brackets
       let leadingWhitespace = Strings.headMatch(string.substring(location_of_first_equals_sign + 1), Strings.whitespace_characters)
       let ruleName = Strings.headMatch(string.substring(location_of_first_equals_sign + 1 + leadingWhitespace.length), this.validRuleNameCharacters)
       if (ruleName.length > 0){
         return string.substring(0, location_of_first_equals_sign + leadingWhitespace.length + ruleName.length + 1)
       }
     }
-  }
-
-  headMatchMultiple(string){
-    return this.headMatchXWithBrackets(string, 'MULTIPLE')
-  }
-
-  //checks if string matches the pattern CHARACTER_CLASS[] and returns the matching string
-  headMatchCharacterClass(string){
-    return this.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
-  }
-
-  //checks if string matches the pattern CHARACTER_CLASS[] and returns the matching string
-  headMatchWSAllowBoth(string){
-    return this.headMatchXWithBrackets(string, 'WS_ALLOW_BOTH')
   }
   
   //If the string starts with one of the pattern strings for or, sequence, quoted string, ws allow both or rule name,

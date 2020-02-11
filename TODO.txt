@@ -41,3 +41,6 @@ When matching MULTIPLE[SEQUENCE[CHARACTER_CLASS['0123456789'], ]]
 --Get rid of human-written parser and
 --deal with the case where there are right brackets inside of quotes[]
 --handle the case of left recursion problems
+
+aliases don't work: (example)
+EXPRESSION = TERM

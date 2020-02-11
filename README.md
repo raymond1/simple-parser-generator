@@ -1,12 +1,18 @@
 # Simple Parser Generator
 
-The Simple Parser Generator is a JavaScript program that has been designed to be an easy to use and understand tool for creating programming language parsers. It takes in a parsing specification written the Simple language and generates a parser that can analyze a string and produce from it a tree of tokens and the higher order expressions that the tokens taken together construct, based on the originally specified parsing specification. The core parser works, and there are a few demos in the demos folder. 
+The Simple Parser Generator is a JavaScript program that has been designed to be an easy to use and understand tool for creating programming language parsers. It takes in a parsing specification written the Simple language and generates a parser that can analyze a string and produce from it a tree of tokens and the higher order expressions that the tokens taken together construct, based on the originally specified parsing specification. 
+
+# Status
+
+Currently, the core parser works, meaning that I have tested most of the constructs listed in the Simple Parser Definition Language and used it reliably several times. There are some known bugs related to translating a user's input grammar, written in Simple, into internal structures that make the parser generator function, but there workarounds are available, and the small size of the parser generator makes it possible to trace down the source of the problem. I've already debugged the main workflows, and the program has reached a state of reliability where it can be used to perform usefuly tasks, despite the bugs that it contains. See the Bugs section below for a list of known bugs.
+
+The demos haven't been fully checked and some of the documentation might be have errors. I plan to finish the calculator demo, and then I will work on fixing the documentation. After that, I plan on putting in a feature freeze until the next release.
 
 ## Why Another Parser Generator?
 
 The Simple Parser Generator was created to provide an alternative to the EBNF style syntax of most other parser generators. When I started making thiss parser generator, I thought that I would make something that was easier to learn and more intuitive than other generators. I wanted something that was easy to use, and had an easily-understandable code base. Unfortunately, as I added more features, my Simple language became more complex, until it became not as simple as I had originally envisioned.
 
-Still, this parser generator is extremely portable and is written in an easily-extendable style. It could easily be ported to other languages, such as C or PHP.
+Still, this parser generator is extremely portable and is written in an easily-extendable style. The main code for this program is only around 1000 lines... and still hasn't been fully optimized. There are some auxiliary functions, but the entire It could easily be ported to other languages, such as C or PHP.
 
 I originally wanted a parser generator to make a simple programming language, but I feel that this project works well enough that it should get its own project.
 
@@ -1425,3 +1431,11 @@ This software is still in its early phases, and I am aware of some bugs and prob
 If you have trouble using my software, you can send me an email at
 
 raymondleon@raymondleon.ca
+
+# Escape Sequences
+You can use S_QUOTE, L_SQUARE_BRACKET, R_SQUARE_BRACKET and COMMA to match the following characters, respectively: ' [ ] ,
+
+# Bugs
+Escape sequences probably don't work very well and haven't been tested thoroughly. For example:
+
+OR[']'] might be incorrectly detected as OR['] followed by ']. You can try writing OR[R_SQUARE_BRACKET] to match a right bracket in this situation.

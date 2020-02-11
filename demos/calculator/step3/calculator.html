@@ -4,34 +4,40 @@
 <meta charset="utf-8"/>
 </head>
 <body>
-<h1>Addition/Subtraction Calculator with Positive and Negative Integers and Multiplication</h1>
+<h1>Addition/Subtraction Calculator with Positive and Negative Integers and Multiplication and Division</h1>
 <p>This demo shows a basic grammar that is used to build a tree that is then processed to evaluate a sequence of addition and subtraction operations.
 
 <h2>The input grammar:</h2>
 <code style='background: #faaaa0; display: block;'>
 <textarea rows=50 cols=80 id=input_grammar>
-EXPRESSION = OR[
-	INTEGER_WITH_OPERATION_LIST,
-	SEQUENCE[OPTIONAL[WHITESPACE], INTEGER, OPTIONAL[WHITESPACE]]
+EXPRESSION = TERM_LIST
+
+TERM_LIST=OR[
+	FACTOR,
+	ADDITIVE_EXPRESSION
 ]
 
-INTEGER_WITH_OPERATION_LIST = SEQUENCE[OPTIONAL[WHITESPACE], INTEGER, OPTIONAL[WHITESPACE], OPERATION_LIST]
+ADDITIVE_EXPRESSION = OR[
+	SEQUENCE[FACTOR, PLUS_OR_MINUS, FACTOR],
 
-OPERATION_LIST = MULTIPLE[
-	OR[
-		ADDITION_OPERATION,
-		SUBTRACTION_OPERATION,
-		MULTIPLICATION_OPERATION,
-		DIVISION_OPERATION
-	]
+	SEQUENCE[FACTOR, PLUS_OR_MINUS, ADDITIVE_EXPRESSION]
 ]
 
-ADDITION_OPERATION = SEQUENCE[OPTIONAL[WHITESPACE], '+', OPTIONAL[WHITESPACE], INTEGER]
-SUBTRACTION_OPERATION = SEQUENCE[OPTIONAL[WHITESPACE], '-', OPTIONAL[WHITESPACE], INTEGER]
-MULTIPLICATION_OPERATION = SEQUENCE[OPTIONAL[WHITESPACE], '*', OPTIONAL[WHITESPACE], INTEGER]
-DIVISION_OPERATION = SEQUENCE[OPTIONAL[WHITESPACE], '/', OPTIONAL[WHITESPACE], INTEGER]
+FACTOR = OR[
+	FUZZY_INTEGER,
+	MULTIPLICATIVE_EXPRESSION,
+	SEQUENCE[FUZZY_INTEGER, MULTIPLICATION, FACTOR]
+]
 
+MULTIPLICATIVE_EXPRESSION = OR
+[
+	SEQUENCE[FUZZY_INTEGER, MULTIPLICATION_OR_DIVISION, FUZZY_INTEGER],
+	SEQUENCE[FUZZY_INTEGER, MULTIPLICATION_OR_DIVISION, MULTIPLICATIVE_EXPRESSION]
+]
 
+MULTIPLICATION_OR_DIVISION = OR['*', '/']
+
+FUZZY_INTEGER = SEQUENCE[OPTIONAL[WHITESPACE], INTEGER, OPTIONAL[WHITESPACE]]
 
 INTEGER = OR[POSITIVE_INTEGER,NEGATIVE_INTEGER]
 
@@ -55,14 +61,6 @@ WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 
 let parser = new Parser()
 
-//2 +3 *8 -7 ^7
-//operation_expression = lhs, operator, rhs
-
-//operation_expression_with_exponentiation
-
-//expression^expression
-//operation_expression_with_multiplication
-//operation_expression_with_addition_subtraction
 function evaluate(expressionTreeNode){
 	let expressionValue
 		switch(expressionTreeNode.name){

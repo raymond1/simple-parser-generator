@@ -72,6 +72,16 @@ Strings.contains_only = function(string, allowed_characters){
   return true
 }
 
+//checks if string contains one or mor characters from character_class
+Strings.contains_character_class = function(string, character_class){
+  for (var i = 0; i < string.length; i++){
+    if (character_class.indexOf(string.charAt(i)) >= 0){
+      return true
+    }
+  }
+  return false
+}
+
 //Counts the number of occurrences of character in string
 Strings.count_occurrences = function(string, character){
   var count = 0

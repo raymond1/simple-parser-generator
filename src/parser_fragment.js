@@ -68,6 +68,8 @@ class Node{
     return children
   }
 
+  //The way this works is if a pattern matches the input string, then the caret is incremented
+  //quoted string and character class are the only two patterns that are incremented not by the length of the input, but by the length of the internal string or matched string.
   match(string, metadata = {depth: 0, parent: null}){
     var newMatchNode = new MatchNode()
 
@@ -83,7 +85,7 @@ class Node{
           let matchInfo = this.rules[0].match(string, {depth: 1, parent: newMatchNode})
           matchLength = matchInfo.matchLength
           matches = [matchInfo]
-          matchFound = matchInfo.matchFound //was the root construct found?
+          matchFound = matchInfo.matchFound
         }
         break
       case 'rule':
@@ -184,13 +186,8 @@ class Node{
           }
       
           //matchLength will be equal to the shortest match, or 0 if there was no match
-          if (andDetected == true){
-            for (let match of matches){
-              if (match.matchLength < matchLength){
-                matchLength = match.matchLength
-              }
-            }
-          }
+          matchLength = match.matchLength
+
           matchFound = andDetected
         }
         break
@@ -218,6 +215,7 @@ class Node{
         break
       case 'quoted string':
         {
+          //matches if the string starts with the quoted string
           let internalString = this['string']
     
           if (string.substring(0, internalString.length) == internalString){
@@ -232,6 +230,7 @@ class Node{
         break
       case 'character class':
         {
+          //matches if the string starts with characters from the character class
           let matchingString = ''
           //i is the number of characters to take for comparison
           //i goes from 1, 2, 3, ... to the length of the string
@@ -260,6 +259,17 @@ class Node{
         }
         break
     }
+
+    let nodesWhereInputStringLengthNeedNotNecessarilyMatchWithMatchLength = ['optional', 'character class', 'and', 'quoted string', 'multiple']
+
+    //A second check for matchfound where the string length is matched against the length of the input string.
+    //Useful for detecting programming errors due to its increased strictness
+    if (!(nodesWhereInputStringLengthNeedNotNecessarilyMatchWithMatchLength.indexOf(this['friendly node type name']) > -1)){
+      if(string.length != matchLength){
+        matchFound = false
+      }  
+    }
+
     let matchString = string.substring(0, matchLength)
     newMatchNode.setProperties({parent: metadata.parent, type: this['friendly node type name'], id: this.id, serial: this.parser.getMatchCount(), depth: metadata.depth, matchFound, matchLength, matchString, matches})
 

@@ -83,7 +83,7 @@ class Node{
           let matchInfo = this.rules[0].match(string, {depth: 1, parent: newMatchNode})
           matchLength = matchInfo.matchLength
           matches = [matchInfo]
-          matchFound = matchInfo.matchFound //was the root construct found?
+          matchFound = matchInfo.matchFound && string.length == matchInfo.matchLength
         }
         break
       case 'rule':

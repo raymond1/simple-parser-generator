@@ -1,3 +1,12 @@
+//These nodes take in text and then emit Nodes which are then used by the user parser to emit match nodes
+class LinearParsingNode{
+  constructor(constructName, headMatchFunction, grammarizeFunction){
+      this.constructName = constructName
+      this.headMatchFunction = headMatchFunction
+      this.grammarizeFunction = grammarizeFunction
+  }
+}
+
 //This is the type of object that is emitted during the parsing operation by the parser
 class MatchNode{
   constructor(){
@@ -19,7 +28,7 @@ class MatchNode{
   }
 }
 
-//This is the type of node used internally by the parser
+//This is the type of node emitted internally by the parser
 class Node{
   constructor(attributesObject){
     this.attributes = []
@@ -245,38 +254,34 @@ class Node{
       
           if (matchingString.length > 0){
             matchFound = true
+            matchLength = matchingString.length
           }
-          matchLength = matchingString.length
         }
         break
       case 'optional':
         {
-          //untested
           let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parent: newMatchNode})
           matches.push(matchInfo)
           matchLength = matchInfo.matchLength
           matchFound = true
         }
         break
-    }
-
-    let nodesWhereInputStringLengthNeedNotNecessarilyMatchWithMatchLength = ['optional', 'character class', 'and', 'quoted string', 'multiple']
-
-    //A second check for matchfound where the string length is matched against the length of the input string.
-    //Useful for detecting programming errors due to its increased strictness
-    if (!(nodesWhereInputStringLengthNeedNotNecessarilyMatchWithMatchLength.indexOf(this['friendly node type name']) > -1)){
-      if(string.length != matchLength){
-        matchFound = false
-      }  
+      case 'exact':
+        {
+          let matchInfo = this.pattern.match(string,{depth: metadata.depth + 1, parent: newMatchNode})
+          matches.push(matchInfo)
+          if (matchInfo.matchFound && matchInfo.matchLength == string.length){
+            matchLength = matchInfo.matchLength
+            matchFound = true  
+          }
+        }
     }
 
     let matchString = string.substring(0, matchLength)
-    newMatchNode.setProperties({parent: metadata.parent, type: this['friendly node type name'], id: this.id, serial: this.parser.getMatchCount(), depth: metadata.depth, matchFound, matchLength, matchString, matches})
-
+    newMatchNode.setProperties({parent: metadata.parent, string, type: this['friendly node type name'], id: this.id, serial: this.parser.getMatchCount(), depth: metadata.depth, matchFound, matchLength, matchString, matches})
     return newMatchNode
   }
 }
-
 
 //Usage: let parser = new Parser()
 //parser.setGrammar(grammarDefinitionString)
@@ -289,63 +294,11 @@ class Parser{
     this.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'WS_ALLOW_BOTH']
     this.idCounter = 0
     this.matchCount = 0 //enumerates the matches
+
+    this.linearParsingNodes = []
+    this.registerLinearParsingNodes() //For each head matching function, there needs to be a corresponding grammarize function
   }
 
-  //Takes in an attributes object {attribute1: value1, attribute2: value2}
-  //All nodes should be created through this interface
-  createNode(nodeOptions){
-    let node = new Node(nodeOptions)
-    //These two properties are meant to be hidden from regular use
-    //They are meant to be abstracted away
-    node['id'] = this.getId()
-    node['parser'] = this
-    return node
-  }
-
-  getMatchCount(){
-    let matchCount = this.matchCount
-    this.matchCount = this.matchCount + 1
-    return matchCount
-  }
-
-  setGrammar(grammarString){
-    this.runningGrammar = this.generateParser(grammarString)
-    if(!this.runningGrammar){
-      throw "Error: invalid grammar specification."
-    }
-    this.rules = this.getRules(this.runningGrammar)
-  }
-
-  getGrammarAST(){
-    return this.runningGrammar
-  }
-
-  getId(){
-    let currentCounter = this.idCounter
-    this.idCounter = this.idCounter + 1
-    return currentCounter
-  }
-
-  //If string starts with a fixed string X, followed by optional empty space and then [ and then a matching right square bracket ] then return the string
-  //Otherwise, return the empty string
-  headMatchXWithBrackets(string, X){
-    var location_of_first_left_bracket = string.indexOf('[')
-    if (location_of_first_left_bracket < 0) return ''
-
-    var left_of_first_left_bracket = string.substring(0,location_of_first_left_bracket).trim()
-    if (left_of_first_left_bracket == X){
-      let indexOfRightMatchingSquareBracket = this.get_matching_right_square_bracket(string,location_of_first_left_bracket)
-
-      if (indexOfRightMatchingSquareBracket > -1){
-        return string.substring(0,indexOfRightMatchingSquareBracket+1)
-      }
-    }
-
-    return false
-  }
-
-  //Returns the or construct portion of a string if found, or the empty string if not found
-  //The string must be at the beginning of the string
   headMatchOr(string){
     return this.headMatchXWithBrackets(string, 'OR')
   }
@@ -370,14 +323,36 @@ class Parser{
     return this.headMatchXWithBrackets(string, 'MULTIPLE')
   }
 
-  //checks if string matches the pattern CHARACTER_CLASS[] and returns the matching string
   headMatchCharacterClass(string){
     return this.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
   }
 
-  //checks if string matches the pattern CHARACTER_CLASS[] and returns the matching string
   headMatchWSAllowBoth(string){
     return this.headMatchXWithBrackets(string, 'WS_ALLOW_BOTH')
+  }
+
+  headMatchExact(string){
+    return this.headMatchXWithBrackets(string, 'EXACT')
+  }
+
+  registerLinearParsingNodes(){
+    this.linearParsingNodes.push(new LinearParsingNode('or', this.headMatchOr, this.grammarize_OR))
+    this.linearParsingNodes.push(new LinearParsingNode('and', this.headMatchAnd, this.grammarize_AND))
+    this.linearParsingNodes.push(new LinearParsingNode('sequence', this.headMatchSequence, this.grammarize_SEQUENCE))
+    this.linearParsingNodes.push(new LinearParsingNode('not', this.headMatchNot, this.grammarize_NOT))
+    this.linearParsingNodes.push(new LinearParsingNode('optional', this.headMatchOptional, this.grammarize_OPTIONAL))
+    this.linearParsingNodes.push(new LinearParsingNode('multiple', this.headMatchMultiple, this.grammarize_MULTIPLE))
+    this.linearParsingNodes.push(new LinearParsingNode('character class', this.headMatchCharacterClass, this.grammarize_CHARACTER_CLASS))
+    this.linearParsingNodes.push(new LinearParsingNode('ws allow both', this.headMatchWSAllowBoth, this.grammarize_WS_ALLOW_BOTH))
+    this.linearParsingNodes.push(new LinearParsingNode('exact', this.headMatchExact, this.grammarize_EXACT))
+
+    //irregular head matching rules
+    this.linearParsingNodes.push(new LinearParsingNode('rule name', this.headMatchRuleName, this.grammarize_RULE_NAME))
+    this.linearParsingNodes.push(new LinearParsingNode('quoted string', this.headMatchQuotedString, this.grammarize_QUOTED_STRING))
+    this.linearParsingNodes.push(new LinearParsingNode('rule', this.headMatchRule, this.grammarize_RULE))
+
+    //Note that the rule for the rule list does not have to be in this list because no reference to it will can be made within one of its rules
+    //and so it will never get triggered during parsing of the input grammar
   }
 
   headMatchRuleName(string){
@@ -393,7 +368,7 @@ class Parser{
       }
     }
     return string.substring(0,length)
-  }
+  }    
 
   headMatchQuotedString(string){
     if (string.startsWith('S_QUOTE')){
@@ -483,61 +458,72 @@ class Parser{
       }
     }
   }
+
+  
+
+  //Takes in an attributes object {attribute1: value1, attribute2: value2}
+  //All nodes should be created through this interface
+  createNode(nodeOptions){
+    let node = new Node(nodeOptions)
+    //These two properties are meant to be hidden from regular use
+    //They are meant to be abstracted away
+    node['id'] = this.getId()
+    node['parser'] = this
+    return node
+  }
+
+  getMatchCount(){
+    let matchCount = this.matchCount
+    this.matchCount = this.matchCount + 1
+    return matchCount
+  }
+
+  setGrammar(grammarString){
+    this.runningGrammar = this.generateParser(grammarString)
+    if(!this.runningGrammar){
+      throw "Error: invalid grammar specification."
+    }
+    this.rules = this.getRules(this.runningGrammar)
+  }
+
+  getGrammarAST(){
+    return this.runningGrammar
+  }
+
+  getId(){
+    let currentCounter = this.idCounter
+    this.idCounter = this.idCounter + 1
+    return currentCounter
+  }
+
+  //If string starts with a fixed string X, followed by optional empty space and then [ and then a matching right square bracket ] then return the string
+  //Otherwise, return the empty string
+  //There is a bug when there is a [ followed by ']'. Even so, life goes on.
+  headMatchXWithBrackets(string, X){
+    var location_of_first_left_bracket = string.indexOf('[')
+    if (location_of_first_left_bracket < 0) return ''
+
+    var left_of_first_left_bracket = string.substring(0,location_of_first_left_bracket).trim()
+    if (left_of_first_left_bracket == X){
+      let indexOfRightMatchingSquareBracket = this.get_matching_right_square_bracket(string,location_of_first_left_bracket)
+
+      if (indexOfRightMatchingSquareBracket > -1){
+        return string.substring(0,indexOfRightMatchingSquareBracket+1)
+      }
+    }
+
+    return false
+  }
+
   
   //If the string starts with one of the pattern strings for or, sequence, quoted string, ws allow both or rule name,
   //return the string containing up to the first pattern string
   //Returns '' if no valid next pattern string is found
   headMatchPattern(string){
-    let patternString = this.headMatchQuotedString(string)
-    if (patternString){
-      return patternString
+    for (let linearParsingNode of this.linearParsingNodes){
+      let patternString = linearParsingNode.headMatchFunction.call(this, string)
+      if (patternString) return patternString
     }
-
-    patternString = this.headMatchOptional(string)
-    if (patternString){
-      return patternString
-    }
-
-    patternString = this.headMatchOr(string)
-    if (patternString){
-      return patternString
-    }
-
-    patternString = this.headMatchAnd(string)
-    if (patternString){
-      return patternString
-    }
-
-    patternString = this.headMatchNot(string)
-    if (patternString){
-      return patternString
-    }
-
-    patternString = this.headMatchSequence(string)
-    if (patternString){
-      return patternString
-    }
-
-    patternString = this.headMatchMultiple(string)
-    if (patternString){
-      return patternString
-    }
-
-    patternString = this.headMatchCharacterClass(string)
-    if (patternString){
-      return patternString
-    }
-
-    patternString = this.headMatchWSAllowBoth(string)
-    if (patternString){
-      return patternString
-    }
-
-    patternString = this.headMatchRuleName(string)
-    if (patternString){
-      return patternString
-    }
-
     return ''
   }
 
@@ -850,8 +836,68 @@ class Parser{
     return null   
   }
 
+  grammarize_EXACT(string){
+    var trimmed_string = string.trim()
+
+    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'EXACT'.length)
+    if (first_few_characters_of_trimmed_string !== 'EXACT')
+    {
+      return null
+    }
+
+    var location_of_first_left_bracket = trimmed_string.indexOf('[')
+    if (location_of_first_left_bracket < 0) return null
+
+    var location_of_last_right_bracket = this.get_matching_right_square_bracket(trimmed_string,location_of_first_left_bracket)
+    if (location_of_last_right_bracket < 0) return null
+    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
+    
+    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
+
+    var pattern = this.grammarize_PATTERN(string_in_between_square_brackets)
+    if (pattern != null){
+      var newExact = this.createNode({'friendly node type name': 'exact', 'pattern': pattern})
+      return newExact
+    }
+
+    return null
+  }
+
+  getTypeOfPattern(string){
+    for (let i = 0; i < this.linearParsingNodes.length; i++){
+      let headMatchResult = this.linearParsingNodes[i].headMatchFunction.call(this,string)
+      if (headMatchResult){
+        return this.linearParsingNodes[i].constructName
+      }
+    }
+    return ''
+  }
+
+  getLinearParsingNodeWithConstructType(constructName){
+    for (let linearParsingNode of this.linearParsingNodes){
+      if (linearParsingNode.constructName == constructName){
+        return linearParsingNode
+      }
+    }
+    return null
+  }
+
+  //Give a type of a pattern to match and a string, this function emits a node tree of the type specified by typeOfPattern if string matches
+  //the pattern specified by typeOfPattern
+  grammarize(typeOfPattern, string){
+    let linearParsingNode = this.getLinearParsingNodeWithConstructType(typeOfPattern)
+    if (linearParsingNode){
+      return linearParsingNode.grammarizeFunction.call(this, string)
+    }
+    return null
+  }
+
   grammarize_PATTERN(string){
     var trimmed_string = string.trim()
+
+    let typeOfPattern = this.getTypeOfPattern(trimmed_string)
+    return this.grammarize(typeOfPattern, trimmed_string)
+/*
     if (this.headMatchQuotedString(trimmed_string)){
       //The quoted string needs to be matched first because of the exceptions
       //L_SQUARE_BRACKET, R_SQUARE_BRACKET, COMMA, S_QUOTE
@@ -903,7 +949,7 @@ class Parser{
         return rule_name
       }  
     }
-
+*/
     return null
   }
 

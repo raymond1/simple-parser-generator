@@ -894,63 +894,8 @@ class Parser{
 
   grammarize_PATTERN(string){
     var trimmed_string = string.trim()
-
     let typeOfPattern = this.getTypeOfPattern(trimmed_string)
     return this.grammarize(typeOfPattern, trimmed_string)
-/*
-    if (this.headMatchQuotedString(trimmed_string)){
-      //The quoted string needs to be matched first because of the exceptions
-      //L_SQUARE_BRACKET, R_SQUARE_BRACKET, COMMA, S_QUOTE
-      var quoted_string = this.grammarize_QUOTED_STRING(trimmed_string)
-      if (quoted_string != null){
-        return quoted_string
-      }  
-    }else if (this.headMatchOptional(trimmed_string)){
-        var optional_construct = this.grammarize_OPTIONAL(trimmed_string)
-        if (optional_construct != null){
-          return optional_construct
-        }  
-    }
-    else if (this.headMatchNot(trimmed_string)){
-      var not_construct = this.grammarize_NOT(trimmed_string)
-      if (not_construct != null){
-        return not_construct
-      }
-    }
-    else if (this.headMatchOr(trimmed_string)){
-      var or_construct = this.grammarize_OR(trimmed_string)
-      if (or_construct != null){
-        return or_construct
-      }  
-    }else if (this.headMatchSequence(trimmed_string)){
-      var sequence_construct = this.grammarize_SEQUENCE(trimmed_string)
-      if (sequence_construct != null){
-        return sequence_construct
-      }  
-    }else if (this.headMatchMultiple(trimmed_string)){
-      var multiple = this.grammarize_MULTIPLE(trimmed_string)
-      if (multiple != null){
-        return multiple
-      }  
-    }else if (this.headMatchCharacterClass(trimmed_string)){
-      let characterClass = this.grammarize_CHARACTER_CLASS(trimmed_string)
-      if (characterClass){
-        return characterClass
-      }
-    }else if (this.headMatchWSAllowBoth(trimmed_string)){
-      var ws_allow_both_construct = this.grammarize_WS_ALLOW_BOTH(trimmed_string)
-      if (ws_allow_both_construct != null){
-        return ws_allow_both_construct
-      }
-    }
-    else if (this.headMatchRuleName(trimmed_string)){
-      var rule_name = this.grammarize_RULE_NAME(trimmed_string)
-      if (rule_name != null){
-        return rule_name
-      }  
-    }
-*/
-    return null
   }
 
   //If string is a valid rule, return a rule node

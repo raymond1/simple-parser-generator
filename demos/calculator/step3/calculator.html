@@ -13,33 +13,34 @@
 EXPRESSION = TERM_LIST
 
 TERM_LIST=OR[
-	FACTOR,
-	ADDITIVE_EXPRESSION
+	ADDITIVE_EXPRESSION,
+	TERM
 ]
+
+TERM = OR[
+	MULTIPLICATIVE_EXPRESSION,
+	FACTOR
+]
+
+FACTOR=OR[INTEGER, MULTIPLICATIVE_EXPRESSION]
+
+INTEGER = SEQUENCE[OPTIONAL[WHITESPACE], OR[POSITIVE_INTEGER,NEGATIVE_INTEGER], OPTIONAL[WHITESPACE]]
 
 ADDITIVE_EXPRESSION = OR[
-	SEQUENCE[FACTOR, PLUS_OR_MINUS, FACTOR],
+	SEQUENCE[TERM, PLUS_OR_MINUS, TERM],
 
-	SEQUENCE[FACTOR, PLUS_OR_MINUS, ADDITIVE_EXPRESSION]
+	SEQUENCE[TERM, PLUS_OR_MINUS, ADDITIVE_EXPRESSION]
 ]
 
-FACTOR = OR[
-	FUZZY_INTEGER,
-	MULTIPLICATIVE_EXPRESSION,
-	SEQUENCE[FUZZY_INTEGER, MULTIPLICATION, FACTOR]
-]
+PLUS_OR_MINUS = OR['+','-']
 
 MULTIPLICATIVE_EXPRESSION = OR
 [
-	SEQUENCE[FUZZY_INTEGER, MULTIPLICATION_OR_DIVISION, FUZZY_INTEGER],
-	SEQUENCE[FUZZY_INTEGER, MULTIPLICATION_OR_DIVISION, MULTIPLICATIVE_EXPRESSION]
+	SEQUENCE[INTEGER, MULTIPLICATION_OR_DIVISION, MULTIPLICATIVE_EXPRESSION],
+	SEQUENCE[INTEGER, MULTIPLICATION_OR_DIVISION, INTEGER]
 ]
 
 MULTIPLICATION_OR_DIVISION = OR['*', '/']
-
-FUZZY_INTEGER = SEQUENCE[OPTIONAL[WHITESPACE], INTEGER, OPTIONAL[WHITESPACE]]
-
-INTEGER = OR[POSITIVE_INTEGER,NEGATIVE_INTEGER]
 
 POSITIVE_INTEGER = CHARACTER_CLASS['0123456789']
 
@@ -51,10 +52,13 @@ WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 <div id="output"></div>
 <input id='expression'>
 <button type='button' onclick='evaluateExpression()'>Evaluate</button>&lt;-- Type in some addition and subtraction commands and press the evaluate button to see what happens! Look in the code to find out how it works.
-<h2>Raw matches(shows parser's internal workings)</h2>
+<h2></h2>
 <div id='test'></div>
 <h2>Matches after pruning</h2>
 <div id='test2'></div>
+<h2>Raw matches(shows parser's internal workings)</h2>
+
+<div id='test3'></div>
 
 <script src='../../../releases/parser.js'></script>
 <script>
@@ -65,25 +69,41 @@ function evaluate(expressionTreeNode){
 	let expressionValue
 		switch(expressionTreeNode.name){
 		case 'EXPRESSION':
+			debugger
 			expressionValue = evaluate(expressionTreeNode.matches[0])
-
 			return expressionValue
 			break
-		case 'INTEGER':
-			return parseInt(expressionTreeNode.matchString, 10)
-			break
-		case 'INTEGER_WITH_OPERATION_LIST':
-			expressionValue = Number(expressionTreeNode.matches[0].matchString)
-			let operationList = expressionTreeNode.matches[1]
-
-			for (let match of operationList.matches){
-				if (match.name == 'ADDITION_OPERATION'){
-					expressionValue += evaluate(match.matches[0])
-				}else if (match.name == 'SUBTRACTION_OPERATION'){
-					expressionValue -= evaluate(match.matches[0])
-				}
+		case 'TERM_LIST':
+			expressionValue = evaluate(expressionTreeNode.matches[0])
+				return expressionValue
+				break
+		case 'ADDITIVE_EXPRESSION':
+			if (expressionTreeNode.matches[1].matchString == '+'){
+				expressionValue = evaluate(expressionTreeNode.matches[0]) + evaluate(expressionTreeNode.matches[2])
+			}
+			else if (expressionTreeNode.matches[1].matchString == '-'){
+				expressionValue = evaluate(expressionTreeNode.matches[0]) - evaluate(expressionTreeNode.matches[2])
 			}
 			return expressionValue
+			break
+		case 'TERM':
+			expressionValue = evaluate(expressionTreeNode.matches[0])
+				return expressionValue
+				break
+		case 'MULTIPLICATIVE_EXPRESSION':
+			if (expressionTreeNode.matches[1].matchString=='*'){
+				expressionValue = evaluate(expressionTreeNode.matches[0]) * evaluate(expressionTreeNode.matches[2])
+			}else if (expressionTreeNode.matches[1]=='/'){
+				expressionValue = evaluate(expressionTreeNode.matches[0]) / evaluate(expressionTreeNode.matches[2])
+			}
+			return expressionValue
+			break
+		case 'FACTOR':
+			expressionValue = evaluate(expressionTreeNode.matches[0])
+				return expressionValue
+				break
+		case 'INTEGER':
+			return parseInt(expressionTreeNode.matchString, 10)
 			break
 	}
 }
@@ -97,15 +117,17 @@ function evaluateExpression(){
 
 	let output = parser.parse(input)
 	output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='WHITESPACE')})
+	output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='POSITIVE_INTEGER'||treeNode['name']=='NEGATIVE_INTEGER')})	
+	output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule name')})
+	console.log(evaluate(output.root))
 
-	alert(evaluate(output.root))
-
-	let treeViewer = new TreeViewer(parser.rawMatches, document.querySelector('#test'))
-	treeViewer.display()
+  let tree = new DOMTreeNode(parser.runningGrammar, document.querySelector('#test'))
 
 	let treeViewer2 = new TreeViewer(output, document.querySelector('#test2'))
 	treeViewer2.display()
 
+	let treeViewer3 = new TreeViewer(parser.rawMatches, document.querySelector('#test3'))
+	treeViewer3.display()
 }
 </script>
 </body>

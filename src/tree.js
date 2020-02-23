@@ -1,3 +1,19 @@
+class Utilities{
+	static array_merge(array1,array2){
+		let returnArray = []
+		for(let element of array1){
+			returnArray.push(element)
+		}
+
+		for(let element of array2){
+			if (returnArray.indexOf(element) == -1){
+				returnArray.push(element)
+			}
+		}
+		return returnArray
+	}
+}
+
 class Tree{
   constructor(treeNode){
     this.root = treeNode
@@ -7,7 +23,7 @@ class Tree{
   //Test is a function you can pass in to return only certain nodes
   //If test is passed in and is not null, then if the test function, when it takes matchTree as a parameter evaluates to true, then
   //matchTree will be returned as part of the result set
-  returnAllNodes(treeNode, test = null){
+  returnAllNodes(treeNode, test = null, matchesSoFar = []){
 
 		//The default test always returns true, in effect returning all nodes
 		if (test == null){
@@ -17,13 +33,13 @@ class Tree{
 		}
 
 		let nodesToReturn = []
-		if (test(treeNode)){
+		if (test(treeNode) && matchesSoFar.indexOf(treeNode) == -1){
 			nodesToReturn.push(treeNode)
 		}
 
 		for (let match of treeNode.matches){
-			let childNodes = this.returnAllNodes(match, test)
-			nodesToReturn = nodesToReturn.concat(childNodes)
+			let childNodes = this.returnAllNodes(match, test, nodesToReturn)
+			nodesToReturn = Utilities.array_merge(nodesToReturn, childNodes)
 		}
 		return nodesToReturn
 	}
@@ -102,14 +118,61 @@ class Tree{
 		}
 	}
 
+	_amputateNodes(treeNode, test){
+		for (let childNode of treeNode.matches){
+			if (test(childNode)){
+				let index = treeNode.matches.indexOf(childNode)
+				treeNode.matches.splice(index, 1)
+			}else{
+				this._amputateNodes(childNode, test)
+			}
+		}
+	}
+
+	//Removes items but does not heal a tree
+	amputateNodes(test){
+		if (test(this.root)){
+			this.root = null
+			return
+		}
+
+		if (this.root){
+			this._amputateNodes(this.root, test)
+		}else{
+			return
+		}
+	}
+
+	//Checks if the node and all ancestors have matchFound attribute set to true
+	static isSuccessfullyDescendedFromRoot(treeNode){
+		if (treeNode.parent == null){
+			//If root node
+			if (treeNode['matchFound']){
+				return true
+			}else{
+				return false
+			}
+		}
+		else{
+			//Not root node
+			if (treeNode['matchFound'] == false){
+				return false
+			}else{
+				return Tree.isSuccessfullyDescendedFromRoot(treeNode.parent)
+			}	
+		}
+	}
+
   //returns a tree consisting only of the rules matched in the user-specified grammar
 	//matches are guaranteed to be contiguous
+	//Only matches that are from an uninterrupted line of successful matches are returned
   getRuleMatchesOnly(){
-    let clonedTree = this.clone()
+		let clonedTree = this.clone()
+		clonedTree.amputateNodes((treeNode)=>{ return !Tree.isSuccessfullyDescendedFromRoot(treeNode)})
+		let successfulRuleNodes = clonedTree.returnAllNodes(clonedTree.root, (_matchTreeNode)=>{return _matchTreeNode.type == 'rule'})
 
-    let ruleNodes = clonedTree.returnAllNodes(clonedTree.root, (_matchTreeNode)=>{return _matchTreeNode.matchFound&&_matchTreeNode.type == 'rule'})
-    let notRuleNodes = clonedTree.treeInvert(ruleNodes)
-    for (let ruleToRemove of notRuleNodes){
+    let notSuccessfulRuleNodes = clonedTree.treeInvert(successfulRuleNodes)
+    for (let ruleToRemove of notSuccessfulRuleNodes){
       clonedTree.removeItemAndHeal(ruleToRemove)
     }
 

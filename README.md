@@ -18,7 +18,7 @@ I originally made the parser generator in order to make a programming language f
 
 ## Demo programs
  
-To see how to use the parser, look in the folder called demos/calculator and open the file 'calculator.html'. It shows an example of the parser in action.
+To see how to use the parser, look in the folder called demos/calculator and open the file 'calculator.html'. It shows an example of the parser in action. You may also look at a live demo <a href=https://raymondleon.ca/portfolio/simple-parser-generator/demos/calculator/step3/calculator.html>here</a>.
 
 To use the parser generator in your html file, simply put the parser.js file in the same directory as your html file and then refer to it in a script tag. After you have connected the script to your program, you will be able to use the parser in your JavaScript code by creating a new Parser object. The basic usage of this object is show below:
 

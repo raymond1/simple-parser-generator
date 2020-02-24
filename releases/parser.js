@@ -1146,26 +1146,35 @@ class Tree{
 		}
 	}
 
-	_amputateNodes(treeNode, test){
-		for (let childNode of treeNode.matches){
+	//removes branches of the tree that match test
+	static _cutNodes(treeNode, test){
+		let nodesToCut = []
+		for (let i = 0; i < treeNode.matches.length; i++){
+			let childNode = treeNode.matches[i]
 			if (test(childNode)){
-				let index = treeNode.matches.indexOf(childNode)
-				treeNode.matches.splice(index, 1)
-			}else{
-				this._amputateNodes(childNode, test)
+				nodesToCut.push(childNode)
 			}
+		}
+
+		for (let i = 0; i < nodesToCut.length; i++){
+			let index = treeNode.matches.indexOf(nodesToCut[i])
+			treeNode.matches.splice(index, 1)
+		}
+
+		for (let i = 0; i < treeNode.matches.length; i++){
+			Tree._cutNodes(treeNode.matches[i], test)
 		}
 	}
 
 	//Removes items but does not heal a tree
-	amputateNodes(test){
+	cutNodes(test){
 		if (test(this.root)){
 			this.root = null
 			return
 		}
 
 		if (this.root){
-			this._amputateNodes(this.root, test)
+			Tree._cutNodes(this.root, test)
 		}else{
 			return
 		}
@@ -1196,7 +1205,7 @@ class Tree{
 	//Only matches that are from an uninterrupted line of successful matches are returned
   getRuleMatchesOnly(){
 		let clonedTree = this.clone()
-		clonedTree.amputateNodes((treeNode)=>{ return !Tree.isSuccessfullyDescendedFromRoot(treeNode)})
+		clonedTree.cutNodes((treeNode)=>{ return treeNode['matchFound'] == false})
 		let successfulRuleNodes = clonedTree.returnAllNodes(clonedTree.root, (_matchTreeNode)=>{return _matchTreeNode.type == 'rule'})
 
     let notSuccessfulRuleNodes = clonedTree.treeInvert(successfulRuleNodes)

@@ -1435,6 +1435,12 @@ raymondleon@raymondleon.ca
 # Escape Sequences
 You can use S_QUOTE, L_SQUARE_BRACKET, R_SQUARE_BRACKET and COMMA to match the following characters, respectively: ' [ ] ,
 
+# Output Tree and Manipulation Functions
+
+After the output tree has been generated, the following functions inside tree.js are available to manipulate the tree: removeItemAndHeal, pruneNodes, cutNodes, getRuleMatchesOnly, resetDepth, treeInvert, clone.
+
+You can also use the objects DOMTreeViewer to view how the parser interprets your grammar and TreeViewer to see the structure of your output nodes. See the calculated demo, step 3 for more information.
+
 # Bugs
 Escape sequences probably don't work very well and haven't been tested thoroughly. For example:
 

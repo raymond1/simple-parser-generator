@@ -45,9 +45,10 @@ NEGATIVE_INTEGER = SEQUENCE['-', POSITIVE_INTEGER]
 WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 </textarea>
 </code>
+<h2>The JavaScript code</h2>
 <div id="output"></div>
 <input id='expression'>
-<button type='button' onclick='evaluateExpression()'>Evaluate</button>&lt;-- Type in some addition and subtraction commands and press the evaluate button to see what happens! Look in the code to find out how it works.
+<button type='button' onclick='evaluateExpression()'>Evaluate</button>&lt;-- When you press this button, the evaluateExpresion function defined in the JavaScript code inside the last script tag in the source code of this page will run, which will take the grammar specified above, turn it into a parser, and then proceed to evaluate it. Type in some addition and subtraction and multiplication and division commands (5 + 7 or 5 + 5*7 -1 or 1 *2 + 3/3) and press the evaluate button to see what happens! Look in the code to find out how it works.
 <pre><code id="result">
 </code></pre>
 <h2>Grammar</h2>
@@ -60,73 +61,74 @@ WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 
 <script src='../../../releases/parser.js'></script>
 <script>
-
-let parser = new Parser()
-
-function evaluate(expressionTreeNode){
-	let expressionValue
-		switch(expressionTreeNode.name){
-		case 'EXPRESSION':
-			expressionValue = evaluate(expressionTreeNode.matches[0])
-			return expressionValue
-			break
-		case 'TERM_LIST':
-			expressionValue = evaluate(expressionTreeNode.matches[0])
-			for (let i = 1; i < expressionTreeNode.matches.length; i++){
-				let additive_operant_term = expressionTreeNode.matches[i]
-				let operator = additive_operant_term.matches[0].matchString
-
-				if (operator == '+'){
-					expressionValue += evaluate(additive_operant_term.matches[1])
-				}else if (operator == '-'){
-					expressionValue -= evaluate(additive_operant_term.matches[1])
-				}
+	function evaluateExpression(){
+		debugger
+		function evaluate(expressionTreeNode){
+			let expressionValue
+			switch(expressionTreeNode.name){
+				case 'EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					return expressionValue
+					break
+				case 'TERM_LIST':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					for (let i = 1; i < expressionTreeNode.matches.length; i++){
+						let additive_operant_term = expressionTreeNode.matches[i]
+						let operator = additive_operant_term.matches[0].matchString
+	
+						if (operator == '+'){
+							expressionValue += evaluate(additive_operant_term.matches[1])
+						}else if (operator == '-'){
+							expressionValue -= evaluate(additive_operant_term.matches[1])
+						}
+					}
+					return expressionValue
+					break
+				case 'TERM':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+						return expressionValue
+						break
+				case 'MULTIPLICATIVE_EXPRESSION':
+					if (expressionTreeNode.matches[1].matchString=='*'){
+						expressionValue = evaluate(expressionTreeNode.matches[0]) * evaluate(expressionTreeNode.matches[2])
+					}else if (expressionTreeNode.matches[1].matchString=='/'){
+						expressionValue = evaluate(expressionTreeNode.matches[0]) / evaluate(expressionTreeNode.matches[2])
+					}
+					return expressionValue
+					break
+				case 'FACTOR':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+						return expressionValue
+						break
+				case 'INTEGER':
+					return parseInt(expressionTreeNode.matchString, 10)
+					break
 			}
-			return expressionValue
-			break
-		case 'TERM':
-			expressionValue = evaluate(expressionTreeNode.matches[0])
-				return expressionValue
-				break
-		case 'MULTIPLICATIVE_EXPRESSION':
-			if (expressionTreeNode.matches[1].matchString=='*'){
-				expressionValue = evaluate(expressionTreeNode.matches[0]) * evaluate(expressionTreeNode.matches[2])
-			}else if (expressionTreeNode.matches[1]=='/'){
-				expressionValue = evaluate(expressionTreeNode.matches[0]) / evaluate(expressionTreeNode.matches[2])
-			}
-			return expressionValue
-			break
-		case 'FACTOR':
-			expressionValue = evaluate(expressionTreeNode.matches[0])
-				return expressionValue
-				break
-		case 'INTEGER':
-			return parseInt(expressionTreeNode.matchString, 10)
-			break
+		}
+	
+		let grammar = document.querySelector('#input_grammar').value
+		let parser = new Parser()
+	
+		parser.setGrammar(grammar)
+	
+		let input = document.getElementById("expression").value
+	
+		let output = parser.parse(input)
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='WHITESPACE')})
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='POSITIVE_INTEGER'||treeNode['name']=='NEGATIVE_INTEGER')})	
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule name')})
+		document.getElementById('result').innerHTML = evaluate(output.root)
+	
+		let tree = new DOMTreeNode(parser.runningGrammar, document.querySelector('#test'))
+	
+		let treeViewer2 = new TreeViewer(output, document.querySelector('#test2'))
+		treeViewer2.display()
+	
+		let treeViewer3 = new TreeViewer(parser.rawMatches, document.querySelector('#test3'))
+		treeViewer3.display()
 	}
-}
 
-function evaluateExpression(){
-	let grammar = document.querySelector('#input_grammar').value
 
-	parser.setGrammar(grammar)
-
-	let input = document.getElementById("expression").value
-
-	let output = parser.parse(input)
-	output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='WHITESPACE')})
-	output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='POSITIVE_INTEGER'||treeNode['name']=='NEGATIVE_INTEGER')})	
-	output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule name')})
-	document.getElementById('result').innerHTML = evaluate(output.root)
-
-  let tree = new DOMTreeNode(parser.runningGrammar, document.querySelector('#test'))
-
-	let treeViewer2 = new TreeViewer(output, document.querySelector('#test2'))
-	treeViewer2.display()
-
-	let treeViewer3 = new TreeViewer(parser.rawMatches, document.querySelector('#test3'))
-	treeViewer3.display()
-}
 </script>
 </body>
 </html>

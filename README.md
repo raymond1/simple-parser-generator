@@ -10,11 +10,11 @@ The demos haven't been fully checked and some of the documentation might be have
 
 ## Why Another Parser Generator?
 
-The Simple Parser Generator was created to provide an alternative to the EBNF style syntax of most other parser generators. When I started making thiss parser generator, I thought that I would make something that was easier to learn and more intuitive than other generators. I wanted something that was easy to use, and had an easily-understandable code base. Unfortunately, as I added more features, my Simple language became more complex, until it became not as simple as I had originally envisioned.
+The Simple Parser Generator was created to provide an alternative to the EBNF style syntax of most other parser generators. When I started making this parser generator, I thought that I would make something that was easier to learn and more intuitive than other generators. I wanted something that was easy to use, and had an easily-understandable code base. Unfortunately, as I added more features, my Simple language became more complex, until it became not as simple as I had originally envisioned.
 
-Still, this parser generator is extremely portable and is written in an easily-extendable style. The main code for this program is only around 1000 lines... and still hasn't been fully optimized. There are some auxiliary functions, but the entire It could easily be ported to other languages, such as C or PHP.
+Still, this parser generator is extremely portable and is written in an easily-extendable style. The main code for this program is only around 1000 lines. It can easily be ported to other languages, such as C or PHP. Small does not mean not powerful. Despite its small size, I feel that it has the potential to be extremely useful because of its extensibility.
 
-I originally wanted a parser generator to make a simple programming language, but I feel that this project works well enough that it should get its own project.
+I originally made the parser generator in order to make a programming language for an environment that I was building, but the parser generator ended up feeling more interesting than the end product I was working on and I felt that it should get its own project. 
 
 ## Demo programs
  

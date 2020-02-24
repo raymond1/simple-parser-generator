@@ -13,7 +13,7 @@
 EXPRESSION = TERM_LIST
 
 TERM_LIST=OR[
-	ADDITIVE_EXPRESSION,
+	SEQUENCE[TERM, MULTIPLE[ADDITIVE_OPERANT_TERM]],
 	TERM
 ]
 
@@ -22,17 +22,11 @@ TERM = OR[
 	FACTOR
 ]
 
+ADDITIVE_OPERANT_TERM = SEQUENCE[PLUS_OR_MINUS, TERM]
+
 FACTOR=OR[INTEGER, MULTIPLICATIVE_EXPRESSION]
 
 INTEGER = SEQUENCE[OPTIONAL[WHITESPACE], OR[POSITIVE_INTEGER,NEGATIVE_INTEGER], OPTIONAL[WHITESPACE]]
-
-ADDITIVE_EXPRESSION = OR[
-	SEQUENCE[ADDITIVE_EXPRESSION_HEAD, PLUS_OR_MINUS, ADDITIVE_EXPRESSION],
-	SEQUENCE[ADDITIVE_EXPRESSION_HEAD, PLUS_OR_MINUS, FACTOR],
-	ADDITIVE_EXPRESSION_HEAD
-]
-
-ADDITIVE_EXPRESSION_HEAD = SEQUENCE[TERM, PLUS_OR_MINUS, TERM]
 
 PLUS_OR_MINUS = OR['+','-']
 
@@ -78,28 +72,15 @@ function evaluate(expressionTreeNode){
 			break
 		case 'TERM_LIST':
 			expressionValue = evaluate(expressionTreeNode.matches[0])
-				return expressionValue
-				break
-		case 'ADDITIVE_EXPRESSION':
-			if (expressionTreeNode.matches.length == 3){
-				if (expressionTreeNode.matches[1].matchString == '+'){
-					expressionValue = evaluate(expressionTreeNode.matches[0]) + evaluate(expressionTreeNode.matches[2])
-				}
-				else if (expressionTreeNode.matches[1].matchString == '-'){
-					expressionValue = evaluate(expressionTreeNode.matches[0]) - evaluate(expressionTreeNode.matches[2])
-				}
-			}else if (expressionTreeNode.matches.length == 1){
-				expressionValue = evaluate(expressionTreeNode.matches[0])
-			}
-			return expressionValue
+			for (let i = 1; i < expressionTreeNode.matches.length; i++){
+				let additive_operant_term = expressionTreeNode.matches[i]
+				let operator = additive_operant_term.matches[0].matchString
 
-			break
-		case 'ADDITIVE_EXPRESSION_HEAD':
-			if (expressionTreeNode.matches[1].matchString == '+'){
-				expressionValue = evaluate(expressionTreeNode.matches[0]) + evaluate(expressionTreeNode.matches[2])
-			}
-			else if (expressionTreeNode.matches[1].matchString == '-'){
-				expressionValue = evaluate(expressionTreeNode.matches[0]) - evaluate(expressionTreeNode.matches[2])
+				if (operator == '+'){
+					expressionValue += evaluate(additive_operant_term.matches[1])
+				}else if (operator == '-'){
+					expressionValue -= evaluate(additive_operant_term.matches[1])
+				}
 			}
 			return expressionValue
 			break

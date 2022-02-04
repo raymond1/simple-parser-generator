@@ -4,13 +4,18 @@
 <meta charset="utf-8"/>
 </head>
 <body>
-<h1>Calculator demo with Addition, Subtraction, Division, Multiplication, Exponentiation, Positive and Negative Integers</h1>
+<h1>Calculator demo with Addition, Subtraction, Division, Multiplication, Exponentiation, Positive and Negative Integers, Parentheses</h1>
 <p>Exponentiation is right-associative, multiplication and division are left-associative. Exponentiation happens before multiplication and division, which happens before addition or subtraction.</p>
 
 <h2>The input grammar:</h2>
 <code style='background: #faaaa0; display: block;'>
 <textarea rows=50 cols=80 id=input_grammar>
 EXPRESSION = ADDITIVE_EXPRESSION
+
+PARENTHETICAL_EXPRESSION = SEQUENCE[LEFT_PARENTHESIS, EXPRESSION, RIGHT_PARENTHESIS]
+
+LEFT_PARENTHESIS = SEQUENCE[OPTIONAL[WHITESPACE], '(', OPTIONAL[WHITESPACE]]
+RIGHT_PARENTHESIS = SEQUENCE[OPTIONAL[WHITESPACE], ')', OPTIONAL[WHITESPACE]]
 
 ADDITIVE_EXPRESSION = OR[
 	SEQUENCE[TERM, MULTIPLE[ADDITIVE_OPERANT_TERM]],
@@ -19,10 +24,13 @@ ADDITIVE_EXPRESSION = OR[
 
 TERM = OR[
 	MULTIPLICATIVE_EXPRESSION,
-	INTEGER
+	SUBEXPRESSION
 ]
 
 ADDITIVE_OPERANT_TERM = SEQUENCE[PLUS_OR_MINUS, TERM]
+
+SUBEXPRESSION = OR[PARENTHETICAL_EXPRESSION,INTEGER]
+
 
 INTEGER = SEQUENCE[OPTIONAL[WHITESPACE], OR[POSITIVE_INTEGER,NEGATIVE_INTEGER], OPTIONAL[WHITESPACE]]
 
@@ -36,15 +44,15 @@ MULTIPLICATIVE_EXPRESSION = OR
 
 FACTOR = OR[
 	EXPONENTIAL_EXPRESSION,
-	INTEGER
+	SUBEXPRESSION
 ]
 
 MULTIPLICATIVE_OPERANT_FACTOR = SEQUENCE[MULTIPLICATION_OR_DIVISION, FACTOR]
 
 EXPONENTIAL_EXPRESSION = OR
 [
-	SEQUENCE[INTEGER, '^', EXPONENTIAL_EXPRESSION],
-	SEQUENCE[INTEGER, '^', INTEGER]
+	SEQUENCE[SUBEXPRESSION, '^', EXPONENTIAL_EXPRESSION],
+	SEQUENCE[SUBEXPRESSION, '^', SUBEXPRESSION],
 ]
 
 MULTIPLICATION_OR_DIVISION = OR['*', '/']
@@ -57,6 +65,103 @@ WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 </textarea>
 </code>
 <h2>The JavaScript code</h2>
+You can see the full code by using the view page source function of your browser. The main code is displayed below:
+
+<code><pre>
+	
+&lt;script src='../../../releases/parser.js'>&lt;/script>
+&lt;script>
+	function evaluateExpression(){
+		debugger
+		function evaluate(expressionTreeNode){
+			let expressionValue
+			switch(expressionTreeNode.name){
+				case 'EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					return expressionValue
+					break
+				case 'ADDITIVE_EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					for (let i = 1; i < expressionTreeNode.matches.length; i++){
+						let additive_operant_term = expressionTreeNode.matches[i]
+						let operator = additive_operant_term.matches[0].matchString
+	
+						if (operator == '+'){
+							expressionValue += evaluate(additive_operant_term.matches[1])
+						}else if (operator == '-'){
+							expressionValue -= evaluate(additive_operant_term.matches[1])
+						}
+					}
+					return expressionValue
+					break
+				case 'TERM':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+						return expressionValue
+						break
+				case 'MULTIPLICATIVE_EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					for (let i = 1; i < expressionTreeNode.matches.length; i++){
+						let multiplicative_operant_factor = expressionTreeNode.matches[i]
+						let operator = multiplicative_operant_factor.matches[0].matchString
+	
+						if (operator == '*'){
+							expressionValue *= evaluate(multiplicative_operant_factor.matches[1])
+						}else if (operator == '/'){
+							expressionValue /= evaluate(multiplicative_operant_factor.matches[1])
+						}
+					}
+					return expressionValue
+					break
+				case 'EXPONENTIAL_EXPRESSION':
+					expressionValue = Math.pow(evaluate(expressionTreeNode.matches[0]), evaluate(expressionTreeNode.matches[1]))
+					return expressionValue
+				  break
+				case 'PARENTHETICAL_EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[1])
+					return expressionValue
+				  break
+				case 'SUBEXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					return expressionValue
+				  break
+
+				case 'FACTOR':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+						return expressionValue
+						break
+				case 'INTEGER':
+					return parseInt(expressionTreeNode.matchString, 10)
+					break
+			}
+		}
+	
+		let grammar = document.querySelector('#input_grammar').value
+		let parser = new Parser()
+	
+		parser.setGrammar(grammar)
+	
+		let input = document.getElementById("expression").value
+	
+		let output = parser.parse(input)
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='WHITESPACE')})
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='POSITIVE_INTEGER'||treeNode['name']=='NEGATIVE_INTEGER')})	
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule name')})
+		document.getElementById('result').innerHTML = evaluate(output.root)
+	
+		let tree = new DOMTreeNode(parser.runningGrammar, document.querySelector('#test'))
+	
+		let treeViewer2 = new TreeViewer(output, document.querySelector('#test2'))
+		treeViewer2.display()
+	
+		let treeViewer3 = new TreeViewer(parser.rawMatches, document.querySelector('#test3'))
+		treeViewer3.display()
+	}
+
+
+&lt;/script&gt;
+</pre>
+</code>
+
 <div id="output"></div>
 <input id='expression'>
 <button type='button' onclick='evaluateExpression()'>Evaluate</button>&lt;-- When you press this button, the evaluateExpresion function defined in the JavaScript code inside the last script tag in the source code of this page will run, which will take the grammar specified above, turn it into a parser, and then proceed to evaluate it. Type in some addition and subtraction and multiplication and division commands (5 + 7 or 5 + 5*7 -1 or 1 *2 + 3/3) and press the evaluate button to see what happens! Look in the code to find out how it works.
@@ -117,6 +222,15 @@ WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 					expressionValue = Math.pow(evaluate(expressionTreeNode.matches[0]), evaluate(expressionTreeNode.matches[1]))
 					return expressionValue
 				  break
+				case 'PARENTHETICAL_EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[1])
+					return expressionValue
+				  break
+				case 'SUBEXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					return expressionValue
+				  break
+
 				case 'FACTOR':
 					expressionValue = evaluate(expressionTreeNode.matches[0])
 						return expressionValue

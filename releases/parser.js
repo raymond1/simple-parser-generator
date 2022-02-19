@@ -1024,9 +1024,7 @@ class Parser{
   set rawMatches(value){
     this._rawMatches = value
   }
-}
-
-class Utilities{
+}class Utilities{
 	static array_merge(array1,array2){
 		let returnArray = []
 		for(let element of array1){
@@ -1579,3 +1577,6 @@ class DOMTreeNode{
     return this.children
   }
 }
+export {Node, Parser}
+export default Parser
+

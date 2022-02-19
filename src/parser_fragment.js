@@ -1025,4 +1025,3 @@ class Parser{
     this._rawMatches = value
   }
 }
-

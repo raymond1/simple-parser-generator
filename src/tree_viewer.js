@@ -2,8 +2,8 @@ class TreeViewer{
   constructor(tree, parentElement){
     this.tree = tree
     this.parentElement = parentElement
-    this.domElement = document.createElement('pre')
     if (parentElement){
+      this.domElement = document.createElement('pre')
       this.parentElement.appendChild(this.domElement)
     }
   }
@@ -31,15 +31,23 @@ class TreeViewer{
 
     for (let key in metadata){
       let keyValue = metadata[key]
-      if (typeof keyValue == 'object' && key !='parent'){
-        if (keyValue !== null){
-          if (Array.isArray(keyValue)){
-            for (let j = 0; j < keyValue.length; j++){
-              outputString += this.getOutputString(keyValue[j])
+
+      //If the keyValue is an object,
+      if (typeof keyValue == 'object'){
+        if (key !='parent'){
+          if (keyValue !== null){
+            if (Array.isArray(keyValue)){
+              for (let j = 0; j < keyValue.length; j++){
+                outputString += this.getOutputString(keyValue[j])
+              }
+            }else{
+              outputString += this.getOutputString(keyValue)
             }
-          }else{
-            outputString += this.getOutputString(keyValue)
           }
+        }
+        else
+        {
+          outputString += '  '.repeat(starIndent) + key + ":" + keyValue.id + '\n'
         }
       }else{
         outputString += '  '.repeat(starIndent) + key + ":" + keyValue + '\n'

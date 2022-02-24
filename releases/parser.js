@@ -347,8 +347,9 @@ class Parser{
     this.linearParsingNodes.push(new LinearParsingNode('exact', this.headMatchExact, this.grammarize_EXACT))
 
     //irregular head matching rules
-    this.linearParsingNodes.push(new LinearParsingNode('rule name', this.headMatchRuleName, this.grammarize_RULE_NAME))
+    //Quoted string needs to be put in first because of S_QUOTE and similar things.
     this.linearParsingNodes.push(new LinearParsingNode('quoted string', this.headMatchQuotedString, this.grammarize_QUOTED_STRING))
+    this.linearParsingNodes.push(new LinearParsingNode('rule name', this.headMatchRuleName, this.grammarize_RULE_NAME))
     this.linearParsingNodes.push(new LinearParsingNode('rule', this.headMatchRule, this.grammarize_RULE))
 
     //Note that the rule for the rule list does not have to be in this list because no reference to it will can be made within one of its rules
@@ -1002,6 +1003,7 @@ class Parser{
         return this.rules[i]
       }
     }
+
     throw 'Error: Unrecognized rule name:' + ruleName
   }
 
@@ -1433,8 +1435,8 @@ class TreeViewer{
   constructor(tree, parentElement){
     this.tree = tree
     this.parentElement = parentElement
-    this.domElement = document.createElement('pre')
     if (parentElement){
+      this.domElement = document.createElement('pre')
       this.parentElement.appendChild(this.domElement)
     }
   }
@@ -1462,15 +1464,23 @@ class TreeViewer{
 
     for (let key in metadata){
       let keyValue = metadata[key]
-      if (typeof keyValue == 'object' && key !='parent'){
-        if (keyValue !== null){
-          if (Array.isArray(keyValue)){
-            for (let j = 0; j < keyValue.length; j++){
-              outputString += this.getOutputString(keyValue[j])
+
+      //If the keyValue is an object,
+      if (typeof keyValue == 'object'){
+        if (key !='parent'){
+          if (keyValue !== null){
+            if (Array.isArray(keyValue)){
+              for (let j = 0; j < keyValue.length; j++){
+                outputString += this.getOutputString(keyValue[j])
+              }
+            }else{
+              outputString += this.getOutputString(keyValue)
             }
-          }else{
-            outputString += this.getOutputString(keyValue)
           }
+        }
+        else
+        {
+          outputString += '  '.repeat(starIndent) + key + ":" + keyValue.id + '\n'
         }
       }else{
         outputString += '  '.repeat(starIndent) + key + ":" + keyValue + '\n'
@@ -1577,6 +1587,6 @@ class DOMTreeNode{
     return this.children
   }
 }
-export {Node, Parser}
+export {Node, Parser, TreeViewer}
 export default Parser
 

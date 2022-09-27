@@ -1,0 +1,52 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "0f99d421c0de808c61e6b5fff7c5e623",
+    "packages": [
+        {
+            "name": "raymond1/document-compiling-cms",
+            "version": "dev-php",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/raymond1/document-compiling-cms.git",
+                "reference": "e6e8909e52c12c07b3066d3a5c199bfce6db0181"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/raymond1/document-compiling-cms/zipball/e6e8909e52c12c07b3066d3a5c199bfce6db0181",
+                "reference": "e6e8909e52c12c07b3066d3a5c199bfce6db0181",
+                "shasum": ""
+            },
+            "type": "project",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Raymond Leon",
+                    "email": "raymondleon@raymondleon.ca"
+                }
+            ],
+            "description": "A system for collating files and fragments into a webite.",
+            "support": {
+                "source": "https://github.com/raymond1/document-compiling-cms/tree/php",
+                "issues": "https://github.com/raymond1/document-compiling-cms/issues"
+            },
+            "time": "2022-09-27T20:51:06+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "raymond1/document-compiling-cms": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
+}

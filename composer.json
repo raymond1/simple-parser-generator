@@ -1,0 +1,11 @@
+{
+  "repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/raymond1/document-compiling-cms"
+    }
+  ],
+  "require": {
+    "raymond1/document-compiling-cms": "dev-php"
+  }
+}

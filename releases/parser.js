@@ -1003,7 +1003,6 @@ class Parser{
         return this.rules[i]
       }
     }
-
     throw 'Error: Unrecognized rule name:' + ruleName
   }
 
@@ -1026,7 +1025,9 @@ class Parser{
   set rawMatches(value){
     this._rawMatches = value
   }
-}class Utilities{
+}
+
+class Utilities{
 	static array_merge(array1,array2){
 		let returnArray = []
 		for(let element of array1){
@@ -1292,6 +1293,8 @@ class Tree{
   */
 }
 
+
+
 //For string functions
 function Strings(){}
 
@@ -1429,6 +1432,8 @@ Strings.headMatchUntilDelimiter = function(string, delimiter){
   }
   return ''
 }
+
+
 
 
 class TreeViewer{
@@ -1587,6 +1592,8 @@ class DOMTreeNode{
     return this.children
   }
 }
+
+
 export {Node, Parser, TreeViewer}
 export default Parser
 

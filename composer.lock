@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/raymond1/document-compiling-cms.git",
-                "reference": "e6e8909e52c12c07b3066d3a5c199bfce6db0181"
+                "reference": "244efad7796eaab99f7354e752080eb9ed8888dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/raymond1/document-compiling-cms/zipball/e6e8909e52c12c07b3066d3a5c199bfce6db0181",
-                "reference": "e6e8909e52c12c07b3066d3a5c199bfce6db0181",
+                "url": "https://api.github.com/repos/raymond1/document-compiling-cms/zipball/244efad7796eaab99f7354e752080eb9ed8888dc",
+                "reference": "244efad7796eaab99f7354e752080eb9ed8888dc",
                 "shasum": ""
             },
             "type": "project",
@@ -35,7 +35,7 @@
                 "source": "https://github.com/raymond1/document-compiling-cms/tree/php",
                 "issues": "https://github.com/raymond1/document-compiling-cms/issues"
             },
-            "time": "2022-09-27T20:51:06+00:00"
+            "time": "2022-09-28T11:21:12+00:00"
         }
     ],
     "packages-dev": [],

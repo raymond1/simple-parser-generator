@@ -1,1 +1,2 @@
 compile src/main.cdf
+copyscript src/copy_demos.txt

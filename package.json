@@ -8,5 +8,10 @@
 	"author": "Raymond Leon <raymondleon@raymondleon.ca>",
 	"license": "SEE LICENCE IN LICENCE",
 	"private": false,
-	"devDependencies": {}
+	"dependencies": {
+		"express": "^4.18.1"
+	},
+	"devDependencies": {
+		
+	}
 }

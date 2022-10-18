@@ -1,0 +1,3 @@
+GET /ocsp/MEIwQDA%2BMDwwOjAJBgUrDgMCGgUABBTWGNJuwZk80d%2BsZ67RB3EB%2Fzi4vQQUEj4XGxG%2B4Jpy2zF8qbpZkyMZ%2B3oCASs%3D HTTP/1.0
+Host: certificate.authority
+

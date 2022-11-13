@@ -89,7 +89,6 @@ console.log("Server started at port " + port);
 //Sign the request and generate a new certificate
 //openssl ca -in server_to_intermediate.csr -out server.crt -config sign_server_by_intermediate.conf -keyfile intermediate_certificate_authority_private_key.pem -outdir server_certificates -cert intermediate.crt
 
-//https://www.ssl.com/blogs/398-day-browser-limit-for-ssl-tls-certificates-begins-september-1-2020/
 //https://www.denetarik.com/2021/01/decoding-ocsp-get-requests.html
 //openssl ocsp -reqin decoded_nginx_request.txt -req_text
 //https://www.itu.int/rec/T-REC-X.690/

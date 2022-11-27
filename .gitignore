@@ -2,3 +2,4 @@ node_modules
 *.swp
 .DS_STORE
 vendor
+src/server/root_certificates/*.pem

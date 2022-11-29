@@ -1,0 +1,7 @@
+You can use this file as a template to create a new file called .env to store the location of your server private key and server certificate.
+
+#Path to server private key. .pem file format may be required.
+server_private_key = ""
+
+#Path to server certificate. .crt file format may be required.
+server_certificate = "" #

@@ -1,33 +1,3 @@
-//These nodes take in text and then emit Nodes which are then used by the user parser to emit match nodes
-class LinearParsingNode{
-  constructor(constructName, headMatchFunction, grammarizeFunction){
-      this.constructName = constructName
-      this.headMatchFunction = headMatchFunction
-      this.grammarizeFunction = grammarizeFunction
-  }
-}
-
-//This is the type of object that is emitted during the parsing operation by the parser
-class MatchNode{
-  constructor(){
-
-  }
-
-  setProperties(newAttributes){
-    for (let newAttribute in newAttributes){
-      this[newAttribute] = newAttributes[newAttribute]
-    }
-  }
-
-  shallowDisplay(){
-    console.log('begin node')
-    for (let attribute in this){
-      console.log(attribute + ':' + this[attribute])
-    }
-    console.log('end node')
-  }
-}
-
 //This is the type of node emitted internally by the parser
 class Node{
   constructor(attributesObject){
@@ -282,6 +252,37 @@ class Node{
     return newMatchNode
   }
 }
+
+//These nodes take in text and then emit Nodes which are then used by the user parser to emit match nodes
+class LinearParsingNode{
+  constructor(constructName, headMatchFunction, grammarizeFunction){
+      this.constructName = constructName
+      this.headMatchFunction = headMatchFunction
+      this.grammarizeFunction = grammarizeFunction
+  }
+}
+
+//This is the type of object that is emitted during the parsing operation by the parser
+class MatchNode{
+  constructor(){
+
+  }
+
+  setProperties(newAttributes){
+    for (let newAttribute in newAttributes){
+      this[newAttribute] = newAttributes[newAttribute]
+    }
+  }
+
+  shallowDisplay(){
+    console.log('begin node')
+    for (let attribute in this){
+      console.log(attribute + ':' + this[attribute])
+    }
+    console.log('end node')
+  }
+}
+
 
 //Usage: let parser = new Parser()
 //parser.setGrammar(grammarDefinitionString)

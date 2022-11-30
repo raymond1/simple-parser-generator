@@ -1433,7 +1433,7 @@ The above rule would match strings that start with 'cling'. For example, 'clingo
 
 By combining multiple rules and patterns together, you can end up with some really useful expressions.
 
-This software is still in its early phases, and I am aware of some bugs and problems in the documentation but it has been released into the wild because I feel it has reached a point where it could be very useful. Be free, my software, and go where you need to go! I'll support you! Grow! Grow!
+This software is still in its early phases, and I am aware of some bugs and problems in the documentation but it has been released into the wild because I feel it has reached a point where it could be very useful. 
 
 If you have trouble using my software, you can send me an email at
 

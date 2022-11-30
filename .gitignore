@@ -4,3 +4,4 @@ node_modules
 vendor
 src/server/root_certificates/*.pem
 demos
+thinking.txt

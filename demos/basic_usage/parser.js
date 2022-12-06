@@ -254,7 +254,7 @@ class Node{
 }
 
 //These nodes take in text and then emit Nodes which are then used by the user parser to emit match nodes
-class LinearParsingNode{
+class LinearParsingRow{
   constructor(constructName, headMatchFunction, grammarizeFunction){
       this.constructName = constructName
       this.headMatchFunction = headMatchFunction
@@ -282,8 +282,6 @@ class MatchNode{
     console.log('end node')
   }
 }
-
-
 //Usage: let parser = new Parser()
 //parser.setGrammar(grammarDefinitionString)
 //parser.parse(string)
@@ -296,8 +294,8 @@ class Parser{
     this.idCounter = 0
     this.matchCount = 0 //enumerates the matches
 
-    this.linearParsingNodes = []
-    this.registerLinearParsingNodes() //For each head matching function, there needs to be a corresponding grammarize function
+    this.LinearParsingRows = []
+    this.registerLinearParsingRows() //For each head matching function, there needs to be a corresponding grammarize function
   }
 
   headMatchOr(string){
@@ -336,22 +334,22 @@ class Parser{
     return this.headMatchXWithBrackets(string, 'EXACT')
   }
 
-  registerLinearParsingNodes(){
-    this.linearParsingNodes.push(new LinearParsingNode('or', this.headMatchOr, this.grammarize_OR))
-    this.linearParsingNodes.push(new LinearParsingNode('and', this.headMatchAnd, this.grammarize_AND))
-    this.linearParsingNodes.push(new LinearParsingNode('sequence', this.headMatchSequence, this.grammarize_SEQUENCE))
-    this.linearParsingNodes.push(new LinearParsingNode('not', this.headMatchNot, this.grammarize_NOT))
-    this.linearParsingNodes.push(new LinearParsingNode('optional', this.headMatchOptional, this.grammarize_OPTIONAL))
-    this.linearParsingNodes.push(new LinearParsingNode('multiple', this.headMatchMultiple, this.grammarize_MULTIPLE))
-    this.linearParsingNodes.push(new LinearParsingNode('character class', this.headMatchCharacterClass, this.grammarize_CHARACTER_CLASS))
-    this.linearParsingNodes.push(new LinearParsingNode('ws allow both', this.headMatchWSAllowBoth, this.grammarize_WS_ALLOW_BOTH))
-    this.linearParsingNodes.push(new LinearParsingNode('exact', this.headMatchExact, this.grammarize_EXACT))
+  registerLinearParsingRows(){
+    this.LinearParsingRows.push(new LinearParsingRow('or', this.headMatchOr, this.grammarize_OR))
+    this.LinearParsingRows.push(new LinearParsingRow('and', this.headMatchAnd, this.grammarize_AND))
+    this.LinearParsingRows.push(new LinearParsingRow('sequence', this.headMatchSequence, this.grammarize_SEQUENCE))
+    this.LinearParsingRows.push(new LinearParsingRow('not', this.headMatchNot, this.grammarize_NOT))
+    this.LinearParsingRows.push(new LinearParsingRow('optional', this.headMatchOptional, this.grammarize_OPTIONAL))
+    this.LinearParsingRows.push(new LinearParsingRow('multiple', this.headMatchMultiple, this.grammarize_MULTIPLE))
+    this.LinearParsingRows.push(new LinearParsingRow('character class', this.headMatchCharacterClass, this.grammarize_CHARACTER_CLASS))
+    this.LinearParsingRows.push(new LinearParsingRow('ws allow both', this.headMatchWSAllowBoth, this.grammarize_WS_ALLOW_BOTH))
+    this.LinearParsingRows.push(new LinearParsingRow('exact', this.headMatchExact, this.grammarize_EXACT))
 
     //irregular head matching rules
     //Quoted string needs to be put in first because of S_QUOTE and similar things.
-    this.linearParsingNodes.push(new LinearParsingNode('quoted string', this.headMatchQuotedString, this.grammarize_QUOTED_STRING))
-    this.linearParsingNodes.push(new LinearParsingNode('rule name', this.headMatchRuleName, this.grammarize_RULE_NAME))
-    this.linearParsingNodes.push(new LinearParsingNode('rule', this.headMatchRule, this.grammarize_RULE))
+    this.LinearParsingRows.push(new LinearParsingRow('quoted string', this.headMatchQuotedString, this.grammarize_QUOTED_STRING))
+    this.LinearParsingRows.push(new LinearParsingRow('rule name', this.headMatchRuleName, this.grammarize_RULE_NAME))
+    this.LinearParsingRows.push(new LinearParsingRow('rule', this.headMatchRule, this.grammarize_RULE))
 
     //Note that the rule for the rule list does not have to be in this list because no reference to it will can be made within one of its rules
     //and so it will never get triggered during parsing of the input grammar
@@ -481,15 +479,61 @@ class Parser{
   }
 
   setGrammar(grammarString){
-    this.runningGrammar = this.generateParser(grammarString)
-    if(!this.runningGrammar){
+    this.grammar = this.generateParser(grammarString)
+    if(!this.grammar){
       throw "Error: invalid grammar specification."
     }
-    this.rules = this.getRules(this.runningGrammar)
+    this.rules = this.getRules(this.grammar)
+  }
+
+  //Given a node, coverts it into a string form
+  exportNode(node, depth = 0){
+    outputString += node['friendly node type name'] + "\n"
+    switch (node['friendly node type name']){
+      case 'rule list':
+        for (let i = 0; i < node['rules'].length; i++){
+          outputString += this.exportNode(node['rules'][i], depth + 1)
+        }
+        break
+      case 'rule':
+        
+        break
+      case 'ws allow both':
+        break
+      case 'not':
+        break
+      case 'optional':
+        break
+      case 'and':
+        break
+      case 'sequence':
+        break
+      case 'or':
+        break
+      case 'quoted string':
+        break;
+      default:
+        throw new Exception('Error while exporting grammar' + node['friendly node type name'])
+    }
+
+    return outputString
+  }
+
+  //Converts in memory representation of grammar into string form that can be saved to disk
+  exportGrammar(){
+    let depth = 0
+    let node = this.grammar
+    let outputString = ''
+    outputString += this.exportNode(node)
+    return outputString
+  }
+
+  importGrammar(){
+
   }
 
   getGrammarAST(){
-    return this.runningGrammar
+    return this.grammar
   }
 
   getId(){
@@ -522,8 +566,8 @@ class Parser{
   //return the string containing up to the first pattern string
   //Returns '' if no valid next pattern string is found
   headMatchPattern(string){
-    for (let linearParsingNode of this.linearParsingNodes){
-      let patternString = linearParsingNode.headMatchFunction.call(this, string)
+    for (let LinearParsingRow of this.LinearParsingRows){
+      let patternString = LinearParsingRow.headMatchFunction.call(this, string)
       if (patternString) return patternString
     }
     return ''
@@ -866,30 +910,30 @@ class Parser{
   }
 
   getTypeOfPattern(string){
-    for (let i = 0; i < this.linearParsingNodes.length; i++){
-      let headMatchResult = this.linearParsingNodes[i].headMatchFunction.call(this,string)
+    for (let i = 0; i < this.LinearParsingRows.length; i++){
+      let headMatchResult = this.LinearParsingRows[i].headMatchFunction.call(this,string)
       if (headMatchResult){
-        return this.linearParsingNodes[i].constructName
+        return this.LinearParsingRows[i].constructName
       }
     }
     return ''
   }
 
-  getLinearParsingNodeWithConstructType(constructName){
-    for (let linearParsingNode of this.linearParsingNodes){
-      if (linearParsingNode.constructName == constructName){
-        return linearParsingNode
+  getLinearParsingRowWithConstructType(constructName){
+    for (let LinearParsingRow of this.LinearParsingRows){
+      if (LinearParsingRow.constructName == constructName){
+        return LinearParsingRow
       }
     }
     return null
   }
 
-  //Give a type of a pattern to match and a string, this function emits a node tree of the type specified by typeOfPattern if string matches
+  //Given a type of a pattern to match and a string, this function emits a node tree of the type specified by typeOfPattern if string matches
   //the pattern specified by typeOfPattern
   grammarize(typeOfPattern, string){
-    let linearParsingNode = this.getLinearParsingNodeWithConstructType(typeOfPattern)
-    if (linearParsingNode){
-      return linearParsingNode.grammarizeFunction.call(this, string)
+    let LinearParsingRow = this.getLinearParsingRowWithConstructType(typeOfPattern)
+    if (LinearParsingRow){
+      return LinearParsingRow.grammarizeFunction.call(this, string)
     }
     return null
   }
@@ -1012,9 +1056,9 @@ class Parser{
   //takes in a string and returns an abstract syntax tree, according to previously loaded grammar
   //Assumes there is only one top-level construct
   parse(inputString){
-    let matchInformationNodes = this.runningGrammar.match(inputString)
+    let matchInformationNodes = this.grammar.match(inputString)
     let matchInformationTree = new Tree(matchInformationNodes)
-    this._rawMatches = matchInformationTree
+    this.rawMatches = matchInformationTree
     let ruleMatchesTree = matchInformationTree.getRuleMatchesOnly()
     return ruleMatchesTree
   }
@@ -1026,9 +1070,7 @@ class Parser{
   set rawMatches(value){
     this._rawMatches = value
   }
-}
-
-class Utilities{
+}class Utilities{
 	static array_merge(array1,array2){
 		let returnArray = []
 		for(let element of array1){
@@ -1294,8 +1336,6 @@ class Tree{
   */
 }
 
-
-
 //For string functions
 function Strings(){}
 
@@ -1433,8 +1473,6 @@ Strings.headMatchUntilDelimiter = function(string, delimiter){
   }
   return ''
 }
-
-
 
 
 class TreeViewer{
@@ -1593,8 +1631,6 @@ class DOMTreeNode{
     return this.children
   }
 }
-
-
 export {Node, Parser, TreeViewer}
 export default Parser
 

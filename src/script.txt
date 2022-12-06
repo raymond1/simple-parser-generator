@@ -1,2 +1,2 @@
-compile src/main.cdf
+compile src/main.template releases/parser.js
 copyscript src/copy_demos.txt

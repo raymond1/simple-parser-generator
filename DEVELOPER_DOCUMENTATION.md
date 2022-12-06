@@ -8,7 +8,7 @@ To develop, do the following:
 
 This will install the document-compiling-cms composer package from github (https://github.com/raymond1/document-compiling-cms).
 
-This tool is able to cobble pieces of files together. It's not the worst, but it is horrible. In any case, I made it, so I'm going to use it. 
+This tool is able to cobble pieces of files together.
 
 To use this tool, do the following:
 
@@ -16,12 +16,14 @@ php vendor/raymond1/document-compiling-cms/generate_website.php src/script.txt
 
 This will trigger the "compilation" process.
 
-4)
+# How to configure and run Nodemon
+Not yet written
+
 
 # Concepts
 Regular nodes(class name Node) are the in-memory nodes that govern how parsing is performed.
 Match nodes(class name MatchNode) are the nodes that are emitted by the parser when it is parsing.
-Linear parsing nodes are actually rows. They are a mapping from a construct type to a string match function and a function that emits regular nodes.
+Linear parsing rows are a mapping from a construct type to a string match function and a function that emits regular nodes.
 
 
 Step 1: string representation of grammar is fed and transformed into an in-memory format.
@@ -36,4 +38,15 @@ The in-memory format of the parser executes with a string parameter. The output 
 Disk
 [test program]
 
+# How to update the generate_webite.php script
+After making changes to the script, go into the document-compiling-cms folder, add and commit your changes and then use the command:
+```
+git push origin 1.0.10
+```
+(replace 1.0.10 with your new tag version.)
+
+Then, from the simple-parser-generator folder, perform a
+```
+composer update
+```.
 

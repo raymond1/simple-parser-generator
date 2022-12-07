@@ -202,9 +202,18 @@ class Parser{
     this.rules = this.getRules(this.grammar)
   }
 
+  //Returns n spaces
+  encodeDepth(n){
+    return ' '.repeat(n)
+  }
+  //Given an object o of the form {name:value} returns a string 
+  encodeProperty(o){
+    let property = Object.keys(o)[0]
+    return property + ":" + o[property] + "\n"
+  }
   //Given a node, coverts it into a string form
   exportNode(node, depth = 0){
-    outputString += node['friendly node type name'] + "\n"
+    let outputString = ' '.repeat(depth) + node['friendly node type name'] + "\n"
     switch (node['friendly node type name']){
       case 'rule list':
         for (let i = 0; i < node['rules'].length; i++){
@@ -212,7 +221,11 @@ class Parser{
         }
         break
       case 'rule':
-        
+        outputString += this.encodeDepth(depth) + this.encodeProperty({name: node.name})
+        debugger
+        this.exportNode(node, depth + 1)
+        //rule
+        // name:dfsdf
         break
       case 'ws allow both':
         break

@@ -17,8 +17,9 @@ php vendor/raymond1/document-compiling-cms/generate_website.php src/script.txt
 This will trigger the "compilation" process.
 
 # How to configure and run Nodemon
-Not yet written
-
+```
+chmod a+x src/server/restart.sh
+```
 
 # Concepts
 Regular nodes(class name Node) are the in-memory nodes that govern how parsing is performed.
@@ -50,3 +51,8 @@ Then, from the simple-parser-generator folder, perform a
 composer update
 ```.
 
+# How to start the server
+Go into the src/server directory.
+```
+npm start
+```

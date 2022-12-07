@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/raymond1/document-compiling-cms.git",
-                "reference": "c3bcd20c6036d1e5ec6a5e3392d4bc20bbb234bc"
+                "reference": "e8f2fa591b98d85144b37875e02d8f9de85a6a85"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/raymond1/document-compiling-cms/zipball/c3bcd20c6036d1e5ec6a5e3392d4bc20bbb234bc",
-                "reference": "c3bcd20c6036d1e5ec6a5e3392d4bc20bbb234bc",
+                "url": "https://api.github.com/repos/raymond1/document-compiling-cms/zipball/e8f2fa591b98d85144b37875e02d8f9de85a6a85",
+                "reference": "e8f2fa591b98d85144b37875e02d8f9de85a6a85",
                 "shasum": ""
             },
             "default-branch": true,
@@ -33,10 +33,10 @@
             ],
             "description": "A system for collating files and fragments into a webite.",
             "support": {
-                "source": "https://github.com/raymond1/document-compiling-cms/tree/1.0.8",
+                "source": "https://github.com/raymond1/document-compiling-cms/tree/1.0.9",
                 "issues": "https://github.com/raymond1/document-compiling-cms/issues"
             },
-            "time": "2022-12-06T15:58:49+00:00"
+            "time": "2022-12-06T16:39:21+00:00"
         }
     ],
     "packages-dev": [],

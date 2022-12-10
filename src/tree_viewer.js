@@ -138,19 +138,10 @@ class DOMTreeNode{
 
   highlight(){
     let ul = this.domElement
-    //.getElementsByTagName('ul')[0]
-    //ul.style.border = "thick #ff0 solid"
     ul.style.backgroundColor = "#ff0"
-    //ul.getElementsByTagName('li')[0].style.backgroundColor = "#ff0"
   }
   unhighlight(){
     let ul = this.domElement
-    //.getElementsByTagName('ul')[0]
-    //ul.style.border = "thick #000 solid"
     ul.style.backgroundColor = "#fff"
-//    ul.getElementsByTagName('li')[0].style.backgroundColor = "#fff"
-  }
-  getChildren(){
-    return this.children
   }
 }

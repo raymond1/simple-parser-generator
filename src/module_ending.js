@@ -1,3 +1,3 @@
-export {Node, Parser, TreeViewer}
+export {Node, RuleListNode, Parser, TreeViewer}
 export default Parser
 

@@ -117,7 +117,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -148,77 +148,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:a
-            string:a
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:b
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:b
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:b
-            *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:false
-            matchLength:0
-            matchString:
-            string:a
-            *****************************
-            type:quoted string
-            id:8
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:b
-            string:b
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:a
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:a
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:a
-            *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -249,7 +179,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -257,46 +187,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
-            id:8
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:b
-            string:b
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:b
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:b
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:b
-            *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:false
-            matchLength:0
-            matchString:
-            string:a
-            *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -327,100 +218,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:a
-            string:a
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:a
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:a
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:a
-            *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:a
-            string:a
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:a
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:a
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:a
-            *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:a
-            string:a
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:a
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:a
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:a
-            *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -451,7 +249,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -459,7 +257,46 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
+            id:8
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:b
+            string:b
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:b
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:b
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:b
+            *****************************
+            type:string literal
+            id:7
+            depth:6
+            matchFound:false
+            matchLength:0
+            matchString:
+            string:a
+            *****************************
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -490,7 +327,100 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
+            id:7
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:a
+            string:a
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:a
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:a
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:a
+            *****************************
+            type:string literal
+            id:7
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:a
+            string:a
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:a
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:a
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:a
+            *****************************
+            type:string literal
+            id:7
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:a
+            string:a
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:a
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:a
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:a
+            *****************************
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -521,7 +451,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -529,7 +459,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -560,38 +490,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:a
-            string:a
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:a
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:a
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:a
-            *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -622,7 +521,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -630,7 +529,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -661,7 +560,38 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
+            id:7
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:a
+            string:a
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:a
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:a
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:a
+            *****************************
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -692,7 +622,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -700,7 +630,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -731,69 +661,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:a
-            string:a
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:a
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:a
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:a
-            *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:a
-            string:a
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:a
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:a
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:a
-            *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -824,7 +692,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -832,7 +700,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -863,7 +731,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -894,7 +762,38 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
+            id:7
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:a
+            string:a
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:a
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:a
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:a
+            *****************************
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -925,7 +824,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -933,7 +832,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -964,7 +863,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -995,77 +894,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:a
-            string:a
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:b
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:b
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:b
-            *****************************
-            type:quoted string
-            id:7
-            depth:6
-            matchFound:false
-            matchLength:0
-            matchString:
-            string:a
-            *****************************
-            type:quoted string
-            id:8
-            depth:6
-            matchFound:true
-            matchLength:1
-            matchString:b
-            string:b
-      *****************************
-      type:rule name
-      id:2
-      depth:3
-      matchFound:true
-      matchLength:1
-      matchString:a
-      value:A_OR_B_CHARACTERS
-        *****************************
-        type:rule
-        id:10
-        depth:4
-        matchFound:true
-        matchLength:1
-        matchString:a
-        name:A_OR_B_CHARACTERS
-          *****************************
-          type:or
-          id:9
-          depth:5
-          matchFound:true
-          matchLength:1
-          matchString:a
-            *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -1096,7 +925,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -1104,7 +933,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -1135,7 +964,38 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
+            id:7
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:a
+            string:a
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:a
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:a
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:a
+            *****************************
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -1166,7 +1026,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -1174,7 +1034,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -1205,7 +1065,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -1236,7 +1096,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:b
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -1244,7 +1104,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:true
@@ -1275,7 +1135,147 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:1
           matchString:a
             *****************************
-            type:quoted string
+            type:string literal
+            id:7
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:a
+            string:a
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:b
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:b
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:b
+            *****************************
+            type:string literal
+            id:7
+            depth:6
+            matchFound:false
+            matchLength:0
+            matchString:
+            string:a
+            *****************************
+            type:string literal
+            id:8
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:b
+            string:b
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:a
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:a
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:a
+            *****************************
+            type:string literal
+            id:7
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:a
+            string:a
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:b
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:b
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:b
+            *****************************
+            type:string literal
+            id:7
+            depth:6
+            matchFound:false
+            matchLength:0
+            matchString:
+            string:a
+            *****************************
+            type:string literal
+            id:8
+            depth:6
+            matchFound:true
+            matchLength:1
+            matchString:b
+            string:b
+      *****************************
+      type:rule name
+      id:2
+      depth:3
+      matchFound:true
+      matchLength:1
+      matchString:a
+      value:A_OR_B_CHARACTERS
+        *****************************
+        type:rule
+        id:10
+        depth:4
+        matchFound:true
+        matchLength:1
+        matchString:a
+        name:A_OR_B_CHARACTERS
+          *****************************
+          type:or
+          id:9
+          depth:5
+          matchFound:true
+          matchLength:1
+          matchString:a
+            *****************************
+            type:string literal
             id:7
             depth:6
             matchFound:true
@@ -1306,7 +1306,7 @@ matchString:aababbaaaababaababaaabaabaababababa
           matchLength:0
           matchString:
             *****************************
-            type:quoted string
+            type:string literal
             id:7
             depth:6
             matchFound:false
@@ -1314,7 +1314,7 @@ matchString:aababbaaaababaababaaabaabaababababa
             matchString:
             string:a
             *****************************
-            type:quoted string
+            type:string literal
             id:8
             depth:6
             matchFound:false
@@ -1423,7 +1423,7 @@ RULE_4 = RULE_3
 
 RULE_3 above would match the string 'SOCKETWRENCH'. RULE_4, because it is defined to be equal to RULE_3, would also match 'SOCKETWRENCH'. In other words, you can refer to the names of the rules you have defined by name.
 
-quoted string pattern:
+string literal pattern:
 ----------------------
 Usage example:
 

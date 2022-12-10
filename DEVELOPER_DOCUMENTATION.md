@@ -16,10 +16,18 @@ php vendor/raymond1/document-compiling-cms/generate_website.php src/script.txt
 
 This will trigger the "compilation" process.
 
-# How to configure and run Nodemon
+# How to initialize hot loading
+From the src/server directory, configure the permissions for restart.sh.
 ```
-chmod a+x src/server/restart.sh
+chmod a+x restart.xh
 ```
+
+Then, to start nodemon, run the command:
+```
+npm run dev
+```
+(also from within the src/server directory).
+
 
 # Concepts
 Regular nodes(class name Node) are the in-memory nodes that govern how parsing is performed.

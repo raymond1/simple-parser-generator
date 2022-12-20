@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <title>3D language demo</title>
+  </head>
+  <body>
+<script type='module'>
+import {Parser, TreeViewer, RuleListNode} from "../parser.js"
+let parser = new Parser()
+
+//Question: is multiple greedy?
+let parsingSpecification = `
+NUMBER = MULTIPLE[CHARACTER_CLASS['0123456789']]
+
+
+`
+parser.setGrammar(parsingSpecification)
+
+
+
+Parser.M1Import("[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]", parser)
+
+let a = parser.grammar.M1Export()
+debugger
+
+//let treeviewer = new TreeViewer(parser.grammar)
+//debugger
+//rule name->multiple->character_class=>
+/*
+let programString = `aababbaaaababaababaaabaabaababababa`
+let outputFromParsing = parser.parse(programString)
+
+// let treeviewer = new TreeViewer(outputFromParsing)
+let outputString = treeviewer.getOutputString(outputFromParsing)
+*/
+//console.log(outputString)
+
+//At this point, you will see something like the following:
+</script>
+  </body>
+</html>

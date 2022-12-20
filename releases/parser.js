@@ -4,14 +4,21 @@
 class Node{
   constructor(metadata){
     this.parser = metadata.parser
-    if (!this.parser) debugger
+if (!this.parser||!this.parser.getId){
+  debugger
+}
     this.id = this.parser.getId()
   }
-  //match returns a new MatchNode containing information on what matched and what did not
-  //A matchNode is always returned. Sometimes the MatchNode says a match was found, and sometimes it says
-  //a match was not found
+
+  //Implemented and overriden by child nodes. Given a node, coverts it into a string form
+  M1Export(depth = 0){
+    throw new Exception('Error while exporting grammar: ' + node['type'] + ' M1Export not implemented.')
+    return ""
+  }
+
 }
 
+//this.rules: an array of rule nodes
 class RuleListNode extends Node{
   constructor(metadata){
     super(metadata)
@@ -22,10 +29,6 @@ class RuleListNode extends Node{
   //If inputString is a valid rule list, return a rule list node, and its corresponding children
   //If not valid, return null
   static grammarize(inputString, parser){
-    if (!parser){
-      debugger
-    }
-
     if (inputString.length < 1) return null
 
     let rules = []
@@ -44,6 +47,40 @@ class RuleListNode extends Node{
     var ruleListNode = new RuleListNode({'rules': rules, 'parser': parser})
 
     return ruleListNode
+  }
+
+  //H1 encoding notes:
+  //Before encoding into human form:
+  //ENC( ->becomes ENC(ENC)(
+  //Question: how to deal with quotes and spaces and newlines?
+  //Quotes are not special
+  //Spaces are not special
+  //Node names are fixed
+  //indentation is fixed
+  //rule list
+  // rule
+  //  name:fasfsfasdf asfsadfsdf "dsfasdfasfasdfENC(NEWLINE)
+  //  multiple
+  //   string literal
+  //    adfasdf
+
+  //M1 encoding notes:
+  //> becomes ENC(R_ANGLE_BRACKET)
+  //, becomes ENC(COMMA)
+  //rule list>rule>asfdasdf,multiple>quoted string>adfasdfasfda,>,
+  //Export function exports in M1 format
+  //s: output string
+
+  //rule
+  //parameter 1: rule name
+  //parameter 2: pattern
+  M1Export(){
+    let s = '[' + this.constructor.type 
+    for (let i = 0; i < this['rules'].length; i++){
+      s += "," + this['rules'][i].M1Export()
+    }
+
+    return s + ']'
   }
 
   //Given a inputString of characters to match against, the match function returns
@@ -74,6 +111,7 @@ class RuleNode extends Node{
   constructor(metadata){
     super(metadata)
     this.name = metadata.name
+    this.pattern = metadata.pattern
   }
   static type = 'rule'
 
@@ -96,7 +134,7 @@ class RuleNode extends Node{
 
     if (name_node == null || pattern_node == null) return null
 
-    return new RuleNode({'pattern': pattern_node, 'name':name_node.value, parser})
+    return new RuleNode({'pattern': pattern_node, 'name':name_node.value, 'parser': parser})
   }
 
   static headMatch(string, parser){
@@ -146,6 +184,14 @@ class RuleNode extends Node{
     }
   }
 
+  //s: output string
+  M1Export(){
+if (!this.pattern||!this.pattern.M1Export){
+  debugger
+}
+    return `[${this.constructor.type},${Parser.M1Escape(this.name)},${this.pattern.M1Export()}]`
+  }
+
   match(inputString, metadata){
     var newMatchNode = new MatchNode()
     let matchInfo = this.pattern.match(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -173,7 +219,7 @@ class RuleNode extends Node{
 class RuleNameNode extends Node{
   constructor(metadata){
     super(metadata)
-    this.value = metadata.ruleName
+    this.value = metadata.value
   }
   static type = 'rule name'
 
@@ -203,6 +249,10 @@ class RuleNameNode extends Node{
       }
     }
     return string.substring(0,length)
+  }
+
+  M1Export(){
+    return `[${this.constructor.type},${this.value}]`
   }
 
   match(inputString, metadata){
@@ -268,6 +318,10 @@ class NotNode extends Node{
     return null
   }
 
+  M1Export(){
+    return `[${this.constructor.type},${this.pattern.M1Export()}]`
+  }
+
   match(inputString, metadata){
     var newMatchNode = new MatchNode()
     let matchInfo = this.pattern.match(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -330,6 +384,18 @@ class SequenceNode extends Node{
     }
 
     return null
+  }
+
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0){
+        patternString += ","
+      }
+      patternsString += `[${pattern.M1Export()}]`
+    })
+    let s = `[${patternString}]`
+    return s
   }
 
   match(inputString, metadata){
@@ -413,6 +479,16 @@ class OrNode extends Node{
     return null
   }
 
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0) patternsString += ","
+      patternsString += pattern.M1Export()
+    })
+    let s = `[${this.constructor.type},${patternsString}]`
+    return s
+  }
+
   match(inputString,metadata){
     var newMatchNode = new MatchNode()
 
@@ -482,6 +558,16 @@ class AndNode extends Node{
     return Parser.headMatchXWithBrackets(string, 'AND')
   }
 
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0) patternsString += ","
+      patternsString += pattern.M1Export()
+    })
+    let s = `[${this.constructor.type},${patternsString}]`
+    return s
+  }
+
   match(inputString,metadata){
     var newMatchNode = new MatchNode()
 
@@ -545,9 +631,6 @@ class MultipleNode extends Node{
   static type = 'multiple'
 
   static grammarize(string, parser){
-  if (!parser){
-    debugger
-  }
     var trimmed_string = string.trim()
 
     var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'MULTIPLE'.length)
@@ -575,6 +658,10 @@ class MultipleNode extends Node{
 
   static headMatch(string){
     return Parser.headMatchXWithBrackets(string, 'MULTIPLE')
+  }
+
+  M1Export(){
+    return `[multiple,${this.pattern.M1Export()}]`
   }
 
   match(inputString, metadata){
@@ -617,13 +704,13 @@ class MultipleNode extends Node{
   }
 }
 
-class QuotedStringNode extends Node{
+class StringLiteralNode extends Node{
   constructor(metadata){
     super(metadata)
     this.string = metadata.string
   }
 
-  static type = 'quoted string'
+  static type = 'string literal'
 
   static grammarize(string, parser){
     //First, handle the special cases
@@ -642,7 +729,7 @@ class QuotedStringNode extends Node{
         }else if (string == 'COMMA'){
           specialString = ','
         }
-        return new QuotedStringNode({'type':'quoted string', 'string':specialString, parser})
+        return new StringLiteralNode({'type':'string literal', 'string':specialString, parser})
     }
 
     //If all characters are in the range 'A-Za-z0-9', return the string as a node.
@@ -655,7 +742,7 @@ class QuotedStringNode extends Node{
 
     var middle_string = string.substring(1, string.length -1)
     
-    return new QuotedStringNode({'string':middle_string, parser})
+    return new StringLiteralNode({'string':middle_string, parser})
   }
 
   headMatch(string){
@@ -696,6 +783,10 @@ class QuotedStringNode extends Node{
       return ''
     }
     return string.substring(0, 1 + stringCharacters.length + 1)
+  }
+
+  M1Export(){
+    return `[${this.constructor.type},${Parser.M1Escape(this.string)}]`
   }
 
   match(inputString, metadata){
@@ -751,9 +842,9 @@ class CharacterClassNode extends Node{
     
     var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket).trim()
 
-    var quotedString = QuotedStringNode.grammarize(string_in_between_square_brackets, parser)
-    if (quotedString != null){
-      return new CharacterClassNode({'string':quotedString.string, parser})
+    var stringLiteral = StringLiteralNode.grammarize(string_in_between_square_brackets, parser)
+    if (stringLiteral != null){
+      return new CharacterClassNode({'string':stringLiteral.string, parser})
     }
 
     return null   
@@ -761,6 +852,10 @@ class CharacterClassNode extends Node{
 
   static headMatch(string){
     return Parser.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
+  }
+
+  M1Export(){
+    return `[${this.constructor.type},${Parser.M1Escape(this.string)}]`
   }
 
   match(inputString, metadata){
@@ -839,6 +934,10 @@ class OptionalNode extends Node{
     return null
   }
 
+  M1Export(){
+    return `[${this.constructor.type},${this.pattern.M1Export()}]`
+  }
+
   match(inputString, metadata){
     let newMatchNode = new MatchNode()
     let matchInfo = this.pattern.match(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -863,34 +962,6 @@ class OptionalNode extends Node{
   }
 }
 
-
-// 'rule list':
-//   for (let i = 0; i < node['rules'].length; i++){
-//     outputString += this.encodeDepth(depth + 1) + this.exportNode(node['rules'][i], depth + 1)
-//   }
-//   break
-// case 'rule':
-//   outputString += this.encodeDepth(depth + 1) + this.encodeProperty({name: node.name})
-//   outputString += this.encodeDepth(depth + 1) + this.exportNode(node['pattern'], depth + 1)
-//   //rule
-//   // name:dfsdf
-//   break
-// case 'or':
-//   break
-// case 'and':
-//   break
-// case 'sequence':
-//   break
-// case 'not':
-//   break
-// case 'optional':
-//   break
-// case 'multiple':
-//   break;
-// case 'string literal':
-//   break;
-
-
 //This is the type of object that is emitted during the parsing operation by the parser
 class MatchNode{
   constructor(){
@@ -908,6 +979,7 @@ class MatchNode{
     console.log('end node')
   }
 }
+
 //Usage: let parser = new Parser()
 //parser.setGrammar(grammarDefinitionString)
 //parser.parse(string)
@@ -928,15 +1000,9 @@ class Parser{
     Parser.nodeTypes.push(OptionalNode)
     Parser.nodeTypes.push(MultipleNode)
     Parser.nodeTypes.push(CharacterClassNode)
-    Parser.nodeTypes.push(QuotedStringNode)
+    Parser.nodeTypes.push(StringLiteralNode)
     Parser.nodeTypes.push(RuleNameNode)
     Parser.nodeTypes.push(RuleNode)
-
-    //irregular head matching rules
-    //Quoted string needs to be put in first because of S_QUOTE and similar things.
-    // this.LinearParsingRows.push(new LinearParsingRow('quoted string', this.headMatchQuotedString, this.grammarize_QUOTED_STRING))
-    // this.LinearParsingRows.push(new LinearParsingRow('rule name', this.headMatchRuleName, this.grammarize_RULE_NAME))
-    // this.LinearParsingRows.push(new LinearParsingRow('rule', this.headMatchRule, this.grammarize_RULE))
 
     //Note that the rule for the rule list does not have to be in this list because no reference to it will can be made within one of its rules
     //and so it will never get triggered during parsing of the input grammar
@@ -958,63 +1024,199 @@ class Parser{
   }
 
   //Returns n spaces
-  encodeDepth(n){
+  static encodeDepth(n){
     return ' '.repeat(n)
   }
+
   //Given an object o of the form {name:value} returns a string 
-  encodeProperty(o){
+  static encodeProperty(o){
     let property = Object.keys(o)[0]
     return property + ":" + o[property] + "\n"
   }
 
-  //Given a node, coverts it into a string form
-//   exportNode(node, depth = 0){
-//     let outputString = node['type'] + "\n"
-//     switch (node['type']){
-//       case 'rule list':
-//         for (let i = 0; i < node['rules'].length; i++){
-//           outputString += this.encodeDepth(depth + 1) + this.exportNode(node['rules'][i], depth + 1)
-//         }
-//         break
-//       case 'rule':
-//         outputString += this.encodeDepth(depth + 1) + this.encodeProperty({name: node.name})
-//         outputString += this.encodeDepth(depth + 1) + this.exportNode(node['pattern'], depth + 1)
-//         //rule
-//         // name:dfsdf
-//         break
-//       case 'or':
-//         break
-//         case 'and':
-//         break
-//       case 'sequence':
-//         break
-//       case 'not':
-//         break
-//       case 'optional':
-//         break
-//       case 'multiple':
-//         break;
-//       case 'quoted string':
-//         break;
-// //'OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'WS_ALLOW_BOTH']
-//       default:
-//         throw new Exception('Error while exporting grammar' + node['type'])
-//     }
+  //Given a string s, returns the first comma that is not part of a node
+  //For example:
+  //Let s be the string '[adsfdsf,[dfd,asdfs,asdf],dsfsadf]'
+  //The function will return 8
+  //Let s2 be the string [dfd,asdfs,asdf],dsfsadf]
+  //This function will return 16 because it is the first *zero level* comma, or top level comma.
+  static getNextZeroLevelComma(s){
+    let bracketLevel = 0
+    let index = -1
+    for (let i = 0; i < s.length; i++){
+      let c = s.substring(i,i+1) //Iterate through string s. c is the current character
+      if (c == '[') bracketLevel++
+      if (c == ']') bracketLevel--
 
-//     return outputString
-//   }
+      if (bracketLevel == 0 && c == ','){
+        return i
+      }
+    }
 
-  //Converts in memory representation of grammar into string form that can be saved to disk
-  exportGrammar(){
-    let depth = 0
-    let node = this.grammar
-    let outputString = ''
-    outputString += this.exportNode(node)
-    return outputString
+    return index
   }
 
-  importGrammar(){
 
+  //Assumes s is of the form string,string,string
+  //Or [a,[sdff,sdfds],fds],[asdf],[adfdf]
+  //Takes in a string s which is a pattern list
+  //[node name,<pattern list>]
+  //Repeatedly find next 0-level comma from caret
+  //If not found, then take entire string as the last pattern
+  //dafsdf+1-1+1-1
+  //Returns an array of pattern nodes
+  static M1GetPatterns(s, parser){
+    let patterns = []
+    let caret = 0
+    
+    let nextZeroLevelComma = Parser.getNextZeroLevelComma(s)
+    while(nextZeroLevelComma > 0){
+      let nextNodeString = s.substring(caret,nextZeroLevelComma)
+      patterns.push(Parser.M1Import(nextNodeString, parser))
+      caret = caret + nextNodeString.length
+    }
+
+    patterns.push(Parser.M1Import(s.substring(caret), parser))
+    return patterns
+}
+  //The return value is a number containing the index of the right square bracket
+  //counting from the left starting from 0
+  //If s starts with a left bracket, then find the matching right bracket
+  //If it doesn't, it should be some sort of string literal, so find either a comma or a right bracket
+  static M1GetOneNodeSpot(s){
+    if (s.substring(0,1)=='['){
+      //return index of matching ]
+      return Parser.getMatchingRightSquareBracket(s,0)
+    }
+
+    //Take everything from the beginning of s until the first comma or until the first right square bracket, whichever is first
+    let commaLocation = s.indexOf(',')
+    let rightBracketLocation = s.indexOf(']')
+
+    if (commaLocation == -1 && rightBracketLocation == -1){
+      console.log('Error: expecting a comma or a right square bracket, but none was found.')
+      return -1
+    }
+
+    if (commaLocation < rightBracketLocation){
+      return commaLocation
+    }
+
+    if (commaLocation > rightBracketLocation){
+      return rightBracketLocation
+    }
+  }
+
+  //Converts ENC(R) into ]
+  //Converts ENC(L) into [
+  //Converts ENC(C) into ,
+  static M1Unescape(s){
+    let s2 = s.replace(/ENC(R)/g, ']')
+    s2 = s2.replace(/ENC(L)/g, '[')
+    s2 = s2.replace(/ENC(C)/g, ',')
+    return s2
+  }
+
+  //Takes in a string in M1 format and converts it into an in-memory representation of a parser
+  static M1Import(s, parser){
+    //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
+    //Get everything from [ to the first comma as the type of a node
+
+    let nodeType = Parser.M1GetNodeType(s)
+    switch(nodeType){
+      case 'rule list':
+        {
+          let ruleListNode = new RuleListNode({parser})
+          //let nodeList
+          //Need to get rule 1, rule 2, rule 3...
+          //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
+
+          //everything from the first comma to the last right bracket are to be processed as a series of nodes
+          let caret = s.indexOf(',') + 1
+          let rules = Parser.M1GetPatterns(s.substring(caret,s.length - 1), parser)
+          ruleListNode.rules = rules
+          parser.grammar = ruleListNode
+        }
+        break
+      case 'rule':
+        {
+          //[rule,rule name,pattern]
+          let firstComma = s.indexOf(',')
+          let secondComma = s.indexOf(',',firstComma + 1)
+          let pattern = Parser.M1GetPatterns(s.substring(secondComma+1, s.length - 1), parser)[0]
+          let ruleNode = new RuleNode({parser:parser, name: s.substring(firstComma+1,secondComma), pattern})
+          return ruleNode
+        }
+      case 'or':
+        {
+          //[or,pattern 1,pattern 2,pattern 3,...,pattern n]
+          let firstComma = s.indexOf(',')
+          let patterns = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
+          let orNode = new OrNode({parser:parser, patterns})
+          return orNode
+        }
+      case 'and':
+        {
+          let firstComma = s.indexOf(',')
+          let patterns = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
+          let node = new AndNode({parser:parser, patterns})
+          return node  
+        }
+      case 'sequence':
+        {
+          let firstComma = s.indexOf(',')
+          let patterns = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
+          let node = new SequenceNode({parser:parser, patterns})
+          return node  
+        }
+      case 'not':
+        {
+          let firstComma = s.indexOf(',')
+          let pattern = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
+          let node = new NotNode({parser:parser, pattern})
+          return node  
+        }
+      case 'optional':
+        {
+          let firstComma = s.indexOf(',')
+          let pattern = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
+          let node = new OptionalNode({parser:parser, pattern})
+          return node  
+        }
+      case 'multiple':
+        {
+          let firstComma = s.indexOf(',')
+          let pattern = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
+          let node = new MultipleNode({parser:parser, pattern})
+          return node  
+        }
+      case 'character class':
+        {
+          let firstComma = s.indexOf(',')
+          let string = Parser.M1Unescape(s.substring(firstComma + 1, s.length - 1))
+          let node = new CharacterClassNode({parser:parser, string})
+          return node  
+        }
+      case 'string literal':
+        break          
+      default:
+        throw new Error('Unknown node type: ') + nodeType
+        break;
+    }
+  }
+
+  //Given a string s, this function returns the string between the first left bracket and the first comma
+  //E.g. In the M1 string [rule list, [multiple,[character class,23432424]]]
+  static M1GetNodeType(s){
+    if (s.substring(0,1) != '['){
+      throw new Error('Invalid M1 format. \'[\' expected at position 0, but not found.')
+    }
+    let firstCommaPosition = s.indexOf(',')
+    if (firstCommaPosition == -1){
+      throw new Error('Invalid M1 format. [ should be followed immediately by a node type, followed by a comma and other property values or nodes, but a comma was not found.')
+    }
+
+    return s.substring(1,firstCommaPosition)
   }
 
   getGrammarAST(){
@@ -1098,9 +1300,6 @@ class Parser{
   
   static getTypeOfPattern(string){
     for (let i = 0; i < Parser.nodeTypes.length; i++){
-      if (!Parser.nodeTypes[i].headMatch){
-        debugger
-      }
       let headMatchResult = Parser.nodeTypes[i].headMatch(string)
       if (headMatchResult){
         return Parser.nodeTypes[i].type
@@ -1134,11 +1333,11 @@ class Parser{
       case 'character class':
         return CharacterClassNode.grammarize(string,parser)
         break
-      case 'quoted string':
-        return QuotedStringNode.grammarize(string,parser)
+      case 'string literal':
+        return StringLiteralNode.grammarize(string,parser)
         break
       case 'rule name':
-        return uleNameNode.grammarize(string,parser)
+        return RuleNameNode.grammarize(string,parser)
         break
       case 'rule':
         return RuleNode.grammarize(string,parser)
@@ -1234,11 +1433,22 @@ class Parser{
   set rawMatches(value){
     this._rawMatches = value
   }
+
+  //s is the input string to M1 encode
+  //> becomes ENC(R_ANGLE_BRACKET)
+  //, becomes ENC(COMMA)
+  static M1Escape(s){
+    let s2 = s.replace(/\[/g, "ENC(L)")
+    s2 = s2.replace(/\]/g, "ENC(R)")
+    s2 = s2.replace(/,/g, "ENC(C)")
+    return s2
+  }
 }
 
 Parser.registerNodeTypes()
 Parser.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
 Parser.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS']
+
 class Utilities{
 	static array_merge(array1,array2){
 		let returnArray = []

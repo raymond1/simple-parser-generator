@@ -3,7 +3,7 @@ node_modules
 .DS_STORE
 vendor
 src/server/root_certificates/*.pem
+demos/basic_usage/parser.js
 demos
 thinking.txt
 releases/parser.js
-demos/basic_usage/parser.js

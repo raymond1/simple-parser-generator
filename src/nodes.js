@@ -4,14 +4,21 @@
 class Node{
   constructor(metadata){
     this.parser = metadata.parser
-    if (!this.parser) debugger
+if (!this.parser||!this.parser.getId){
+  debugger
+}
     this.id = this.parser.getId()
   }
-  //match returns a new MatchNode containing information on what matched and what did not
-  //A matchNode is always returned. Sometimes the MatchNode says a match was found, and sometimes it says
-  //a match was not found
+
+  //Implemented and overriden by child nodes. Given a node, coverts it into a string form
+  M1Export(depth = 0){
+    throw new Exception('Error while exporting grammar: ' + node['type'] + ' M1Export not implemented.')
+    return ""
+  }
+
 }
 
+//this.rules: an array of rule nodes
 class RuleListNode extends Node{
   constructor(metadata){
     super(metadata)
@@ -22,10 +29,6 @@ class RuleListNode extends Node{
   //If inputString is a valid rule list, return a rule list node, and its corresponding children
   //If not valid, return null
   static grammarize(inputString, parser){
-    if (!parser){
-      debugger
-    }
-
     if (inputString.length < 1) return null
 
     let rules = []
@@ -44,6 +47,40 @@ class RuleListNode extends Node{
     var ruleListNode = new RuleListNode({'rules': rules, 'parser': parser})
 
     return ruleListNode
+  }
+
+  //H1 encoding notes:
+  //Before encoding into human form:
+  //ENC( ->becomes ENC(ENC)(
+  //Question: how to deal with quotes and spaces and newlines?
+  //Quotes are not special
+  //Spaces are not special
+  //Node names are fixed
+  //indentation is fixed
+  //rule list
+  // rule
+  //  name:fasfsfasdf asfsadfsdf "dsfasdfasfasdfENC(NEWLINE)
+  //  multiple
+  //   string literal
+  //    adfasdf
+
+  //M1 encoding notes:
+  //> becomes ENC(R_ANGLE_BRACKET)
+  //, becomes ENC(COMMA)
+  //rule list>rule>asfdasdf,multiple>quoted string>adfasdfasfda,>,
+  //Export function exports in M1 format
+  //s: output string
+
+  //rule
+  //parameter 1: rule name
+  //parameter 2: pattern
+  M1Export(){
+    let s = '[' + this.constructor.type 
+    for (let i = 0; i < this['rules'].length; i++){
+      s += "," + this['rules'][i].M1Export()
+    }
+
+    return s + ']'
   }
 
   //Given a inputString of characters to match against, the match function returns
@@ -74,6 +111,7 @@ class RuleNode extends Node{
   constructor(metadata){
     super(metadata)
     this.name = metadata.name
+    this.pattern = metadata.pattern
   }
   static type = 'rule'
 
@@ -96,7 +134,7 @@ class RuleNode extends Node{
 
     if (name_node == null || pattern_node == null) return null
 
-    return new RuleNode({'pattern': pattern_node, 'name':name_node.value, parser})
+    return new RuleNode({'pattern': pattern_node, 'name':name_node.value, 'parser': parser})
   }
 
   static headMatch(string, parser){
@@ -146,6 +184,14 @@ class RuleNode extends Node{
     }
   }
 
+  //s: output string
+  M1Export(){
+if (!this.pattern||!this.pattern.M1Export){
+  debugger
+}
+    return `[${this.constructor.type},${Parser.M1Escape(this.name)},${this.pattern.M1Export()}]`
+  }
+
   match(inputString, metadata){
     var newMatchNode = new MatchNode()
     let matchInfo = this.pattern.match(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -173,7 +219,7 @@ class RuleNode extends Node{
 class RuleNameNode extends Node{
   constructor(metadata){
     super(metadata)
-    this.value = metadata.ruleName
+    this.value = metadata.value
   }
   static type = 'rule name'
 
@@ -203,6 +249,10 @@ class RuleNameNode extends Node{
       }
     }
     return string.substring(0,length)
+  }
+
+  M1Export(){
+    return `[${this.constructor.type},${this.value}]`
   }
 
   match(inputString, metadata){
@@ -268,6 +318,10 @@ class NotNode extends Node{
     return null
   }
 
+  M1Export(){
+    return `[${this.constructor.type},${this.pattern.M1Export()}]`
+  }
+
   match(inputString, metadata){
     var newMatchNode = new MatchNode()
     let matchInfo = this.pattern.match(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -330,6 +384,18 @@ class SequenceNode extends Node{
     }
 
     return null
+  }
+
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0){
+        patternString += ","
+      }
+      patternsString += `[${pattern.M1Export()}]`
+    })
+    let s = `[${patternString}]`
+    return s
   }
 
   match(inputString, metadata){
@@ -413,6 +479,16 @@ class OrNode extends Node{
     return null
   }
 
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0) patternsString += ","
+      patternsString += pattern.M1Export()
+    })
+    let s = `[${this.constructor.type},${patternsString}]`
+    return s
+  }
+
   match(inputString,metadata){
     var newMatchNode = new MatchNode()
 
@@ -482,6 +558,16 @@ class AndNode extends Node{
     return Parser.headMatchXWithBrackets(string, 'AND')
   }
 
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0) patternsString += ","
+      patternsString += pattern.M1Export()
+    })
+    let s = `[${this.constructor.type},${patternsString}]`
+    return s
+  }
+
   match(inputString,metadata){
     var newMatchNode = new MatchNode()
 
@@ -545,9 +631,6 @@ class MultipleNode extends Node{
   static type = 'multiple'
 
   static grammarize(string, parser){
-  if (!parser){
-    debugger
-  }
     var trimmed_string = string.trim()
 
     var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'MULTIPLE'.length)
@@ -575,6 +658,10 @@ class MultipleNode extends Node{
 
   static headMatch(string){
     return Parser.headMatchXWithBrackets(string, 'MULTIPLE')
+  }
+
+  M1Export(){
+    return `[multiple,${this.pattern.M1Export()}]`
   }
 
   match(inputString, metadata){
@@ -617,13 +704,13 @@ class MultipleNode extends Node{
   }
 }
 
-class QuotedStringNode extends Node{
+class StringLiteralNode extends Node{
   constructor(metadata){
     super(metadata)
     this.string = metadata.string
   }
 
-  static type = 'quoted string'
+  static type = 'string literal'
 
   static grammarize(string, parser){
     //First, handle the special cases
@@ -642,7 +729,7 @@ class QuotedStringNode extends Node{
         }else if (string == 'COMMA'){
           specialString = ','
         }
-        return new QuotedStringNode({'type':'quoted string', 'string':specialString, parser})
+        return new StringLiteralNode({'type':'string literal', 'string':specialString, parser})
     }
 
     //If all characters are in the range 'A-Za-z0-9', return the string as a node.
@@ -655,7 +742,7 @@ class QuotedStringNode extends Node{
 
     var middle_string = string.substring(1, string.length -1)
     
-    return new QuotedStringNode({'string':middle_string, parser})
+    return new StringLiteralNode({'string':middle_string, parser})
   }
 
   headMatch(string){
@@ -696,6 +783,10 @@ class QuotedStringNode extends Node{
       return ''
     }
     return string.substring(0, 1 + stringCharacters.length + 1)
+  }
+
+  M1Export(){
+    return `[${this.constructor.type},${Parser.M1Escape(this.string)}]`
   }
 
   match(inputString, metadata){
@@ -751,9 +842,9 @@ class CharacterClassNode extends Node{
     
     var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket).trim()
 
-    var quotedString = QuotedStringNode.grammarize(string_in_between_square_brackets, parser)
-    if (quotedString != null){
-      return new CharacterClassNode({'string':quotedString.string, parser})
+    var stringLiteral = StringLiteralNode.grammarize(string_in_between_square_brackets, parser)
+    if (stringLiteral != null){
+      return new CharacterClassNode({'string':stringLiteral.string, parser})
     }
 
     return null   
@@ -761,6 +852,10 @@ class CharacterClassNode extends Node{
 
   static headMatch(string){
     return Parser.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
+  }
+
+  M1Export(){
+    return `[${this.constructor.type},${Parser.M1Escape(this.string)}]`
   }
 
   match(inputString, metadata){
@@ -839,6 +934,10 @@ class OptionalNode extends Node{
     return null
   }
 
+  M1Export(){
+    return `[${this.constructor.type},${this.pattern.M1Export()}]`
+  }
+
   match(inputString, metadata){
     let newMatchNode = new MatchNode()
     let matchInfo = this.pattern.match(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -863,34 +962,6 @@ class OptionalNode extends Node{
   }
 }
 
-
-// 'rule list':
-//   for (let i = 0; i < node['rules'].length; i++){
-//     outputString += this.encodeDepth(depth + 1) + this.exportNode(node['rules'][i], depth + 1)
-//   }
-//   break
-// case 'rule':
-//   outputString += this.encodeDepth(depth + 1) + this.encodeProperty({name: node.name})
-//   outputString += this.encodeDepth(depth + 1) + this.exportNode(node['pattern'], depth + 1)
-//   //rule
-//   // name:dfsdf
-//   break
-// case 'or':
-//   break
-// case 'and':
-//   break
-// case 'sequence':
-//   break
-// case 'not':
-//   break
-// case 'optional':
-//   break
-// case 'multiple':
-//   break;
-// case 'string literal':
-//   break;
-
-
 //This is the type of object that is emitted during the parsing operation by the parser
 class MatchNode{
   constructor(){
@@ -908,3 +979,4 @@ class MatchNode{
     console.log('end node')
   }
 }
+

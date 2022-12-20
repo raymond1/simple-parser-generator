@@ -64,3 +64,14 @@ Go into the src/server directory.
 ```
 npm start
 ```
+
+# M1 file format
+[node name,adasfdasdf,adsfad,[adff ]]
+
+Nodes are described by a left bracket [ and a matching right bracket ]. After the left bracket and before the right bracket, there is a node name.
+
+Special characters: [ is encoded as ENC(L)
+] is encoded as ENC(R)
+, is encoded as ENC(C)
+
+

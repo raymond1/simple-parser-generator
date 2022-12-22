@@ -21,6 +21,10 @@ parser.setGrammar(parsingSpecification)
 Parser.M1Import("[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]", parser)
 
 let a = parser.grammar.M1Export()
+let b = Parser.M1ConvertToH1(a)
+let c = Parser.H1ConvertToM1(b)
+let d = Parser.M1Import(c, parser)
+let e = parser.grammar.H1Export()
 debugger
 
 //let treeviewer = new TreeViewer(parser.grammar)

@@ -3,19 +3,15 @@
 //parser operates.
 class Node{
   constructor(metadata){
+    this.type = this.constructor.type //Show type in object for the debugger
     this.parser = metadata.parser
-if (!this.parser||!this.parser.getId){
-  debugger
-}
     this.id = this.parser.getId()
   }
 
   //Implemented and overriden by child nodes. Given a node, coverts it into a string form
   M1Export(depth = 0){
     throw new Exception('Error while exporting grammar: ' + node['type'] + ' M1Export not implemented.')
-    return ""
   }
-
 }
 
 //this.rules: an array of rule nodes
@@ -186,9 +182,6 @@ class RuleNode extends Node{
 
   //s: output string
   M1Export(){
-if (!this.pattern||!this.pattern.M1Export){
-  debugger
-}
     return `[${this.constructor.type},${Parser.M1Escape(this.name)},${this.pattern.M1Export()}]`
   }
 

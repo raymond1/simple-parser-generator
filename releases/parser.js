@@ -3,19 +3,15 @@
 //parser operates.
 class Node{
   constructor(metadata){
+    this.type = this.constructor.type //Show type in object for the debugger
     this.parser = metadata.parser
-if (!this.parser||!this.parser.getId){
-  debugger
-}
     this.id = this.parser.getId()
   }
 
   //Implemented and overriden by child nodes. Given a node, coverts it into a string form
   M1Export(depth = 0){
     throw new Exception('Error while exporting grammar: ' + node['type'] + ' M1Export not implemented.')
-    return ""
   }
-
 }
 
 //this.rules: an array of rule nodes
@@ -186,9 +182,6 @@ class RuleNode extends Node{
 
   //s: output string
   M1Export(){
-if (!this.pattern||!this.pattern.M1Export){
-  debugger
-}
     return `[${this.constructor.type},${Parser.M1Escape(this.name)},${this.pattern.M1Export()}]`
   }
 
@@ -1003,11 +996,20 @@ class Parser{
     Parser.nodeTypes.push(StringLiteralNode)
     Parser.nodeTypes.push(RuleNameNode)
     Parser.nodeTypes.push(RuleNode)
+    Parser.nodeTypes.push(RuleListNode)
 
     //Note that the rule for the rule list does not have to be in this list because no reference to it will can be made within one of its rules
     //and so it will never get triggered during parsing of the input grammar
   }
 
+  //Returns an array of all node types known by the parser
+  static getNodeTypeNames(){
+    let nodeTypeNames = []
+    for (let nodeType of Parser.nodeTypes){
+      nodeTypeNames.push(nodeType.type)
+    }
+    return nodeTypeNames
+  }
 
   getMatchCount(){
     let matchCount = this.matchCount
@@ -1023,10 +1025,6 @@ class Parser{
     this.rules = this.getRules(this.grammar)
   }
 
-  //Returns n spaces
-  static encodeDepth(n){
-    return ' '.repeat(n)
-  }
 
   //Given an object o of the form {name:value} returns a string 
   static encodeProperty(o){
@@ -1110,10 +1108,12 @@ class Parser{
   //Converts ENC(R) into ]
   //Converts ENC(L) into [
   //Converts ENC(C) into ,
+  //Converts ENC(S) into  (space)
   static M1Unescape(s){
     let s2 = s.replace(/ENC(R)/g, ']')
     s2 = s2.replace(/ENC(L)/g, '[')
     s2 = s2.replace(/ENC(C)/g, ',')
+    s2 = s2.replace(/ENC(S)/g, ' ')
     return s2
   }
 
@@ -1205,7 +1205,7 @@ class Parser{
     }
   }
 
-  //Given a string s, this function returns the string between the first left bracket and the first comma
+  //Given a string s in M1 format, this function returns the string between the first left bracket and the first comma
   //E.g. In the M1 string [rule list, [multiple,[character class,23432424]]]
   static M1GetNodeType(s){
     if (s.substring(0,1) != '['){
@@ -1435,13 +1435,252 @@ class Parser{
   }
 
   //s is the input string to M1 encode
-  //> becomes ENC(R_ANGLE_BRACKET)
-  //, becomes ENC(COMMA)
+  //] becomes ENC(R)
+  //[ becomes ENC(L)
+  //, becomes ENC(C)
+  // (space) becomes ENC(S)
   static M1Escape(s){
     let s2 = s.replace(/\[/g, "ENC(L)")
     s2 = s2.replace(/\]/g, "ENC(R)")
     s2 = s2.replace(/,/g, "ENC(C)")
+    s2 = s2.replace(/ /g, "ENC(S)")
     return s2
+  }
+
+  
+
+  //M1:[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
+  //rule list
+  // rule
+  //  
+  //Following a node name, add a line. Keep the node name
+  //When seeing the [, add indentation
+  //If it is a rule node, add indentation for the second parameter
+  //rule list
+  //This function converts from machine format M1 into human-compatible format H1
+  static M1ConvertToH1(s, depth = 0){
+    if (s.substring(0,1) != '['){
+      return Parser.H1EncodeDepth(depth) + s.slice()
+    }
+
+    let outputString = ''
+    let caret = 1
+
+    let commaIndex = s.indexOf(',')
+    let nodeType = s.substring(caret, commaIndex)
+    outputString += Parser.H1EncodeDepth(depth) + nodeType + '\n'
+
+    caret += nodeType.length + 1//increase caret by left bracket plus node name + a comma, plus one character
+    //obtain comma position relative to the string s starting at position caret
+    let commaOffset = Parser.getNextZeroLevelComma(s.substring(caret)) 
+    while(commaOffset > -1){
+      let nextNodeString = s.substring(caret,commaOffset + caret)
+      outputString += Parser.M1ConvertToH1(nextNodeString, depth + 1) + '\n'
+      caret = caret + nextNodeString.length + 1 //Skip to one character past the last found comma
+      commaOffset = Parser.getNextZeroLevelComma(s.substring(caret))
+    }
+
+    outputString += Parser.M1ConvertToH1(s.substring(caret,s.length - 1), depth + 1)
+    return outputString
+  }
+
+  //Given a string s beginning with a node at line 0, this function will return the last character in the node
+  static H1GetNodeString(s){
+    //1)Get depth of first line, which should contain the node name
+    let firstNodeDepth = Parser.H1GetDepth(s)
+
+    //2)Go line by line until a lower or equal depth has been reached. That should be the end of the current node
+    let lines = s.split('\n')
+
+    let nodeString = lines[0] + '\n'
+    for (let i = 1; i < lines.length; i++){
+      let line = lines[i]
+      let lineDepth = Parser.H1GetDepth(line)
+      if (lineDepth <= firstNodeDepth){
+        break
+      }
+
+      //No delimiter at end of last line
+      let delimiter = '\n'
+      if (i == lines.length -1){
+        delimiter = ''
+      }
+      nodeString += lines[i] + delimiter
+    }
+    return nodeString
+  }
+
+  //s: a string in H1 format, starting with a node string
+  static H1GetNumberOfChildren(s){
+    let lines = s.split('\n')
+    let firstNodeDepth = Parser.H1GetDepth(s)
+    let numberOfChildren = 0
+    for (let i = 1; i < lines.length; i++){
+      let line = lines[i]
+      let lineDepth = Parser.H1GetDepth(line)
+      if (lineDepth <= firstNodeDepth){
+        break
+      }
+      if (lineDepth == firstNodeDepth + 1){
+        numberOfChildren++
+      }
+    }
+    return numberOfChildren
+  }
+
+  //Takes in a tree in H1 format, possibly with leading spaces also, and returns the children of the node on the first line. The children
+  //are returned as strings
+  //Assumes input string is the complete node string for a single node
+  static H1GetChildNuggets(s){
+    let childNodes = []
+    let lines = s.split('\n')
+    let firstNodeDepth = Parser.H1GetDepth(s)
+    let nodeName = Parser.H1GetNodeName(s)
+    
+    let nodeTypeNames = Parser.getNodeTypeNames()
+    if (nodeTypeNames.indexOf(nodeName) == -1){
+      //error
+      throw new Error('Unknown node type: ' + nodeName)
+    }
+
+    if (['string literal','character class'].indexOf(nodeName) > -1){
+      //Take the next line
+      childNodes.push(lines[1].substring(firstNodeDepth+1))
+    }
+    else{
+      //For all other nodes, return an array of the child node strings
+      let numberOfChildren = 0
+      for (let i = 1; i < lines.length; i++){
+        let line = lines[i] + '\n'
+        let lineDepth = Parser.H1GetDepth(line)
+        if (lineDepth <= firstNodeDepth){
+          break
+        }
+
+        let newChild = false
+        if (lineDepth == firstNodeDepth + 1){
+          numberOfChildren++
+          childNodes.push('')
+          newChild = true
+        }
+  
+        if (lineDepth >= firstNodeDepth + 1){
+          childNodes[numberOfChildren-1] += line
+        }
+      }
+
+      for (let i = 0; i < childNodes.length; i++){
+        childNodes[i] = childNodes[i].substring(0,childNodes[i].length - 1) //Chop off last carriage return for each child
+      }
+    }
+
+    return childNodes
+  }
+
+  //Given a string s in H1 format, returns the number of spaces before the first line in s. The number of
+  //spaces is called the depth.
+  static H1GetDepth(s){
+    let numberOfSpaces = 0
+    for (let i = 0; i < s.length; i++){
+      if (s.substring(i,i+1) == ' '){
+        numberOfSpaces += 1
+      }else{
+        break
+      }
+    }
+    return numberOfSpaces
+  }
+
+  //Returns the index of the first line with a particular depth in depthArray such that
+  //the line number is greater than or equal to startingLine
+  static H1GetFirstLineWithDepth(depthArray, firstNodeDepth, startingLine = 1){
+    for (let i = 0; i < depthArray.length; i++){
+      if (depthArray[i] == firstNodeDepth){
+        if (i >= startingLine){
+          return firstNodeDepth
+        }
+      }
+    }
+
+    return -1
+  }
+
+  //Takes in a node string s and returns the first line without the carriage return and leading spaces
+  static H1GetNodeName(s){
+    let depth = Parser.H1GetDepth(s)
+    let nodeName = s.substring(depth,s.indexOf('\n'))
+    return nodeName
+  }
+
+  //A string in H1 form starts with a node name on a single line
+  //followed by a property or
+  //one or more nodes.
+  //Or one property followed by one or more nodes
+  //Given a string in H1 form:
+  //rule list
+  // rule
+  //  NUMBER
+  //  multiple
+  //   multiple
+  //    sequence
+  //     reference rule name 2----To do
+  //     multiple
+  //      character class
+  //       (space)(space)0123456789
+  // rule2
+  //  rule name 2
+  //  multiple
+  //   string literal
+  //    (space)fsfasfasdfsdfs
+  //this function will convert it into M1 format
+  static H1ConvertToM1(s){
+    //Valid H1 format means the first line is the name of a node type
+    let nodeString = Parser.H1GetNodeString(s)
+    if (nodeString == ''){
+      throw new Error('String passed in for H1 to M1 conversion is not in H1 format.')
+    }
+    let childNuggets = Parser.H1GetChildNuggets(nodeString)
+
+    //Get the node name
+    let nodeName = Parser.H1GetNodeName(s)
+    let childrenString = ''
+
+    if (nodeName == 'rule'){
+      let depth = Parser.H1GetDepth(s)
+      childrenString += childNuggets[0].substring(depth + 1) + ','
+      childrenString += Parser.H1ConvertToM1(childNuggets[1])
+    }else if (nodeName == 'character class' || nodeName == 'string literal'){
+      let depth = Parser.H1GetDepth(s)
+      let lines = s.split('\n')
+      childrenString += lines[1].substring(depth + 1)
+    }
+    else{
+      for (let i = 0; i < childNuggets.length; i++){
+        if (i > 0){
+          childrenString += ','
+        }
+        childrenString += Parser.H1ConvertToM1(childNuggets[i])
+      }
+    }
+
+    let outputString = `[${nodeName},${childrenString}]`
+
+    return outputString
+  }
+
+  //Returns n spaces
+  static H1EncodeDepth(n){
+    return ' '.repeat(n)
+  }
+  
+
+  static H1Import(s){
+
+  }
+
+  //Given the root node of a parsing tree, this transforms it into H1 format
+  static H1Export(node){
+
   }
 }
 

@@ -66,7 +66,7 @@ npm start
 ```
 
 # M1 file format
-[node name,adasfdasdf,adsfad,[adff ]]
+[node name,adasfdasdf,adsfad,[adff ], [jump,asdfsf]]
 
 Nodes are described by a left bracket [ and a matching right bracket ]. After the left bracket and before the right bracket, there is a node name.
 
@@ -74,4 +74,25 @@ Special characters: [ is encoded as ENC(L)
 ] is encoded as ENC(R)
 , is encoded as ENC(C)
 
+# H1 file format
+rule list
+ rule
+  NUMBER
+  multiple
+   character class
+    0123456789
+   jump rule name
 
+Reading of a file starts from top to bottom. The first line is the name of a node type. The valid node types are listed in the section titled "List of node types". Following a node type will be a comma, followed by one or more comma-separated pieces of information. The information in between the commas will be called nodes or properties. Nodes or properties are called nuggets.
+
+# List of node types:
+  'or',
+  'and',
+  'sequence',
+  'not'
+  'optional',
+  'multiple'
+  'character class'
+  'string literal'
+  'rule name',
+  'rule'

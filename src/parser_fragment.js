@@ -11,14 +11,15 @@ class Parser{
 
   static registerNodeTypes(){
     Parser.nodeTypes = []
+    Parser.nodeTypes.push(SequenceNode)
     Parser.nodeTypes.push(OrNode)
     Parser.nodeTypes.push(AndNode)
-    Parser.nodeTypes.push(SequenceNode)
+    Parser.nodeTypes.push(MultipleNode)
     Parser.nodeTypes.push(NotNode)
     Parser.nodeTypes.push(OptionalNode)
-    Parser.nodeTypes.push(MultipleNode)
     Parser.nodeTypes.push(CharacterClassNode)
     Parser.nodeTypes.push(StringLiteralNode)
+    //Order matters for getnodetype
     Parser.nodeTypes.push(RuleNameNode)
     Parser.nodeTypes.push(RuleNode)
     Parser.nodeTypes.push(RuleListNode)
@@ -45,6 +46,7 @@ class Parser{
   setGrammar(grammarString){
     this.grammar = this.generateParser(grammarString)
     if(!this.grammar){
+      debugger
       throw "Error: invalid grammar specification."
     }
     this.rules = this.getRules(this.grammar)
@@ -699,12 +701,62 @@ class Parser{
   }
   
 
-  static H1Import(s){
+  static H1Import(s, parser){
 
   }
 
+
+  //Returns without a trailing carriage return
+  //rule list
+  // rule
+  //  multiple
   //Given the root node of a parsing tree, this transforms it into H1 format
-  static H1Export(node){
+  static H1Export(node, depth = 0){
+    let outputString = Parser.H1EncodeDepth(depth) + node.type + '\n'
+
+    let childrenString = ''
+    switch(node.type){
+      case 'multiple':
+      case 'not':
+      case 'optional':
+        {
+          childrenString += Parser.H1Export(node.pattern, depth + 1)
+        }
+        break
+      case 'or':
+      case 'and':
+      case 'sequence':
+      case 'rule list':
+        {
+          let listPropertyName = 'patterns'
+          if (node.type == 'rule list') listPropertyName = 'rules'
+
+          for (let i = 0; i < node[listPropertyName].length; i++){
+            childrenString += Parser.H1Export(node[listPropertyName][i], depth + 1)
+            if (i < node.rules.length - 1){
+              childrenString += '\n'
+            }
+          }      
+        }
+        break
+      case 'rule':
+        {
+          childrenString += Parser.H1EncodeDepth(depth + 1) + node.name + '\n'
+          childrenString += Parser.H1Export(node.pattern, depth + 1)
+        }
+        break
+      case 'character class':
+      case 'string literal':
+      case 'rule name':
+        {
+          childrenString += Parser.H1EncodeDepth(depth + 1) + node.string
+        }
+      break
+      default:
+        break
+    }
+    outputString += childrenString
+    return outputString  
 
   }
 }

@@ -130,7 +130,7 @@ class RuleNode extends Node{
 
     if (name_node == null || pattern_node == null) return null
 
-    return new RuleNode({'pattern': pattern_node, 'name':name_node.value, 'parser': parser})
+    return new RuleNode({'pattern': pattern_node, 'name':name_node.string, 'parser': parser})
   }
 
   static headMatch(string, parser){
@@ -212,7 +212,7 @@ class RuleNode extends Node{
 class RuleNameNode extends Node{
   constructor(metadata){
     super(metadata)
-    this.value = metadata.value
+    this.string = metadata.string
   }
   static type = 'rule name'
 
@@ -224,11 +224,13 @@ class RuleNameNode extends Node{
     if (string == 'S_QUOTE'||string == 'L_SQUARE_BRACKET'||string=='R_SQUARE_BRACKET') return null
 
     if (Strings.contains_only(string, Parser.validRuleNameCharacters)){
-      return new RuleNameNode({'value':string, parser})
+      return new RuleNameNode({'string':string, parser})
     }
     return null
   }
 
+  //leave as not static
+  //needs to be bypassed in the getnodetype function
   headMatch(string){
     let ruleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
     let length = 0
@@ -245,12 +247,12 @@ class RuleNameNode extends Node{
   }
 
   M1Export(){
-    return `[${this.constructor.type},${this.value}]`
+    return `[${this.constructor.type},${this.string}]`
   }
 
   match(inputString, metadata){
     var newMatchNode = new MatchNode()
-    let rule = this.parser.getRule(this.value)
+    let rule = this.parser.getRule(this.string)
     let matchInfo = rule.match(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
     Object.assign(
@@ -266,7 +268,7 @@ class RuleNameNode extends Node{
         matches: [matchInfo],
         matchString: inputString.substring(0, matchLength),
 
-        value: this.value
+        string: this.string
       }
     )
 
@@ -738,7 +740,7 @@ class StringLiteralNode extends Node{
     return new StringLiteralNode({'string':middle_string, parser})
   }
 
-  headMatch(string){
+  static headMatch(string){
     if (string.startsWith('S_QUOTE')){
       return 'S_QUOTE'
     }

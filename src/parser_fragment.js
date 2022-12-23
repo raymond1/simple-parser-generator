@@ -700,9 +700,10 @@ class Parser{
     return ' '.repeat(n)
   }
   
-
+  //Given a string in H1 format, loads the appropriate nodes into memory
   static H1Import(s, parser){
-
+    let M1Code = Parser.H1ConvertToM1(s)
+    Parser.M1Import(M1Code, parser)
   }
 
 

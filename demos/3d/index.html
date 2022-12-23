@@ -20,12 +20,25 @@ parser.setGrammar(parsingSpecification)
 
 Parser.M1Import("[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]", parser)
 
+//Does M1 export work?
 let a = parser.grammar.M1Export()
+
+//Does M1 to H1 conversion work?
 let b = Parser.M1ConvertToH1(a)
+
+//Does H1 to M1 conversion work?
 let c = Parser.H1ConvertToM1(b)
-let d = Parser.M1Import(c, parser)
+
+//Does M1 import work?
+Parser.M1Import(c, parser)
+
+//Does H1 export work?
 let e = Parser.H1Export(parser.grammar)
-debugger
+
+//Does H1 Import work?
+let parser2 = new Parser()
+Parser.H1Import(e,parser2)
+let f = Parser.H1Export(parser2.grammar)
 
 //let treeviewer = new TreeViewer(parser.grammar)
 //debugger

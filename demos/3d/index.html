@@ -2,57 +2,96 @@
 <html>
   <head>
     <title>3D language demo</title>
+    <link rel='stylesheet' href="style.css">
   </head>
   <body>
-<script type='module'>
-import {Parser, TreeViewer, RuleListNode} from "../parser.js"
-let parser = new Parser()
+    <div id="gradient">
+    </div>
+    <div id="app">
+      <grammar-lab
+       v-bind:grammar="grammar"
+       v-bind:program="program"
+       v-on:update-grammar="updateGrammar"
+       v-on:update-program="updateProgram"></grammar-lab>
+    </div>
 
-//Question: is multiple greedy?
-let parsingSpecification = `
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+          "parser": "../parser.js"
+        }
+      }
+    </script>
+    
+    <script type="module">
+import * as Vue from 'vue'
+import Parser from 'parser'
+import GrammarLab from './GrammarLab.js'
+
+let parsingSpecification = `NUMBER = CHARACTER_CLASS['0123456789']`
+/*`
+
+PROGRAM=MULTIPLE[REF[SECTION]]
+
 NUMBER = MULTIPLE[CHARACTER_CLASS['0123456789']]
 
+SECTION=OR['POINTS','LINES','TRIANGLES']
 
-`
+POINT=OR[
+  REF[NUMBER],
+  SEQUENCE[REF[NUMBER],STRING_LITERAL[,], REF[NUMBER]],
+  SEQUENCE[REF[NUMBER],STRING_LITERAL[,], REF[NUMBER]],STRING_LITERAL[,], REF[NUMBER]
+]
+
+LINE=SEQUENCE[POINT, STRING_LITERAL[ ], POINT]
+
+TRIANGLE=SEQUENCE[REF[POINT], STRING_LITERAL[ ], REF[POINT], STRING_LITERAL[ ], REF[POINT]]
+
+POINTS_SECTION=SEQUENCE[STRING_LITERAL[POINTS],OPTIONAL[MULTIPLE[REF[POINT]]]]
+
+LINES_SECTION=SEQUENCE[STRING_LITERAL[LINES],OPTIONAL[MULTIPLE[REF[POINT]]]]
+
+TRIANGLES_SECTION=SEQUENCE[STRING_LITERAL[TRIANGLES],OPTIONAL[MULTIPLE[REF[POINT]]]]
+
+`*/
+
+let parser = new Parser()
+
 parser.setGrammar(parsingSpecification)
 
+//4)Specify a string containing a program written in the language defined by the parsing specification.
+let programString = `01010`
+/*`POINTS
+0,0,0
 
-
-Parser.M1Import("[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]", parser)
-
-//Does M1 export work?
-let a = parser.grammar.M1Export()
-
-//Does M1 to H1 conversion work?
-let b = Parser.M1ConvertToH1(a)
-
-//Does H1 to M1 conversion work?
-let c = Parser.H1ConvertToM1(b)
-
-//Does M1 import work?
-Parser.M1Import(c, parser)
-
-//Does H1 export work?
-let e = Parser.H1Export(parser.grammar)
-
-//Does H1 Import work?
-let parser2 = new Parser()
-Parser.H1Import(e,parser2)
-let f = Parser.H1Export(parser2.grammar)
-
-//let treeviewer = new TreeViewer(parser.grammar)
-//debugger
-//rule name->multiple->character_class=>
-/*
-let programString = `aababbaaaababaababaaabaabaababababa`
-let outputFromParsing = parser.parse(programString)
-
-// let treeviewer = new TreeViewer(outputFromParsing)
-let outputString = treeviewer.getOutputString(outputFromParsing)
+CAMERA
+0,0,100
+0,0,0`
 */
-//console.log(outputString)
+let app = Vue.createApp({
+  data() {
+    return {
+      grammar:parsingSpecification,
+      program: programString,
+    }
+  },
+  components: {
+    GrammarLab
+  },
+  methods:{
+    updateGrammar(g){
+      this.grammar = g
+    },
+    updateProgram(p){
+      this.program = p
+    }
+  }
+})
 
-//At this point, you will see something like the following:
-</script>
+app.provide('parser', parser)
+app.mount('#app')
+    </script>
+    
   </body>
 </html>

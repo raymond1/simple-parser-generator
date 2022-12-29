@@ -46,10 +46,10 @@ class Parser{
   setGrammar(grammarString){
     this.grammar = this.generateParser(grammarString)
     if(!this.grammar){
-      debugger
-      throw "Error: invalid grammar specification."
+      console.log("Error: invalid grammar specification.")
+    }else{
+      this.rules = this.getRules(this.grammar)
     }
-    this.rules = this.getRules(this.grammar)
   }
 
 
@@ -446,11 +446,16 @@ class Parser{
   //takes in a string and returns an abstract syntax tree, according to previously loaded grammar
   //Assumes there is only one top-level construct
   parse(inputString){
-    let matchInformationNodes = this.grammar.match(inputString)
-    let matchInformationTree = new Tree(matchInformationNodes)
-    this.rawMatches = matchInformationTree
-    let ruleMatchesTree = matchInformationTree.getRuleMatchesOnly()
-    return ruleMatchesTree
+    if (this.grammar){
+      let matchInformationNodes = this.grammar.match(inputString)
+      let matchInformationTree = new Tree(matchInformationNodes)
+      this.rawMatches = matchInformationTree
+      let ruleMatchesTree = matchInformationTree.getRuleMatchesOnly()
+      return ruleMatchesTree  
+    }
+    else{
+      console.log('No grammar has been loaded into the parser.')
+    }
   }
 
   get rawMatches(){

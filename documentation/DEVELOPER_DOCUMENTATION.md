@@ -62,7 +62,7 @@ composer update
 # How to start the server
 Go into the src/server directory.
 ```
-npm start
+npm run dev
 ```
 
 # M1 file format

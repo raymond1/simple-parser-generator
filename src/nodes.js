@@ -97,7 +97,7 @@ class RuleListNode extends Node{
       matchFound:  matchInfo.matchFound, 
       matchLength: matchInfo.matchLength, 
       matches: [matchInfo],
-      matchString: inputString.substring(0, matchLength) 
+      matchString: inputString.substring(0, matchInfo.matchLength)
     })
     return newMatchNode
   }
@@ -200,7 +200,7 @@ class RuleNode extends Node{
         matchFound:  matchInfo.matchFound, 
         matchLength: matchInfo.matchLength, 
         matches: [matchInfo],
-        matchString: inputString.substring(0, matchLength),
+        matchString: inputString.substring(0, matchInfo.matchLength),
 
         name: this.name
       }
@@ -229,9 +229,7 @@ class RuleNameNode extends Node{
     return null
   }
 
-  //leave as not static
-  //needs to be bypassed in the getnodetype function
-  headMatch(string){
+  static headMatch(string){
     let ruleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
     let length = 0
     //A valid rule name consists of letters, numbers and underscores
@@ -675,7 +673,8 @@ class MultipleNode extends Node{
       matchInfo = this.pattern.match(tempString,{depth: metadata.depth + 1, parent: this})
       matches.push(matchInfo)
     }
-
+  
+    let matchFound = false
     if (matches.length > 0){
       matchFound = true
     }
@@ -691,7 +690,7 @@ class MultipleNode extends Node{
         matchFound:  matchFound, 
         matchLength: totalMatchLength,
         matches,
-        matchString: inputString.substring(0, matchLength),
+        matchString: inputString.substring(0, totalMatchLength),
       }
     )
 
@@ -726,18 +725,8 @@ class StringLiteralNode extends Node{
         }
         return new StringLiteralNode({'type':'string literal', 'string':specialString, parser})
     }
-
-    //If all characters are in the range 'A-Za-z0-9', return the string as a node.
-    if (string.length < 2){
-      return null
-    }
-    if (string.charAt(0) != '\'') return null
-    if (string.charAt(string.length -1) != '\'') return null
-    if (Strings.count_occurrences(string, '\'') > 2) return null
-
-    var middle_string = string.substring(1, string.length -1)
     
-    return new StringLiteralNode({'string':middle_string, parser})
+    return new StringLiteralNode({'string':string, parser})
   }
 
   static headMatch(string){
@@ -810,7 +799,9 @@ class StringLiteralNode extends Node{
   }
 }
 
-
+//Each character class is associated with an initialization string (this.string)
+//Given an input string, CharacterClassNode will match with the first n characters of the string
+//such that all those characters are one of the initilization characters of the input string.
 class CharacterClassNode extends Node{
   constructor(metadata){
     super(metadata)
@@ -884,7 +875,6 @@ class CharacterClassNode extends Node{
       serial: this.parser.getMatchCount(),
       matchFound:  matchFound, 
       matchLength,
-      matches,
       matchString: inputString.substring(0, matchLength),
     })
     return newMatchNode

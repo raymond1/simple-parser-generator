@@ -7,12 +7,18 @@
   <body>
     <div id="gradient">
     </div>
-    <div id="app">
+    <div id="app" v-cloak>
       <grammar-lab
-       v-bind:grammar="grammar"
-       v-bind:program="program"
-       v-on:update-grammar="updateGrammar"
-       v-on:update-program="updateProgram"></grammar-lab>
+        v-bind:grammar="grammar"
+        v-bind:program="program"
+        v-on:update-program="updateProgram"
+        v-on:h1-export="h1Export"
+        v-on:m1-export="m1Export"
+        v-cloak
+        ></grammar-lab>
+        <modal v-cloak v-bind:open="modalOpen" v-on:close="closeModal" v-bind:content="modalContent">
+          <template v-slot:header>{{modalHeader}}</template>
+        </modal>
     </div>
 
     <script type="importmap">
@@ -28,6 +34,7 @@
 import * as Vue from 'vue'
 import Parser from 'parser'
 import GrammarLab from './GrammarLab.js'
+import Modal from './Modal.js'
 
 let parsingSpecification = `NUMBER = CHARACTER_CLASS['0123456789']`
 /*`
@@ -74,17 +81,42 @@ let app = Vue.createApp({
     return {
       grammar:parsingSpecification,
       program: programString,
+      modalOpen:false,
+      modalHeader: '',
+      modalContent:'',
+      parser:parser,
     }
   },
   components: {
-    GrammarLab
+    GrammarLab,
+    Modal
   },
   methods:{
-    updateGrammar(g){
-      this.grammar = g
-    },
     updateProgram(p){
       this.program = p
+    },
+    h1Export(){
+      this.modalOpen = true
+      try{
+        this.modalContent = Parser.H1Export(this.parser.grammar)
+      }
+      catch(e){
+        this.modalContent = 'Error'
+      }
+      this.modalHeader = 'H1 Export'
+    },
+    m1Export(){
+      this.modalOpen = true
+      try{
+        this.modalContent = Parser.M1Export(this.parser.grammar)
+      }
+      catch(e){
+        this.modalContent = 'Error'
+      }
+      this.modalHeader = 'M1 Export'
+    },
+    closeModal(){
+      this.modalOpen = false
     }
   }
 })

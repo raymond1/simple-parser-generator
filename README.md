@@ -20,7 +20,14 @@ H1 is meant to be a human-readable format, similar to JSON, that has a relativel
 # Description of the V1 virtual machine and its micro-parsers
 
 ## Sequence
+
+A 'sequence' micro-parser is associated with one or more child micro-parsers. When fed with an input string, it produces a true result if each of its child micro-parsers produces a true result when the micro-parsers are tested in sequence.
+
+Matching starts at index 0 for the input string, and is incremented by the length of a successful match from a child node.
+
 ## Or
+An 'or' micro-parser is associated with one or more child micro-parsers. It produces a true result if any of its child micro-parsers produces a true result.
+
 ## Multiple
 ## Not
 ## Optional
@@ -1470,3 +1477,7 @@ You can also use the objects DOMTreeViewer to view how the parser interprets you
 Escape sequences probably don't work very well and haven't been tested thoroughly. For example:
 
 OR[']'] might be incorrectly detected as OR['] followed by ']. You can try writing OR[R_SQUARE_BRACKET] to match a right bracket in this situation.
+
+#API
+
+The Parser object has the following methods

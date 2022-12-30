@@ -763,8 +763,12 @@ class Parser{
     }
     outputString += childrenString
     return outputString  
-
   }
+
+  static M1Export(node, depth = 0){
+    return node.M1Export(depth)
+  }
+
 }
 
 Parser.registerNodeTypes()

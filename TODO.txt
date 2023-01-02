@@ -1,9 +1,13 @@
-Grammar import and export. --Result: can export from one language and import in another. Allows for bootstrapping.
-
 Smarter error messages about input grammar problems. Error message comes from longest matched length.
 Comments on input grammar.
 Disambiguation algorithm.
 Character set design and specification.--How to interpret arbitrary byte sequences
+
+
+M1 export and H1 export for rule and rulename reconsideration.
+M1 export with character class is buggy
+
+
 
 
 

@@ -3,10 +3,10 @@
 export default {
   template: `
   <div>
-    <div v-if='state == "input-grammar"'><button 
+    <div v-if='state == "grammar"'><button 
       v-on:click="H1Export">H1 Export</button><button 
       v-on:click='M1Export'>M1 Export</button></div>
-    <div v-if='state == "input-program"'></div>
+    <div v-if='state == "program"'></div>
     <div v-if='state == "output"'><button v-on:click="parse">Parse</button></div>
   </div>
     `,

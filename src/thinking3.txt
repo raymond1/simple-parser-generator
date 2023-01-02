@@ -1,0 +1,17 @@
+number = character_class['01234567890']
+number = character_class[01234567890]
+
+0101010 0234324
+
+Should fail or should succeed?
+
+
+Should succeed.
+
+number = entire[character_class['01234567890']]
+
+How the parser works
+
+The input string fed into the program.
+The grammar that describes the nodes.
+The output tokens generated.

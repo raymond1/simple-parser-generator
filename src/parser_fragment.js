@@ -62,7 +62,6 @@ class Parser{
 
   setGrammar(s){
     let language = Parser.detectImportLanguage(s, this)
-    console.log(language)
     if (language == 'M1'){
       this.grammar = Parser.M1Import(s, this)
     }else if (language == 'H1'){
@@ -785,7 +784,7 @@ class Parser{
         {
           childrenString += Parser.H1EncodeDepth(depth + 1) + node.string
         }
-      break
+        break
       default:
         break
     }

@@ -20,8 +20,8 @@ export default {
       <div class='main-area-inside'>
         <div class='wrapper'>
           <div class='wrapper2'>
-            <textarea id='input-grammar' v-if='tab == "input-grammar"' class='textarea' v-on:change='updateGrammar'>{{grammar}}</textarea>
-            <textarea id='program' v-if='tab == "input-program"' class='textarea' v-on:change='updateProgram'>{{program}}</textarea>
+            <textarea id='grammar' v-if='tab == "grammar"' class='textarea' v-on:change='updateGrammar'>{{grammar}}</textarea>
+            <textarea id='program' v-if='tab == "program"' class='textarea' v-on:change='updateProgram'>{{program}}</textarea>
             <div v-if='tab == "output"' class='output' ref='output'><pre><code>{{output}}</code></pre></div>
           </div>
         </div>
@@ -44,14 +44,14 @@ export default {
   },
   data(){
     return{
-      tab: 'input-grammar',
+      tab: 'grammar',
       output: ''
     }
   },
   methods:{
     tabSelect(e){
       if (e == 1){
-        this.tab = 'input-grammar'
+        this.tab = 'grammar'
       }else if (e == 2){
         this.tab = 'program'
       }else if (e == 3){

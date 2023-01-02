@@ -1,3 +1,5 @@
+
+
 export default {
   template: `
   <div>
@@ -16,6 +18,7 @@ export default {
   methods:{
     parse(){
       this.parser.setGrammar(this.grammar)
+
       let parsedOutputTree = this.parser.parse(this.program)
       this.$emit('update-output', parsedOutputTree)
     },

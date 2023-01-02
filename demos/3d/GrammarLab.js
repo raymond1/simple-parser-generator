@@ -1,14 +1,21 @@
 import CommandBar from './CommandBar.js'
+import Tabs from './Tabs.js'
 import {TreeViewer} from 'parser'
 
 export default {
   template: `
   <div class='ui-area'>
-    <div class='tabs'>
-      <div v-bind:class='tab1State' v-on:click='tabSelect($event)' value='input-grammar'>Input Grammar</div>
-      <div v-bind:class='tab2State' v-on:click='tabSelect($event)' value='input-program'>Input program</div>
-      <div v-bind:class='tab3State' v-on:click='tabSelect($event)' value='output'>Output</div>
-    </div>
+    <tabs v-on:tab-select='tabSelect'>
+      <template v-slot:s1>
+        <div>Grammar</div>
+      </template>
+      <template v-slot:s2>
+        <div>Program</div>
+      </template>
+      <template v-slot:s3>
+        <div>Parsed output</div>
+      </template>
+    </tabs>
     <div class='main-area'>
       <div class='main-area-inside'>
         <div class='wrapper'>
@@ -38,31 +45,18 @@ export default {
   data(){
     return{
       tab: 'input-grammar',
-      tab1State: 'tab selected',
-      tab2State: 'tab',
-      tab3State: 'tab',
       output: ''
     }
   },
   methods:{
     tabSelect(e){
-      this.tab1State = 'tab'
-      this.tab2State = 'tab'
-      this.tab3State = 'tab'
-      
-      let tabName = e.target.getAttribute('value')
-      switch(tabName){
-        case 'input-grammar':
-          this.tab1State = 'tab selected'
-          break
-        case 'input-program':
-          this.tab2State = 'tab selected'
-          break
-        case 'output':
-          this.tab3State = 'tab selected'
-          break
+      if (e == 1){
+        this.tab = 'input-grammar'
+      }else if (e == 2){
+        this.tab = 'program'
+      }else if (e == 3){
+        this.tab = 'output'
       }
-      this.tab = tabName
     },
     updateGrammar(e){
       this.parser.setGrammar(e.target.value)
@@ -82,7 +76,8 @@ export default {
     }
   },
   components:{
-    CommandBar
+    CommandBar,
+    Tabs
   },
   emits: ['update-grammar', 'update-program', 'h1-export', 'm1-export'],
   inject:['parser']

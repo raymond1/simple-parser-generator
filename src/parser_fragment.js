@@ -43,12 +43,40 @@ class Parser{
     return matchCount
   }
 
-  setGrammar(grammarString){
-    this.grammar = this.generateParser(grammarString)
-    if(!this.grammar){
-      console.log("Error: invalid grammar specification.")
+  //Given a string s, returns "M1", "H1", "H2" or "unknown", depending on the type of 
+  //language the information is written in
+  static detectImportLanguage(s, parser){
+    //[rule list,
+    //rule list
+    //<rule name> = <rule>
+    if (s.substring(0,'[rule list'.length) == '[rule list'){
+      return 'M1'
+    }else if (s.substring(0, 'rule list'.length) == 'rule list'){
+      return 'H1'
+    }else if (RuleNode.headMatch(s, parser) != null){
+      return 'H2'
     }else{
+      return 'unknown'
+    }
+  }
+
+  setGrammar(s){
+    let language = Parser.detectImportLanguage(s, this)
+    console.log(language)
+    if (language == 'M1'){
+      this.grammar = Parser.M1Import(s, this)
+    }else if (language == 'H1'){
+      this.grammar = Parser.H1Import(s, this)
+    }else if (language == 'H2'){
+      this.grammar = Parser.H2Import(s, this)
+    }else{
+      this.grammar = null
+    }
+    if(this.grammar){
       this.rules = this.getRules(this.grammar)
+    }
+    else{
+      console.log("Error: invalid grammar specification.")
     }
   }
 
@@ -383,8 +411,8 @@ class Parser{
 
   //Takes in a string representation of a grammar, and returns a parser
   //The parser is an in-memory tree structure representation of the grammar
-  generateParser(string){
-    var return_node = RuleListNode.grammarize(string, this)
+  static H2Import(string, parser){
+    var return_node = RuleListNode.grammarize(string, parser)
 
     if (return_node == null){
       console.log('Grammar is empty or there was an error in your grammar. Or, there is an error in this parser.')

@@ -387,7 +387,7 @@ class SequenceNode extends Node{
       }
       patternsString += `[${pattern.M1Export()}]`
     })
-    let s = `[${patternString}]`
+    let s = `[${patternsString}]`
     return s
   }
 
@@ -913,7 +913,7 @@ class OptionalNode extends Node{
 
     var pattern = Parser.grammarize_PATTERN(string_in_between_square_brackets, parser)
     if (pattern != null){
-      return new OptionalNode({'pattern': pattern})
+      return new OptionalNode({'pattern': pattern, parser})
     }
 
     return null
@@ -939,6 +939,76 @@ class OptionalNode extends Node{
       id: this.id, 
       serial: this.parser.getMatchCount(),
       matchFound:  true, 
+      matchLength: matchInfo.matchLength,
+      matches,
+      matchString: inputString.substring(0, matchLength),
+    })
+    return newMatchNode
+  }
+}
+
+//Produces a match if the input string matches the inner pattern match
+class EntireNode extends Node{
+  constructor(metadata){
+    super(metadata)
+    this.pattern = metadata.pattern
+  }
+
+  static type = 'entire'
+
+  static headMatch(string){
+    return Parser.headMatchXWithBrackets(string, 'ENTIRE')
+  }
+
+  static grammarize(string, parser){
+    var trimmed_string = string.trim()
+
+    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'ENTIRE'.length)
+    if (first_few_characters_of_trimmed_string !== 'ENTIRE')
+    {
+      return null
+    }
+
+    var location_of_first_left_bracket = trimmed_string.indexOf('[')
+    if (location_of_first_left_bracket < 0) return null
+
+    var location_of_last_right_bracket = Parser.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    if (location_of_last_right_bracket < 0) return null
+    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
+    
+    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
+
+    var pattern = Parser.grammarize_PATTERN(string_in_between_square_brackets, parser)
+    if (pattern != null){
+      return new EntireNode({'pattern': pattern, parser})
+    }
+
+    return null
+  }
+
+  M1Export(){
+    return `[${this.constructor.type},${this.pattern.M1Export()}]`
+  }
+
+  match(inputString, metadata){
+    let newMatchNode = new MatchNode()
+    let matchInfo = this.pattern.match(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+
+    let matches = []
+    let matchLength = 0
+    matches.push(matchInfo)
+
+    let matchFound = false
+    if (matchInfo.length == inputString.length) matchFound = true
+
+    Object.assign(newMatchNode, {
+      parent: metadata.parent, 
+      depth: metadata.depth,
+      inputString: inputString.slice(), 
+      type: this['type'].slice(),
+      id: this.id, 
+      serial: this.parser.getMatchCount(),
+      matchFound:  matchFound, 
       matchLength: matchInfo.matchLength,
       matches,
       matchString: inputString.substring(0, matchLength),

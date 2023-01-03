@@ -19,6 +19,7 @@ class Parser{
     Parser.nodeTypes.push(OptionalNode)
     Parser.nodeTypes.push(CharacterClassNode)
     Parser.nodeTypes.push(StringLiteralNode)
+    Parser.nodeTypes.push(EntireNode)
     //Order matters for getnodetype
     Parser.nodeTypes.push(RuleNameNode)
     Parser.nodeTypes.push(RuleNode)
@@ -390,6 +391,9 @@ class Parser{
       case 'string literal':
         return StringLiteralNode.grammarize(string,parser)
         break
+      case 'entire':
+        return EntireNode.grammarize(string,parser)
+        break
       case 'rule name':
         return RuleNameNode.grammarize(string,parser)
         break
@@ -477,8 +481,9 @@ class Parser{
       let matchInformationNodes = this.grammar.match(inputString)
       let matchInformationTree = new Tree(matchInformationNodes)
       this.rawMatches = matchInformationTree
-      let ruleMatchesTree = matchInformationTree.getRuleMatchesOnly()
-      return ruleMatchesTree  
+      return this.rawMatches
+      // let ruleMatchesTree = matchInformationTree.getRuleMatchesOnly()
+      // return ruleMatchesTree  
     }
     else{
       console.log('No grammar has been loaded into the parser.')
@@ -752,6 +757,7 @@ class Parser{
       case 'multiple':
       case 'not':
       case 'optional':
+      case 'entire':
         {
           childrenString += Parser.H1Export(node.pattern, depth + 1)
         }
@@ -800,5 +806,5 @@ class Parser{
 
 Parser.registerNodeTypes()
 Parser.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
-Parser.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS']
+Parser.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
 

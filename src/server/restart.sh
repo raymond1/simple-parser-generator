@@ -1,4 +1,3 @@
-pwd
 cd ../..
 make
 cd src/server

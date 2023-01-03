@@ -16,16 +16,23 @@ php vendor/raymond1/document-compiling-cms/generate_website.php src/script.txt
 
 This will trigger the "compilation" process.
 
-# How to initialize hot loading
-From the src/server directory, configure the permissions for restart.sh.
-```
-chmod a+x restart.xh
-```
+4)Set script permissions
+Permissions:
+In root, chmod u+x dev_script.sh.
+In src/server, chmod u+x restart.sh.
 
-Then, to start nodemon, run the command:
+5)Run:
 ```
 npm run dev
 ```
+from the root folder or the src/server folder.
+
+# How to initialize hot loading
+From the src/server directory, configure the permissions for restart.sh.
+```
+chmod a+x restart.sh
+```
+
 (also from within the src/server directory).
 
 

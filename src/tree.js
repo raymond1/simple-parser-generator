@@ -24,7 +24,9 @@ class Tree{
   //If test is passed in and is not null, then if the test function, when it takes matchTree as a parameter evaluates to true, then
   //matchTree will be returned as part of the result set
   returnAllNodes(treeNode, test = null, matchesSoFar = []){
-
+		if (!treeNode){
+			return null
+		}
 		//The default test always returns true, in effect returning all nodes
 		if (test == null){
 			test = function(){
@@ -178,12 +180,20 @@ class Tree{
   getRuleMatchesOnly(){
 		let clonedTree = this.clone()
 		clonedTree.cutNodes((treeNode)=>{ return treeNode['matchFound'] == false})
-		let successfulRuleNodes = clonedTree.returnAllNodes(clonedTree.root, (_matchTreeNode)=>{return _matchTreeNode.type == 'rule'})
+		let successfulRuleNodes = null
+		if (clonedTree.root){
+			successfulRuleNodes = clonedTree.returnAllNodes(clonedTree.root, 
+				(_matchTreeNode)=>{
+					return _matchTreeNode.type == 'rule'
+				})	
+		}
 
     let notSuccessfulRuleNodes = clonedTree.treeInvert(successfulRuleNodes)
-    for (let ruleToRemove of notSuccessfulRuleNodes){
-      clonedTree.removeItemAndHeal(ruleToRemove)
-    }
+		if (notSuccessfulRuleNodes){
+			for (let ruleToRemove of notSuccessfulRuleNodes){
+				clonedTree.removeItemAndHeal(ruleToRemove)
+			}	
+		}
 
     let returnValue = new Tree(clonedTree.root)
     returnValue.resetDepth(returnValue.root, 0)
@@ -203,6 +213,10 @@ class Tree{
 
 	//Given a set of nodes in a list, this function returns all elements in domain which are not in the list of nodes passed in
 	treeInvert(selectedNodeList, matchTreeNode = this.root){
+		if (!selectedNodeList){
+			return this.returnAllNodes(matchTreeNode)
+		}
+
 		let test = this.returnAllNodes(matchTreeNode, (_matchTreeNode)=>{
 			let booleanValue = selectedNodeList.includes(_matchTreeNode)
 			return !booleanValue

@@ -36,7 +36,8 @@ import Parser from 'parser'
 import GrammarLab from './GrammarLab.js'
 import Modal from './Modal.js'
 
-let parsingSpecification = `NUMBER = CHARACTER_CLASS['0123456789']`
+let parsingSpecification = `
+NUMBER = ENTIRE[CHARACTER_CLASS[0123456789]]`
 /*`
 
 PROGRAM=MULTIPLE[REF[SECTION]]
@@ -64,8 +65,6 @@ TRIANGLES_SECTION=SEQUENCE[STRING_LITERAL[TRIANGLES],OPTIONAL[MULTIPLE[REF[POINT
 `*/
 
 let parser = new Parser()
-
-parser.setGrammar(parsingSpecification)
 
 //4)Specify a string containing a program written in the language defined by the parsing specification.
 let programString = `01010`

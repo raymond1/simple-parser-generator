@@ -56,6 +56,7 @@ export default {
         this.tab = 'program'
       }else if (e == 3){
         this.tab = 'output'
+        this.parse()
       }
     },
     updateGrammar(e){
@@ -65,20 +66,29 @@ export default {
       this.$emit('update-program', e.target.value)
     },
     updateOutput(parsedOutputTree){
-      let treeviewer = new TreeViewer(parsedOutputTree, this.$refs.output)
-      this.output = treeviewer.getOutputString(parsedOutputTree)
+      if (this.$refs.output){//the output ref is conditionally rendered in a v-if
+        let treeviewer = new TreeViewer(parsedOutputTree, this.$refs.output)
+debugger
+        this.output = treeviewer.getOutputString(parsedOutputTree)  
+      }
     },
     h1Export(){
       this.$emit('h1-export')
     },
     m1Export(){
       this.$emit('m1-export')
-    }
+    },
+    parse(){
+      this.parser.setGrammar(this.grammar)
+      let parsedOutputTree = this.parser.parse(this.program)
+      this.updateOutput(parsedOutputTree)
+    },
+
   },
   components:{
     CommandBar,
     Tabs
   },
-  emits: ['update-grammar', 'update-program', 'h1-export', 'm1-export'],
+  emits: ['update-grammar', 'update-program', 'update-output', 'h1-export', 'm1-export'],
   inject:['parser']
 }

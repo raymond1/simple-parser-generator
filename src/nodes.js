@@ -792,7 +792,6 @@ class StringLiteralNode extends Node{
       matchLength: matchFound?this.string.length:0,
       matches,
       matchString: inputString.substring(0, matchLength),
-
       string: this.string
     })
     return newMatchNode

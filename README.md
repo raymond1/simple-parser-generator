@@ -10,9 +10,16 @@ Because these micro-parsers are portable and can be implemented in basically any
 
 The collection of micro-parsers that need to be implemented are collectively called the V1 virtual machine.
 
-# Example usage
+# Installation
 
-Imagine that you have an extremely simple web page.
+1. Make a new package.json file
+npm install git+https://github.com/raymond1/simple-parser-generator.git
+
+Imagine that you have an extremely simple web page set up on a web server. 
+
+Imagine that you have NodeJS and NPM installed on your computer. Create a new folder and call it A. Then, enter into the A directory. Then, copy the file releases/parser.js into that directory. Then, create the file index.js.
+
+In
 
 
 

@@ -1045,6 +1045,11 @@ class Parser{
     this.matchCount = 0 //enumerates the matches
   }
 
+  //Uses console.log to verify that the software has been installed correctly
+  installCheck(){
+    console.log('Simple Parser Generator is installed.')
+  }
+
   static registerNodeTypes(){
     Parser.nodeTypes = []
     Parser.nodeTypes.push(SequenceNode)

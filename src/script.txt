@@ -1,2 +1,2 @@
-compile src/main.template releases/parser.js
+compile src/main.template releases/parser_generator.js
 copyscript src/copy_demos.txt

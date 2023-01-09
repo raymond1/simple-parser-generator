@@ -1,7 +1,7 @@
 <%
 copy
  src/nodes.js 
- src/parser_fragment.js 
+ src/parser_generator.js 
  src/tree.js 
  src/strings.js 
  src/tree_viewer.js 

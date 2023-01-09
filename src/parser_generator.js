@@ -1,9 +1,9 @@
-//Usage: let parser = new Parser()
+//Usage: let parser = new ParserGenerator()
 //parser.setGrammar(grammarDefinitionString)
 //parser.parse(string)
-//In other words, the grammar that the parser needs to parse is passed into the constructor during the creation on the Parser object
-//Then, the parse function is run, taking in an string representing a small set of data given in the language specified by the language loaded by the Parser object during its construction
-class Parser{
+//In other words, the grammar that the parser needs to parse is passed into the constructor during the creation on the ParserGenerator object
+//Then, the parse function is run, taking in an string representing a small set of data given in the language specified by the language loaded by the ParserGenerator object during its construction
+class ParserGenerator{
   constructor(){
     this.idCounter = 0
     this.matchCount = 0 //enumerates the matches
@@ -11,24 +11,24 @@ class Parser{
 
   //Uses console.log to verify that the software has been installed correctly
   installCheck(){
-    console.log('Simple Parser Generator is installed.')
+    console.log('Simple ParserGenerator Generator is installed.')
   }
 
   static registerNodeTypes(){
-    Parser.nodeTypes = []
-    Parser.nodeTypes.push(SequenceNode)
-    Parser.nodeTypes.push(OrNode)
-    Parser.nodeTypes.push(AndNode)
-    Parser.nodeTypes.push(MultipleNode)
-    Parser.nodeTypes.push(NotNode)
-    Parser.nodeTypes.push(OptionalNode)
-    Parser.nodeTypes.push(CharacterClassNode)
-    Parser.nodeTypes.push(StringLiteralNode)
-    Parser.nodeTypes.push(EntireNode)
+    ParserGenerator.nodeTypes = []
+    ParserGenerator.nodeTypes.push(SequenceNode)
+    ParserGenerator.nodeTypes.push(OrNode)
+    ParserGenerator.nodeTypes.push(AndNode)
+    ParserGenerator.nodeTypes.push(MultipleNode)
+    ParserGenerator.nodeTypes.push(NotNode)
+    ParserGenerator.nodeTypes.push(OptionalNode)
+    ParserGenerator.nodeTypes.push(CharacterClassNode)
+    ParserGenerator.nodeTypes.push(StringLiteralNode)
+    ParserGenerator.nodeTypes.push(EntireNode)
     //Order matters for getnodetype
-    Parser.nodeTypes.push(RuleNameNode)
-    Parser.nodeTypes.push(RuleNode)
-    Parser.nodeTypes.push(RuleListNode)
+    ParserGenerator.nodeTypes.push(RuleNameNode)
+    ParserGenerator.nodeTypes.push(RuleNode)
+    ParserGenerator.nodeTypes.push(RuleListNode)
 
     //Note that the rule for the rule list does not have to be in this list because no reference to it will can be made within one of its rules
     //and so it will never get triggered during parsing of the input grammar
@@ -37,7 +37,7 @@ class Parser{
   //Returns an array of all node types known by the parser
   static getNodeTypeNames(){
     let nodeTypeNames = []
-    for (let nodeType of Parser.nodeTypes){
+    for (let nodeType of ParserGenerator.nodeTypes){
       nodeTypeNames.push(nodeType.type)
     }
     return nodeTypeNames
@@ -67,13 +67,13 @@ class Parser{
   }
 
   setGrammar(s){
-    let language = Parser.detectImportLanguage(s, this)
+    let language = ParserGenerator.detectImportLanguage(s, this)
     if (language == 'M1'){
-      this.grammar = Parser.M1Import(s, this)
+      this.grammar = ParserGenerator.M1Import(s, this)
     }else if (language == 'H1'){
-      this.grammar = Parser.H1Import(s, this)
+      this.grammar = ParserGenerator.H1Import(s, this)
     }else if (language == 'H2'){
-      this.grammar = Parser.H2Import(s, this)
+      this.grammar = ParserGenerator.H2Import(s, this)
     }else{
       this.grammar = null
     }
@@ -127,14 +127,14 @@ class Parser{
     let patterns = []
     let caret = 0
     
-    let nextZeroLevelComma = Parser.getNextZeroLevelComma(s)
+    let nextZeroLevelComma = ParserGenerator.getNextZeroLevelComma(s)
     while(nextZeroLevelComma > 0){
       let nextNodeString = s.substring(caret,nextZeroLevelComma)
-      patterns.push(Parser.M1Import(nextNodeString, parser))
+      patterns.push(ParserGenerator.M1Import(nextNodeString, parser))
       caret = caret + nextNodeString.length
     }
 
-    patterns.push(Parser.M1Import(s.substring(caret), parser))
+    patterns.push(ParserGenerator.M1Import(s.substring(caret), parser))
     return patterns
 }
   //The return value is a number containing the index of the right square bracket
@@ -144,7 +144,7 @@ class Parser{
   static M1GetOneNodeSpot(s){
     if (s.substring(0,1)=='['){
       //return index of matching ]
-      return Parser.getMatchingRightSquareBracket(s,0)
+      return ParserGenerator.getMatchingRightSquareBracket(s,0)
     }
 
     //Take everything from the beginning of s until the first comma or until the first right square bracket, whichever is first
@@ -182,7 +182,7 @@ class Parser{
     //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
     //Get everything from [ to the first comma as the type of a node
 
-    let nodeType = Parser.M1GetNodeType(s)
+    let nodeType = ParserGenerator.M1GetNodeType(s)
     switch(nodeType){
       case 'rule list':
         {
@@ -193,7 +193,7 @@ class Parser{
 
           //everything from the first comma to the last right bracket are to be processed as a series of nodes
           let caret = s.indexOf(',') + 1
-          let rules = Parser.M1GetPatterns(s.substring(caret,s.length - 1), parser)
+          let rules = ParserGenerator.M1GetPatterns(s.substring(caret,s.length - 1), parser)
           ruleListNode.rules = rules
           parser.grammar = ruleListNode
         }
@@ -203,7 +203,7 @@ class Parser{
           //[rule,rule name,pattern]
           let firstComma = s.indexOf(',')
           let secondComma = s.indexOf(',',firstComma + 1)
-          let pattern = Parser.M1GetPatterns(s.substring(secondComma+1, s.length - 1), parser)[0]
+          let pattern = ParserGenerator.M1GetPatterns(s.substring(secondComma+1, s.length - 1), parser)[0]
           let ruleNode = new RuleNode({parser:parser, name: s.substring(firstComma+1,secondComma), pattern})
           return ruleNode
         }
@@ -211,49 +211,49 @@ class Parser{
         {
           //[or,pattern 1,pattern 2,pattern 3,...,pattern n]
           let firstComma = s.indexOf(',')
-          let patterns = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
+          let patterns = ParserGenerator.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
           let orNode = new OrNode({parser:parser, patterns})
           return orNode
         }
       case 'and':
         {
           let firstComma = s.indexOf(',')
-          let patterns = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
+          let patterns = ParserGenerator.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
           let node = new AndNode({parser:parser, patterns})
           return node  
         }
       case 'sequence':
         {
           let firstComma = s.indexOf(',')
-          let patterns = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
+          let patterns = ParserGenerator.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
           let node = new SequenceNode({parser:parser, patterns})
           return node  
         }
       case 'not':
         {
           let firstComma = s.indexOf(',')
-          let pattern = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
+          let pattern = ParserGenerator.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
           let node = new NotNode({parser:parser, pattern})
           return node  
         }
       case 'optional':
         {
           let firstComma = s.indexOf(',')
-          let pattern = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
+          let pattern = ParserGenerator.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
           let node = new OptionalNode({parser:parser, pattern})
           return node  
         }
       case 'multiple':
         {
           let firstComma = s.indexOf(',')
-          let pattern = Parser.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
+          let pattern = ParserGenerator.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
           let node = new MultipleNode({parser:parser, pattern})
           return node  
         }
       case 'character class':
         {
           let firstComma = s.indexOf(',')
-          let string = Parser.M1Unescape(s.substring(firstComma + 1, s.length - 1))
+          let string = ParserGenerator.M1Unescape(s.substring(firstComma + 1, s.length - 1))
           let node = new CharacterClassNode({parser:parser, string})
           return node  
         }
@@ -298,7 +298,7 @@ class Parser{
 
     var left_of_first_left_bracket = string.substring(0,location_of_first_left_bracket).trim()
     if (left_of_first_left_bracket == X){
-      let indexOfRightMatchingSquareBracket = Parser.getMatchingRightSquareBracket(string,location_of_first_left_bracket)
+      let indexOfRightMatchingSquareBracket = ParserGenerator.getMatchingRightSquareBracket(string,location_of_first_left_bracket)
 
       if (indexOfRightMatchingSquareBracket > -1){
         return string.substring(0,indexOfRightMatchingSquareBracket+1)
@@ -313,7 +313,7 @@ class Parser{
   //return the string containing up to the first pattern string
   //Returns '' if no valid next pattern string is found
   static headMatchPattern(string){
-    for (let nodeType of Parser.nodeTypes){
+    for (let nodeType of ParserGenerator.nodeTypes){
       let patternString = nodeType.headMatch(string)//headMatchFunction.call(this, string)
       if (patternString) return patternString
     }
@@ -330,12 +330,12 @@ class Parser{
     let patterns = []
     let tempString = string.trim()
     while(tempString != ''){
-      let nextPatternString = Parser.headMatchPattern(tempString)
+      let nextPatternString = ParserGenerator.headMatchPattern(tempString)
       if (nextPatternString == ''){
         break
       }
       else{
-        let singlePattern = Parser.grammarize_PATTERN(nextPatternString)
+        let singlePattern = ParserGenerator.grammarize_PATTERN(nextPatternString)
         if (singlePattern){
           patterns.push(singlePattern)
         }else{
@@ -359,10 +359,10 @@ class Parser{
   }
   
   static getTypeOfPattern(string){
-    for (let i = 0; i < Parser.nodeTypes.length; i++){
-      let headMatchResult = Parser.nodeTypes[i].headMatch(string)
+    for (let i = 0; i < ParserGenerator.nodeTypes.length; i++){
+      let headMatchResult = ParserGenerator.nodeTypes[i].headMatch(string)
       if (headMatchResult){
-        return Parser.nodeTypes[i].type
+        return ParserGenerator.nodeTypes[i].type
       }
     }
     return ''
@@ -413,7 +413,7 @@ class Parser{
 
   static grammarize_PATTERN(string, parser){
     var trimmed_string = string.trim()
-    let typeOfPattern = Parser.getTypeOfPattern(trimmed_string)
+    let typeOfPattern = ParserGenerator.getTypeOfPattern(trimmed_string)
     return parser.grammarize(typeOfPattern, trimmed_string, parser)
   }
 
@@ -529,7 +529,7 @@ class Parser{
   //This function converts from machine format M1 into human-compatible format H1
   static M1ConvertToH1(s, depth = 0){
     if (s.substring(0,1) != '['){
-      return Parser.H1EncodeDepth(depth) + s.slice()
+      return ParserGenerator.H1EncodeDepth(depth) + s.slice()
     }
 
     let outputString = ''
@@ -537,26 +537,26 @@ class Parser{
 
     let commaIndex = s.indexOf(',')
     let nodeType = s.substring(caret, commaIndex)
-    outputString += Parser.H1EncodeDepth(depth) + nodeType + '\n'
+    outputString += ParserGenerator.H1EncodeDepth(depth) + nodeType + '\n'
 
     caret += nodeType.length + 1//increase caret by left bracket plus node name + a comma, plus one character
     //obtain comma position relative to the string s starting at position caret
-    let commaOffset = Parser.getNextZeroLevelComma(s.substring(caret)) 
+    let commaOffset = ParserGenerator.getNextZeroLevelComma(s.substring(caret)) 
     while(commaOffset > -1){
       let nextNodeString = s.substring(caret,commaOffset + caret)
-      outputString += Parser.M1ConvertToH1(nextNodeString, depth + 1) + '\n'
+      outputString += ParserGenerator.M1ConvertToH1(nextNodeString, depth + 1) + '\n'
       caret = caret + nextNodeString.length + 1 //Skip to one character past the last found comma
-      commaOffset = Parser.getNextZeroLevelComma(s.substring(caret))
+      commaOffset = ParserGenerator.getNextZeroLevelComma(s.substring(caret))
     }
 
-    outputString += Parser.M1ConvertToH1(s.substring(caret,s.length - 1), depth + 1)
+    outputString += ParserGenerator.M1ConvertToH1(s.substring(caret,s.length - 1), depth + 1)
     return outputString
   }
 
   //Given a string s beginning with a node at line 0, this function will return the last character in the node
   static H1GetNodeString(s){
     //1)Get depth of first line, which should contain the node name
-    let firstNodeDepth = Parser.H1GetDepth(s)
+    let firstNodeDepth = ParserGenerator.H1GetDepth(s)
 
     //2)Go line by line until a lower or equal depth has been reached. That should be the end of the current node
     let lines = s.split('\n')
@@ -564,7 +564,7 @@ class Parser{
     let nodeString = lines[0] + '\n'
     for (let i = 1; i < lines.length; i++){
       let line = lines[i]
-      let lineDepth = Parser.H1GetDepth(line)
+      let lineDepth = ParserGenerator.H1GetDepth(line)
       if (lineDepth <= firstNodeDepth){
         break
       }
@@ -582,11 +582,11 @@ class Parser{
   //s: a string in H1 format, starting with a node string
   static H1GetNumberOfChildren(s){
     let lines = s.split('\n')
-    let firstNodeDepth = Parser.H1GetDepth(s)
+    let firstNodeDepth = ParserGenerator.H1GetDepth(s)
     let numberOfChildren = 0
     for (let i = 1; i < lines.length; i++){
       let line = lines[i]
-      let lineDepth = Parser.H1GetDepth(line)
+      let lineDepth = ParserGenerator.H1GetDepth(line)
       if (lineDepth <= firstNodeDepth){
         break
       }
@@ -603,10 +603,10 @@ class Parser{
   static H1GetChildNuggets(s){
     let childNodes = []
     let lines = s.split('\n')
-    let firstNodeDepth = Parser.H1GetDepth(s)
-    let nodeName = Parser.H1GetNodeName(s)
+    let firstNodeDepth = ParserGenerator.H1GetDepth(s)
+    let nodeName = ParserGenerator.H1GetNodeName(s)
     
-    let nodeTypeNames = Parser.getNodeTypeNames()
+    let nodeTypeNames = ParserGenerator.getNodeTypeNames()
     if (nodeTypeNames.indexOf(nodeName) == -1){
       //error
       throw new Error('Unknown node type: ' + nodeName)
@@ -621,7 +621,7 @@ class Parser{
       let numberOfChildren = 0
       for (let i = 1; i < lines.length; i++){
         let line = lines[i] + '\n'
-        let lineDepth = Parser.H1GetDepth(line)
+        let lineDepth = ParserGenerator.H1GetDepth(line)
         if (lineDepth <= firstNodeDepth){
           break
         }
@@ -676,7 +676,7 @@ class Parser{
 
   //Takes in a node string s and returns the first line without the carriage return and leading spaces
   static H1GetNodeName(s){
-    let depth = Parser.H1GetDepth(s)
+    let depth = ParserGenerator.H1GetDepth(s)
     let nodeName = s.substring(depth,s.indexOf('\n'))
     return nodeName
   }
@@ -704,22 +704,22 @@ class Parser{
   //this function will convert it into M1 format
   static H1ConvertToM1(s){
     //Valid H1 format means the first line is the name of a node type
-    let nodeString = Parser.H1GetNodeString(s)
+    let nodeString = ParserGenerator.H1GetNodeString(s)
     if (nodeString == ''){
       throw new Error('String passed in for H1 to M1 conversion is not in H1 format.')
     }
-    let childNuggets = Parser.H1GetChildNuggets(nodeString)
+    let childNuggets = ParserGenerator.H1GetChildNuggets(nodeString)
 
     //Get the node name
-    let nodeName = Parser.H1GetNodeName(s)
+    let nodeName = ParserGenerator.H1GetNodeName(s)
     let childrenString = ''
 
     if (nodeName == 'rule'){
-      let depth = Parser.H1GetDepth(s)
+      let depth = ParserGenerator.H1GetDepth(s)
       childrenString += childNuggets[0].substring(depth + 1) + ','
-      childrenString += Parser.H1ConvertToM1(childNuggets[1])
+      childrenString += ParserGenerator.H1ConvertToM1(childNuggets[1])
     }else if (nodeName == 'character class' || nodeName == 'string literal'){
-      let depth = Parser.H1GetDepth(s)
+      let depth = ParserGenerator.H1GetDepth(s)
       let lines = s.split('\n')
       childrenString += lines[1].substring(depth + 1)
     }
@@ -728,7 +728,7 @@ class Parser{
         if (i > 0){
           childrenString += ','
         }
-        childrenString += Parser.H1ConvertToM1(childNuggets[i])
+        childrenString += ParserGenerator.H1ConvertToM1(childNuggets[i])
       }
     }
 
@@ -744,8 +744,8 @@ class Parser{
   
   //Given a string in H1 format, loads the appropriate nodes into memory
   static H1Import(s, parser){
-    let M1Code = Parser.H1ConvertToM1(s)
-    Parser.M1Import(M1Code, parser)
+    let M1Code = ParserGenerator.H1ConvertToM1(s)
+    ParserGenerator.M1Import(M1Code, parser)
   }
 
 
@@ -755,7 +755,7 @@ class Parser{
   //  multiple
   //Given the root node of a parsing tree, this transforms it into H1 format
   static H1Export(node, depth = 0){
-    let outputString = Parser.H1EncodeDepth(depth) + node.type + '\n'
+    let outputString = ParserGenerator.H1EncodeDepth(depth) + node.type + '\n'
 
     let childrenString = ''
     switch(node.type){
@@ -764,7 +764,7 @@ class Parser{
       case 'optional':
       case 'entire':
         {
-          childrenString += Parser.H1Export(node.pattern, depth + 1)
+          childrenString += ParserGenerator.H1Export(node.pattern, depth + 1)
         }
         break
       case 'or':
@@ -776,7 +776,7 @@ class Parser{
           if (node.type == 'rule list') listPropertyName = 'rules'
 
           for (let i = 0; i < node[listPropertyName].length; i++){
-            childrenString += Parser.H1Export(node[listPropertyName][i], depth + 1)
+            childrenString += ParserGenerator.H1Export(node[listPropertyName][i], depth + 1)
             if (i < node.rules.length - 1){
               childrenString += '\n'
             }
@@ -785,15 +785,15 @@ class Parser{
         break
       case 'rule':
         {
-          childrenString += Parser.H1EncodeDepth(depth + 1) + node.name + '\n'
-          childrenString += Parser.H1Export(node.pattern, depth + 1)
+          childrenString += ParserGenerator.H1EncodeDepth(depth + 1) + node.name + '\n'
+          childrenString += ParserGenerator.H1Export(node.pattern, depth + 1)
         }
         break
       case 'character class':
       case 'string literal':
       case 'rule name':
         {
-          childrenString += Parser.H1EncodeDepth(depth + 1) + node.string
+          childrenString += ParserGenerator.H1EncodeDepth(depth + 1) + node.string
         }
         break
       default:
@@ -809,7 +809,7 @@ class Parser{
 
 }
 
-Parser.registerNodeTypes()
-Parser.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
-Parser.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
+ParserGenerator.registerNodeTypes()
+ParserGenerator.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
+ParserGenerator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
 

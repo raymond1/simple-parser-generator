@@ -126,7 +126,7 @@ class RuleNode extends Node{
     if (right_of_equals.length < 1) return null
 
     var name_node = RuleNameNode.grammarize(left_of_equals.trim(), parser)
-    var pattern_node = Parser.grammarize_PATTERN(right_of_equals.trim(), parser)
+    var pattern_node = ParserGenerator.grammarize_PATTERN(right_of_equals.trim(), parser)
 
     if (name_node == null || pattern_node == null) return null
 
@@ -155,7 +155,7 @@ class RuleNode extends Node{
 
       let trimmed_string_between_equals_sign_and_first_left_square_bracket = string_between_equals_sign_and_first_left_square_bracket.trim()
 
-      if (Parser.keywords.indexOf(trimmed_string_between_equals_sign_and_first_left_square_bracket) >= 0){
+      if (ParserGenerator.keywords.indexOf(trimmed_string_between_equals_sign_and_first_left_square_bracket) >= 0){
         //This is one of the keywords
         is_keyword = true
       }
@@ -163,7 +163,7 @@ class RuleNode extends Node{
 
     if (location_of_first_left_square_bracket >= 0 && is_keyword){ //if first left square bracket was found
 
-      let location_of_matching_right_square_bracket = Parser.getMatchingRightSquareBracket(string, location_of_first_left_square_bracket)
+      let location_of_matching_right_square_bracket = ParserGenerator.getMatchingRightSquareBracket(string, location_of_first_left_square_bracket)
       if (location_of_matching_right_square_bracket == -1){
         return ''
       }
@@ -173,7 +173,7 @@ class RuleNode extends Node{
     }else{
       //This is a rule name with no brackets
       let leadingWhitespace = Strings.headMatch(string.substring(location_of_first_equals_sign + 1), Strings.whitespace_characters)
-      let ruleName = Strings.headMatch(string.substring(location_of_first_equals_sign + 1 + leadingWhitespace.length), Parser.validRuleNameCharacters)
+      let ruleName = Strings.headMatch(string.substring(location_of_first_equals_sign + 1 + leadingWhitespace.length), ParserGenerator.validRuleNameCharacters)
       if (ruleName.length > 0){
         return string.substring(0, location_of_first_equals_sign + leadingWhitespace.length + ruleName.length + 1)
       }
@@ -182,7 +182,7 @@ class RuleNode extends Node{
 
   //s: output string
   M1Export(){
-    return `[${this.constructor.type},${Parser.M1Escape(this.name)},${this.pattern.M1Export()}]`
+    return `[${this.constructor.type},${ParserGenerator.M1Escape(this.name)},${this.pattern.M1Export()}]`
   }
 
   match(inputString, metadata){
@@ -223,7 +223,7 @@ class RuleNameNode extends Node{
     if (string.length < 1) return null
     if (string == 'S_QUOTE'||string == 'L_SQUARE_BRACKET'||string=='R_SQUARE_BRACKET') return null
 
-    if (Strings.contains_only(string, Parser.validRuleNameCharacters)){
+    if (Strings.contains_only(string, ParserGenerator.validRuleNameCharacters)){
       return new RuleNameNode({'string':string, parser})
     }
     return null
@@ -282,7 +282,7 @@ class NotNode extends Node{
   static type = 'not'
 
   static headMatch(string){
-    return Parser.headMatchXWithBrackets(string, 'NOT')
+    return ParserGenerator.headMatchXWithBrackets(string, 'NOT')
   }
 
   static grammarize(string, parser){
@@ -297,13 +297,13 @@ class NotNode extends Node{
     var location_of_first_left_bracket = trimmed_string.indexOf('[')
     if (location_of_first_left_bracket < 0) return null
 
-    var location_of_last_right_bracket = Parser.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    var location_of_last_right_bracket = ParserGenerator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
     if (location_of_last_right_bracket < 0) return null
     if (location_of_last_right_bracket != trimmed_string.length - 1) return null
     
     var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
 
-    var pattern = Parser.grammarize_PATTERN(string_in_between_square_brackets, parser)
+    var pattern = ParserGenerator.grammarize_PATTERN(string_in_between_square_brackets, parser)
     if (pattern != null){
       return new NotNode({'pattern': pattern, parser})
     }
@@ -349,7 +349,7 @@ class SequenceNode extends Node{
   static type = 'sequence'
 
   static headMatch(string){
-    return Parser.headMatchXWithBrackets(string, SequenceNode.type)
+    return ParserGenerator.headMatchXWithBrackets(string, SequenceNode.type)
   }
 
   static grammarize(string, parser){
@@ -365,13 +365,13 @@ class SequenceNode extends Node{
     var location_of_first_left_bracket = trimmed_string.indexOf('[')
     if (location_of_first_left_bracket < 0) return null
 
-    var location_of_last_right_bracket = Parser.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    var location_of_last_right_bracket = ParserGenerator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
     if (location_of_last_right_bracket < 0) return null
     if (location_of_last_right_bracket != trimmed_string.length - 1) return null
     
     var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
 
-    let patterns = Parser.grammarize_PATTERN_LIST(string_in_between_square_brackets.trim(), parser)
+    let patterns = ParserGenerator.grammarize_PATTERN_LIST(string_in_between_square_brackets.trim(), parser)
     if (patterns != null){
       return new SequenceNode({'patterns':patterns, parser})
     }
@@ -438,7 +438,7 @@ class OrNode extends Node{
   static type = 'or'
   
   static headMatch(s){
-    return Parser.headMatchXWithBrackets(s, 'OR')
+    return ParserGenerator.headMatchXWithBrackets(s, 'OR')
   }
 
   static grammarize(string, parser){
@@ -455,7 +455,7 @@ class OrNode extends Node{
     var location_of_first_left_bracket = trimmed_string.indexOf('[')
     if (location_of_first_left_bracket < 0) return null
 
-    var location_of_matching_right_bracket = Parser.getMatchingRightSquareBracket(trimmed_string, location_of_first_left_bracket)
+    var location_of_matching_right_bracket = ParserGenerator.getMatchingRightSquareBracket(trimmed_string, location_of_first_left_bracket)
     if (location_of_matching_right_bracket < 0) return null
     if (location_of_matching_right_bracket != trimmed_string.length - 1) return null
 
@@ -464,7 +464,7 @@ class OrNode extends Node{
 
     var string_in_between_two_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_matching_right_bracket)
 
-    var pattern_list = Parser.grammarize_PATTERN_LIST(string_in_between_two_square_brackets, parser)
+    var pattern_list = ParserGenerator.grammarize_PATTERN_LIST(string_in_between_two_square_brackets, parser)
     if (pattern_list != null){
       return new OrNode({'patterns':pattern_list, parser})
     }
@@ -531,7 +531,7 @@ class AndNode extends Node{
     var string_before_first_left_square_bracket = trimmed_string.substring(0, location_of_first_left_square_bracket)
     if (string_before_first_left_square_bracket.trim() != 'AND') return null
 
-    var location_of_matching_right_square_bracket = Parser.getMatchingRightSquareBracket(trimmed_string, location_of_first_left_square_bracket)
+    var location_of_matching_right_square_bracket = ParserGenerator.getMatchingRightSquareBracket(trimmed_string, location_of_first_left_square_bracket)
     if (location_of_matching_right_square_bracket < 0){
       return null
     }
@@ -539,7 +539,7 @@ class AndNode extends Node{
     if (location_of_matching_right_square_bracket + 1 != trimmed_string.length) return null
     var string_between_square_brackets = trimmed_string.substring(location_of_first_left_square_bracket + 1, location_of_matching_right_square_bracket)
 
-    let patterns = Parser.grammarize_PATTERN_LIST(string_between_square_brackets.trim(), parser)
+    let patterns = ParserGenerator.grammarize_PATTERN_LIST(string_between_square_brackets.trim(), parser)
     if (patterns != null){
       return new AndNode({'patterns':patterns, parser})
     }
@@ -548,7 +548,7 @@ class AndNode extends Node{
   }
 
   static headMatch(string){
-    return Parser.headMatchXWithBrackets(string, 'AND')
+    return ParserGenerator.headMatchXWithBrackets(string, 'AND')
   }
 
   M1Export(){
@@ -635,13 +635,13 @@ class MultipleNode extends Node{
     var location_of_first_left_bracket = trimmed_string.indexOf('[')
     if (location_of_first_left_bracket < 0) return null
 
-    var location_of_last_right_bracket = Parser.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    var location_of_last_right_bracket = ParserGenerator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
     if (location_of_last_right_bracket < 0) return null
     if (location_of_last_right_bracket != trimmed_string.length - 1) return null
     
     var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
 
-    var pattern = Parser.grammarize_PATTERN(string_in_between_square_brackets, parser)
+    var pattern = ParserGenerator.grammarize_PATTERN(string_in_between_square_brackets, parser)
     if (pattern != null){
       return new MultipleNode({pattern, parser})
     }
@@ -650,7 +650,7 @@ class MultipleNode extends Node{
   }
 
   static headMatch(string){
-    return Parser.headMatchXWithBrackets(string, 'MULTIPLE')
+    return ParserGenerator.headMatchXWithBrackets(string, 'MULTIPLE')
   }
 
   M1Export(){
@@ -770,7 +770,7 @@ class StringLiteralNode extends Node{
   }
 
   M1Export(){
-    return `[${this.constructor.type},${Parser.M1Escape(this.string)}]`
+    return `[${this.constructor.type},${ParserGenerator.M1Escape(this.string)}]`
   }
 
   match(inputString, metadata){
@@ -821,7 +821,7 @@ class CharacterClassNode extends Node{
     var location_of_first_left_bracket = trimmed_string.indexOf('[')
     if (location_of_first_left_bracket < 0) return null
 
-    var location_of_last_right_bracket = Parser.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    var location_of_last_right_bracket = ParserGenerator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
     if (location_of_last_right_bracket < 0) return null
     if (location_of_last_right_bracket != trimmed_string.length - 1) return null
     
@@ -836,11 +836,11 @@ class CharacterClassNode extends Node{
   }
 
   static headMatch(string){
-    return Parser.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
+    return ParserGenerator.headMatchXWithBrackets(string, 'CHARACTER_CLASS')
   }
 
   M1Export(){
-    return `[${this.constructor.type},${Parser.M1Escape(this.string)}]`
+    return `[${this.constructor.type},${ParserGenerator.M1Escape(this.string)}]`
   }
 
   match(inputString, metadata){
@@ -889,7 +889,7 @@ class OptionalNode extends Node{
   static type = 'optional'
 
   static headMatch(string){
-    return Parser.headMatchXWithBrackets(string, 'OPTIONAL')
+    return ParserGenerator.headMatchXWithBrackets(string, 'OPTIONAL')
   }
 
   static grammarize(string, parser){
@@ -904,13 +904,13 @@ class OptionalNode extends Node{
     var location_of_first_left_bracket = trimmed_string.indexOf('[')
     if (location_of_first_left_bracket < 0) return null
 
-    var location_of_last_right_bracket = Parser.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    var location_of_last_right_bracket = ParserGenerator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
     if (location_of_last_right_bracket < 0) return null
     if (location_of_last_right_bracket != trimmed_string.length - 1) return null
     
     var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
 
-    var pattern = Parser.grammarize_PATTERN(string_in_between_square_brackets, parser)
+    var pattern = ParserGenerator.grammarize_PATTERN(string_in_between_square_brackets, parser)
     if (pattern != null){
       return new OptionalNode({'pattern': pattern, parser})
     }
@@ -956,7 +956,7 @@ class EntireNode extends Node{
   static type = 'entire'
 
   static headMatch(string){
-    return Parser.headMatchXWithBrackets(string, 'ENTIRE')
+    return ParserGenerator.headMatchXWithBrackets(string, 'ENTIRE')
   }
 
   static grammarize(string, parser){
@@ -971,13 +971,13 @@ class EntireNode extends Node{
     var location_of_first_left_bracket = trimmed_string.indexOf('[')
     if (location_of_first_left_bracket < 0) return null
 
-    var location_of_last_right_bracket = Parser.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    var location_of_last_right_bracket = ParserGenerator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
     if (location_of_last_right_bracket < 0) return null
     if (location_of_last_right_bracket != trimmed_string.length - 1) return null
     
     var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
 
-    var pattern = Parser.grammarize_PATTERN(string_in_between_square_brackets, parser)
+    var pattern = ParserGenerator.grammarize_PATTERN(string_in_between_square_brackets, parser)
     if (pattern != null){
       return new EntireNode({'pattern': pattern, parser})
     }

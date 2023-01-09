@@ -1,3 +1,3 @@
-export {Parser, TreeViewer}
-export default Parser
+export {ParserGenerator, TreeViewer}
+export default ParserGenerator
 

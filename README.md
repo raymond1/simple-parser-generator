@@ -1,23 +1,71 @@
-# Simple Parser Generator
+# Simple ParserGenerator Generator
 
-The Simple Parser Generator is a JavaScript parser generator that allows the use of several input languages to describe a parser. The parsers generated are serializable and can be ported to any platform that implements the V1 virtual machine. This portability is accomplished by using a micro-parser architecture where multiple small and simple parsers are connected together to generate a larger, more complex parser.
+The Simple ParserGenerator Generator is a JavaScript parser generator that allows the use of several input languages to describe a parser. The parsers generated are serializable and can be ported to any platform that implements the V1 virtual machine. This portability is accomplished by using a micro-parser architecture where multiple small and simple parsers are connected together to generate a larger, more complex parser.
 
 # How it works
 
-The Simple Parser Generator takes in a parser specification in either the M1, H1, or H2 languages(the M1, H1 and H2 languages are specified in the documentation folder, in the files [H1.md](documentation/H1.md), [M1.md](documentation/M1.md), and [H2.md](documentation/H2.md)). These files are read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, ready to take an input string and convert it into tokens.
+The Simple ParserGenerator Generator takes in a parser specification in either the M1, H1, or H2 languages(the M1, H1 and H2 languages are specified in the documentation folder, in the files [H1.md](documentation/H1.md), [M1.md](documentation/M1.md), and [H2.md](documentation/H2.md)). These files are read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, ready to take an input string and convert it into tokens.
 
 Because these micro-parsers are portable and can be implemented in basically any sufficiently powerful programming language, they are essentially a type of virtual machine. This means that any programming language that implements all the micro-parsers could potentially operate the same parser loaded into memory from a different language. The M1 file format is meant to be a portable machine format still readable by humans that can serialize parsers written in one language and allow them to be deserialized and loaded into memory using another programming language that implements all the micro-parsers used in the first language.
 
 The collection of micro-parsers that need to be implemented are collectively called the V1 virtual machine.
 
-# Installation
+# Installation and testing
 
-1. Make a new package.json file
-npm install git+https://github.com/raymond1/simple-parser-generator.git
+## NodeJS
+1. Make a new package.json file.
+2. Set the type attribute in the package.json file to module.
+3. npm install git+https://github.com/raymond1/simple-parser-generator.git
+4. Create a file called index.js and add the following line
+```
+import {ParserGenerator} from './parser_generator.js'
+```
+5. Testing (Optional)
+After the import line and before the end of the ```</script>``` tag, add the lines
+```
+let parserGenerator = new ParserGenerator()
+parserGenerator.installCheck()
+```
+6. Activate the index.js file from NodeJS with the command:
+```
+node index.js
+```
 
+If the software was successfully installed, you should see the message: 'Simple Parser Generator is installed.'
+
+## Browsers
+1. Set up a web server that can serve HTML and JS pages with the correct Content-Type headers.
+2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving it from.
+3. Clone the https://github.com/raymond1/simple-parser-generator repository.
+4. Copy the file releases/parser_generator.js into the folder that your web server is serving.
+5. In your index.html file, add a script tag that refers to the parser_generator.js file.
+```
+<script type="module">
+import {ParserGenerator} from './parser_generator.js'
+</script>
+```
+6. Testing (Optional)
+After the import line and before the end of the ```</script>``` tag, add the lines
+```
+let parserGenerator = new ParserGenerator()
+parserGenerator.installCheck()
+```
+7. Access the index.html url to activate the script it references.
+
+If the software was successfully installed, you should see the message: 'Simple Parser Generator is installed.'
+
+## Tutorial
+
+After installation has been complete from the installation steps above, you will see the following line:
+```
+parser = new ParserGenerator.ParserGenerator()
+```
+
+After this line, you can add JavaScript code
+line in the install
 Imagine that you have an extremely simple web page set up on a web server. 
 
-Imagine that you have NodeJS and NPM installed on your computer. Create a new folder and call it A. Then, enter into the A directory. Then, copy the file releases/parser.js into that directory. Then, create the file index.js.
+Imagine that you have NodeJS and NPM installed on your computer. Create a new folder and call it A. Then, enter into the A directory. Then, copy the file releases/parser_generator.js into that directory. Then, create the file index.js.
 
 In
 
@@ -25,7 +73,7 @@ In
 
 # Details on the different file formats
 
-H1 is meant to be a human-readable format, similar to JSON, that has a relatively simple parser. M1 is meant to be a machine-readable text format used for serializing parsers generated by the Simple Parser Generator. H2 is a human-friendly file format meant to be easier to use than H1, but because it is more complicated, it is also buggier and less portable, although it is more powerful and expressive than either H1 or M2.
+H1 is meant to be a human-readable format, similar to JSON, that has a relatively simple parser. M1 is meant to be a machine-readable text format used for serializing parsers generated by the Simple ParserGenerator Generator. H2 is a human-friendly file format meant to be easier to use than H1, but because it is more complicated, it is also buggier and less portable, although it is more powerful and expressive than either H1 or M2.
 
 # Description of the V1 virtual machine and its micro-parsers
 
@@ -49,13 +97,13 @@ An 'or' micro-parser is associated with one or more child micro-parsers. It prod
 
 # Status
 
-The Simple Parser Generator is currently in its second generation and is undergoing testing and bug fixes. 
+The Simple ParserGenerator Generator is currently in its second generation and is undergoing testing and bug fixes. 
 
 ## Demo programs
  
 To see how to use the parser, look in the folder called demos/calculator and open the file 'calculator.html'. It shows an example of the parser in action. You may also look at a live demo <a href=https://raymondleon.ca/portfolio/simple-parser-generator/demos/calculator/step3/calculator.html>here</a>.
 
-To use the parser generator in your html file, simply put the parser.js file in the same directory as your html file and then refer to it in a script tag. After you have connected the script to your program, you will be able to use the parser in your JavaScript code by creating a new Parser object.
+To use the parser generator in your html file, simply put the parser_generator.js file in the same directory as your html file and then refer to it in a script tag. After you have connected the script to your program, you will be able to use the parser in your JavaScript code by creating a new ParserGenerator object.
 
 There is a nodejs web server that is provided as part of this code that can be used to test the simple parser generator. To operate it, do the following:
 
@@ -68,7 +116,7 @@ The basic usage of this object is shown in the section "Summary of typical usage
 
 1. First, create the generic parser object. At this point, the parser is dumb and doesn't do anything.
 ```
-let parser = new Parser()
+let parser = new ParserGenerator()
 ```
 
 2. Create a parsing specification consisting of rules that teach the parser what is a valid program and what is an invalid program
@@ -108,7 +156,7 @@ console.log(outputString)
 
 
 Build instructions:
-Go into the code directory and type in "make" from the terminal. This will copy parser.js into the releases folder and create the parser_commonjs.js files(for CommonJS require('simple-parser-generator') type usage) as well as parser_module.js for the newer "import Parser from './simple-parser-generator'" type import statements.
+Go into the code directory and type in "make" from the terminal. This will copy parser_generator.js into the releases folder and create the parser_commonjs.js files(for CommonJS require('simple-parser-generator') type usage) as well as parser_module.js for the newer "import ParserGenerator from './simple-parser-generator'" type import statements.
 
 Simple Language:
 

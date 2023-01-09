@@ -1,2 +1,2 @@
-releases/parser.js demos/basic_usage
-releases/parser.js demos
+releases/parser_generator.js demos/basic_usage
+releases/parser_generator.js demos

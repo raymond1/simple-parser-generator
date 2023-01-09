@@ -12,6 +12,9 @@ The collection of micro-parsers that need to be implemented are collectively cal
 
 # Example usage
 
+Imagine that you have an extremely simple web page.
+
+
 
 # Details on the different file formats
 

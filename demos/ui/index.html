@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Grammar Lab</title>
+    <link href="style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="heading"><h1>Grammar Lab</h1></div>
+    <div class="horizontal">
+      <div class='grammar_area'>
+        <div class='centre'><h2>Grammar</h2></div>
+        <textarea class="grammar" id="grammar"></textarea>
+      </div>
+      <div class='program_area'>
+        <div class='centre'><h2>Program</h2></div>
+        <textarea class="program" id="program"></textarea>
+      </div>
+    </div>
+    <div class="output_area">
+      <div class='centre'><h2>Output</h2></div>
+      <textarea class="output" id="output"></textarea>
+    </div>
+    <div class="commands">
+      <div class="run_options_area">
+        <button id="run">Run</button>
+        <div><input type="radio" name="input_language" value="H1" id="H1"><label for="H1">H1</label></div>
+        <div><input type="radio" name="input_language" value="M1" id="M1"><label for="H1">M1</label></div>
+        <div><input type="radio" name="input_language" value="H2" id="M2"><label for="H1">M2</label></div>
+      </div>
+    </div>
+    <script type="module">
+import * as Parser from '../parser.js'
+
+let parser = new Parser.Parser()
+let inputGrammar = document.getElementById('grammar')
+
+document.getElementById('run').addEventListener('click', ()=>{
+
+})
+
+//new Parser()
+
+    </script>
+  </body>
+</html>

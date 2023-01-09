@@ -1,3 +1,5 @@
+let path2 = require('node:path')
+console.log(path2)
 require('dotenv').config()
 const https = require("https")
 const express = require("express")
@@ -8,9 +10,19 @@ const router = express.Router()
 const fs = require("fs")
 const port = 443
 
-console.log(process.env.server_private_key)
-
-app.use(express.static('../../demos/'))
+app.use(express.static('../../demos/',   {
+  setHeaders: function(res, path, stat) {
+    let extension = path2.extname(path)
+console.log('inside setHeaders')
+    console.log(extension + path)
+    console.log(Object.keys(stat))
+    console.log('extension is:' + extension)
+    if (extension == '.js') {
+console.log('js detected')
+      res.set({'Content-Type': 'application/javascript'}) 
+    }
+  }
+}))
 
 router.get('/os', (request,response)=>{
 

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang=en>
+  <head>
+    <title>Browser Install</title>
+  </head>
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "simple-parser-generator":"./parser_generator.js"
+        }
+      }
+    </script>
+    <script type="module">
+import ParserGenerator from 'simple-parser-generator'
+let parserGenerator = new ParserGenerator()
+parserGenerator.installCheck()
+    </script>
+  </body>
+</html>
+

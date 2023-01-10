@@ -18,10 +18,10 @@ The collection of micro-parsers that need to be implemented are collectively cal
 3. npm install git+https://github.com/raymond1/simple-parser-generator.git
 4. Create a file called index.js and add the following line
 ```
-import {ParserGenerator} from './parser_generator.js'
+import ParserGenerator from 'simple-parser-generator'
 ```
 5. Testing (Optional)
-After the import line and before the end of the ```</script>``` tag, add the lines
+After the import line , add the lines
 ```
 let parserGenerator = new ParserGenerator()
 parserGenerator.installCheck()
@@ -31,34 +31,57 @@ parserGenerator.installCheck()
 node index.js
 ```
 
-If the software was successfully installed, you should see the message: 'Simple Parser Generator is installed.'
+If the software was successfully installed, you should see the message: 'Simple Parser Generator is installed.' 
 
 ## Browsers
 1. Set up a web server that can serve HTML and JS pages with the correct Content-Type headers.
 2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving it from.
 3. Clone the https://github.com/raymond1/simple-parser-generator repository.
 4. Copy the file releases/parser_generator.js into the folder that your web server is serving.
-5. In your index.html file, add a script tag that refers to the parser_generator.js file.
+5. In your index.html file, add the following just before the end of your body tag:
 ```
-<script type="module">
-import {ParserGenerator} from './parser_generator.js'
-</script>
-```
-6. Testing (Optional)
-After the import line and before the end of the ```</script>``` tag, add the lines
-```
+    <script type="importmap">
+      {
+        "imports": {
+          "simple-parser-generator":"./parser_generator.js"
+        }
+      }
+    </script>
+    <script type="module">
+import ParserGenerator from 'simple-parser-generator'
 let parserGenerator = new ParserGenerator()
 parserGenerator.installCheck()
+    </script>
 ```
-7. Access the index.html url to activate the script it references.
+6. Testing (Optional)
+Access the index.html url to activate the script it references.
 
-If the software was successfully installed, you should see the message: 'Simple Parser Generator is installed.'
+If the software was successfully installed, you should see the following message: 'Simple Parser Generator is installed.' This message should show up in Dev Tools or another similar console-enabled debugging browser-based tool.
 
 ## Tutorial
 
+After going through the installation steps above, you will have access to a ParserGenerator object. The following short tutorial demonstrates how a parser is generated using the ParserGenerator object.
+
+### 1. Creating the parser generator.
+After the import line, the parser generator is instantiated with the line 
+```
+let parserGenerator = new ParserGenerator()
+```
+
+### 2. Setting the input grammar.
+
+The Parser Generator(PG) object requires a parsing specification, or input grammar in order to differentiate between valid and invalid programs. There are three input languages that can currently be used: H2, H1 and M1.
+
+
+....
+
+
+
+
+
 After installation has been complete from the installation steps above, you will see the following line:
 ```
-parser = new ParserGenerator.ParserGenerator()
+let parserGenerator = new ParserGenerator()
 ```
 
 After this line, you can add JavaScript code

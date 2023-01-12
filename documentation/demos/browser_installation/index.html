@@ -7,14 +7,14 @@
     <script type="importmap">
       {
         "imports": {
-          "simple-parser-generator":"./parser_generator.js"
+          "simple-parser-generator":"./parser.js"
         }
       }
     </script>
     <script type="module">
-import ParserGenerator from 'simple-parser-generator'
-let parserGenerator = new ParserGenerator()
-parserGenerator.installCheck()
+import Generator from 'simple-parser-generator'
+let parser = new Generator()
+parser.installCheck()
     </script>
   </body>
 </html>

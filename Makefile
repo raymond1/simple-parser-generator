@@ -1,6 +1,10 @@
-all:
-	php vendor/raymond1/document-compiling-cms/generate_website.php src/script.txt
+.PHONY: all documentation
 
-documentation: src/parser_generator.js
-	npx jsdoc releases/parser_generator.js
-	mv -p out/* documentation/api
+all:
+	php vendor/raymond1/document-compiling-cms/generate_website.php src/make_generator.script
+
+documentation:
+	npx jsdoc releases/parser.js
+	rm -rf documentation/api
+	mkdir documentation/api
+	mv out/* documentation/api

@@ -324,7 +324,7 @@ WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 `
 
 
-var test_parser = new Parser()
+var test_parser = new Generator()
 test_parser.setGrammar(grammar2)
 
 let tree = new DOMTreeNode(test_parser.runningGrammar, document.querySelector('#test'))

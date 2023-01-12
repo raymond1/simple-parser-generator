@@ -107,7 +107,7 @@ WHITESPACE = MULTIPLE[CHARACTER_CLASS[' \n\t']]
 		}
 	
 		let grammar = document.querySelector('#input_grammar').value
-		let parser = new Parser()
+		let parser = new Generator()
 	
 		parser.setGrammar(grammar)
 	

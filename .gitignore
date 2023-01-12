@@ -4,5 +4,5 @@ node_modules
 vendor
 src/server/root_certificates/*.pem
 thinking*.txt
-releases/parser_generator.js
-out
+releases/parser.js
+documentation/demos/*/*.js

@@ -1,5 +1,5 @@
 //1) First, create the generic parser object. At this point, the parser is dumb and doesn't do anything.
-let parser = new Parser()
+let parser = new Generator()
 
 //2)Create a parsing specification consisting of rules that teach the parser what is a valid program and what is an invalid program
 let parsingSpecification = 

@@ -1,5 +1,5 @@
-import ParserGenerator from 'simple-parser-generator'
-let parserGenerator = new ParserGenerator()
-parserGenerator.installCheck()
+import Generator from 'simple-parser-generator'
+let parser = new Generator()
+parser.installCheck()
 
 

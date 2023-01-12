@@ -1,9 +1,9 @@
 <%
-copy
- src/nodes.js 
- src/parser_generator.js 
- src/tree.js 
- src/strings.js 
- src/tree_viewer.js 
- src/module_ending.js 
+transcribe
+ src/generator/nodes.js 
+ src/generator/generator.js 
+ src/generator/tree.js 
+ src/generator/strings.js 
+ src/generator/tree_viewer.js 
+ src/generator/module_ending.js 
 %>

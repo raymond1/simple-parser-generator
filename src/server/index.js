@@ -10,7 +10,7 @@ const router = express.Router()
 const fs = require("fs")
 const port = 443
 
-app.use(express.static('../../demos/',   {
+app.use(express.static('../../documentation/',   {
   setHeaders: function(res, path, stat) {
     let extension = path2.extname(path)
 console.log('inside setHeaders')

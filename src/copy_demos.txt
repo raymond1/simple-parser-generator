@@ -1,7 +1,0 @@
-releases/parser_generator.js documentation/demos/basic_usage
-releases/parser_generator.js documentation/demos/browser_installation
-releases/parser_generator.js documentation/demos/calculator
-releases/parser_generator.js documentation/demos/nodejs
-releases/parser_generator.js documentation/demos/debug
-releases/parser_generator.js documentation/demos/ui
-releases/parser_generator.js documentation/demos/vuedemo

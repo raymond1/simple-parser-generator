@@ -32,7 +32,7 @@
     
     <script type="module">
 import * as Vue from 'vue'
-import Parser from 'parser'
+import Generator from 'parser'
 import GrammarLab from './GrammarLab.js'
 import Modal from './Modal.js'
 
@@ -64,7 +64,7 @@ TRIANGLES_SECTION=SEQUENCE[STRING_LITERAL[TRIANGLES],OPTIONAL[MULTIPLE[REF[POINT
 
 `*/
 
-let parser = new Parser()
+let parser = new Generator()
 
 //4)Specify a string containing a program written in the language defined by the parsing specification.
 let programString = `01010`
@@ -97,7 +97,7 @@ let app = Vue.createApp({
     h1Export(){
       this.modalOpen = true
       try{
-        this.modalContent = Parser.H1Export(this.parser.grammar)
+        this.modalContent = Generator.H1Export(this.parser.grammar)
       }
       catch(e){
         this.modalContent = 'Error'
@@ -107,7 +107,7 @@ let app = Vue.createApp({
     m1Export(){
       this.modalOpen = true
       try{
-        this.modalContent = Parser.M1Export(this.parser.grammar)
+        this.modalContent = Generator.M1Export(this.parser.grammar)
       }
       catch(e){
         this.modalContent = 'Error'

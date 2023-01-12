@@ -1,0 +1,2 @@
+compile src/main.template releases/generator.js
+copyscript src/demos.copy

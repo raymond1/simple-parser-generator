@@ -5,4 +5,11 @@ vendor
 src/server/root_certificates/*.pem
 thinking*.txt
 releases/parser.js
-documentation/demos/*/*.js
+documentation/demos/basic_usage/*.js
+documentation/demos/browser_installation/*.js
+documentation/demos/calculator/*.js
+documentation/demos/debug/*.js
+documentation/demos/nodejs/*.js
+documentation/demos/ui/*.js
+documentation/demos/vuedemo/*.js
+documentation/api

@@ -1054,7 +1054,10 @@ class Generator{
     this.matchCount = 0 //enumerates the matches
   }
 
-  //Uses console.log to verify that the software has been installed correctly
+  /**
+   * Uses console.log to verify that the software has been installed correctly. Running Generator.installCheck() should
+   * display a confirmation message that the software is installed.
+   * */
   static installCheck(){
     console.log('Simple Generator Generator is installed.')
   }
@@ -1095,7 +1098,8 @@ class Generator{
   }
 
   /*
-   * Given a string s, returns "M1", "H1", "H2" or "unknown", depending on the file format.
+   * Detects the file format for a given string. Returns "M1", "H1" or "H2" based off of a heuristic analyzing the start of a file.
+   # Returns "unknown" for all other file types.
    * 
    * @param {A String object holding an input grammar in H2, H1 or M1 format.} s 
    * @param {A Generator object that will be generating the parser.} parser 
@@ -1117,7 +1121,8 @@ class Generator{
   }
 
   /**
-   * Sets the grammar that the parser generator will generate a parser for.
+   * Sets the grammar that the parser generator will generate a parser for. The second parameter, language is optional.
+   * If specified as one of 'M1', 'H1', or 'H2', that file format will be used to construct a parser in memory. If not specified, 'H2' is assumed.
    * 
    * @param {String} s 
    * @param {String} language 
@@ -1148,7 +1153,7 @@ class Generator{
   }
 
 
-  /**
+  /*
    * 
    * Takes in an input string and feeds it into the in-memory parser after setGrammar has been run.
    * 

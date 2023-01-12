@@ -3,8 +3,8 @@
  * and allows for the import of these formats back into an in-memory parser.
  * 
  * Usage:
- * let parser = new Generator() //Construct a new parser generator
- * parser.setGrammar(grammarDefinitionString) //set input grammar
+ * let generator = new Generator() //Construct a new parser generator
+ * generator.generateParser(grammarDefinitionString) //set input grammar
  * let outputTree = paparserGeneratorrser.parse(inputString) //parse input string
  * 
  * In other words, the grammar that the parser needs to parse is passed into the constructor during the creation on the Generator object
@@ -85,28 +85,32 @@ class Generator{
   }
 
   /**
-   * Sets the grammar that the parser generator will generate a parser for. The second parameter, language is optional.
-   * If specified as one of 'M1', 'H1', or 'H2', that file format will be used to construct a parser in memory. If not specified, 'H2' is assumed.
+   * Generates an in-memory parser using a string description in M1, H1 or H2 formats.
    * 
-   * @param {String} s 
+   * The definition for a parser in either M1, H1 or H2 format
+   * @param {String} parserDescription
+   *
+   * One of 'M1', 'H1', or 'H2' in lower case or upper case.
    * @param {String} language 
    */
-  setGrammar(s, language='H2'){
-    if (language == 'M1'){
-      this.grammar = Generator.M1Import(s, this)
-    }else if (language == 'H1'){
-      this.grammar = Generator.H1Import(s, this)
-    }else if (language == 'H2'){
-      this.grammar = Generator.H2Import(s, this)
+  generateParser(parserDescription, language){
+    if (!language){
+      throw new Error("No input language specified.")
+    }
+
+    let _language = language.toUpperCase()
+    let parser
+    if (_language == 'M1'){
+      parser = Generator.M1Import(parserDescription, this)
+    }else if (_language == 'H1'){
+      parser = Generator.H1Import(parserDescription, this)
+    }else if (_language == 'H2'){
+      parser = Generator.H2Import(parserDescription, this)
     }else{
-      this.grammar = null
+      throw new Error("Invalid input language. Should be 'H1', 'M1' or 'H2'(either lower or upper case).")
     }
-    if(this.grammar){
-      this.rules = this.getRules(this.grammar)
-    }
-    else{
-      console.log("Error: invalid grammar specification.")
-    }
+    
+    return parser
   }
 
 
@@ -149,3 +153,6 @@ Generator.registerNodeTypes()
 Generator.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
 Generator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
 
+Generator.H1Import = H1.H1Import
+Generator.M1Import = M1.M1Import
+Generator.H2Import = H2.H2Import

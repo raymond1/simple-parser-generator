@@ -2,7 +2,7 @@ class H1{
   //Given a string s beginning with a node at line 0, this function will return the last character in the node
   static H1GetNodeString(s){
     //1)Get depth of first line, which should contain the node name
-    let firstNodeDepth = Generator.H1GetDepth(s)
+    let firstNodeDepth = H1.H1GetDepth(s)
 
     //2)Go line by line until a lower or equal depth has been reached. That should be the end of the current node
     let lines = s.split('\n')
@@ -10,7 +10,7 @@ class H1{
     let nodeString = lines[0] + '\n'
     for (let i = 1; i < lines.length; i++){
       let line = lines[i]
-      let lineDepth = Generator.H1GetDepth(line)
+      let lineDepth = H1.H1GetDepth(line)
       if (lineDepth <= firstNodeDepth){
         break
       }
@@ -29,11 +29,11 @@ class H1{
     //s: a string in H1 format, starting with a node string
     static H1GetNumberOfChildren(s){
       let lines = s.split('\n')
-      let firstNodeDepth = Generator.H1GetDepth(s)
+      let firstNodeDepth = H1.H1GetDepth(s)
       let numberOfChildren = 0
       for (let i = 1; i < lines.length; i++){
         let line = lines[i]
-        let lineDepth = Generator.H1GetDepth(line)
+        let lineDepth = H1.H1GetDepth(line)
         if (lineDepth <= firstNodeDepth){
           break
         }
@@ -50,8 +50,8 @@ class H1{
     static H1GetChildNuggets(s){
       let childNodes = []
       let lines = s.split('\n')
-      let firstNodeDepth = Generator.H1GetDepth(s)
-      let nodeName = Generator.H1GetNodeName(s)
+      let firstNodeDepth = H1.H1GetDepth(s)
+      let nodeName = H1.H1GetNodeName(s)
       
       let nodeTypeNames = Generator.getNodeTypeNames()
       if (nodeTypeNames.indexOf(nodeName) == -1){
@@ -68,7 +68,7 @@ class H1{
         let numberOfChildren = 0
         for (let i = 1; i < lines.length; i++){
           let line = lines[i] + '\n'
-          let lineDepth = Generator.H1GetDepth(line)
+          let lineDepth = H1.H1GetDepth(line)
           if (lineDepth <= firstNodeDepth){
             break
           }
@@ -123,7 +123,7 @@ class H1{
   
     //Takes in a node string s and returns the first line without the carriage return and leading spaces
     static H1GetNodeName(s){
-      let depth = Generator.H1GetDepth(s)
+      let depth = H1.H1GetDepth(s)
       let nodeName = s.substring(depth,s.indexOf('\n'))
       return nodeName
     }
@@ -151,22 +151,22 @@ class H1{
     //this function will convert it into M1 format
     static H1ConvertToM1(s){
       //Valid H1 format means the first line is the name of a node type
-      let nodeString = Generator.H1GetNodeString(s)
+      let nodeString = H1.H1GetNodeString(s)
       if (nodeString == ''){
         throw new Error('String passed in for H1 to M1 conversion is not in H1 format.')
       }
-      let childNuggets = Generator.H1GetChildNuggets(nodeString)
+      let childNuggets = H1.H1GetChildNuggets(nodeString)
   
       //Get the node name
-      let nodeName = Generator.H1GetNodeName(s)
+      let nodeName = H1.H1GetNodeName(s)
       let childrenString = ''
   
       if (nodeName == 'rule'){
-        let depth = Generator.H1GetDepth(s)
+        let depth = H1.H1GetDepth(s)
         childrenString += childNuggets[0].substring(depth + 1) + ','
-        childrenString += Generator.H1ConvertToM1(childNuggets[1])
+        childrenString += H1.H1ConvertToM1(childNuggets[1])
       }else if (nodeName == 'character class' || nodeName == 'string literal'){
-        let depth = Generator.H1GetDepth(s)
+        let depth = H1.H1GetDepth(s)
         let lines = s.split('\n')
         childrenString += lines[1].substring(depth + 1)
       }
@@ -175,7 +175,7 @@ class H1{
           if (i > 0){
             childrenString += ','
           }
-          childrenString += Generator.H1ConvertToM1(childNuggets[i])
+          childrenString += H1.H1ConvertToM1(childNuggets[i])
         }
       }
   
@@ -191,8 +191,8 @@ class H1{
     
     //Given a string in H1 format, loads the appropriate nodes into memory
     static H1Import(s, parser){
-      let M1Code = Generator.H1ConvertToM1(s)
-      Generator.M1Import(M1Code, parser)
+      let M1Code = H1.H1ConvertToM1(s)
+      M1.M1Import(M1Code, parser)
     }
   
   
@@ -202,7 +202,7 @@ class H1{
     //  multiple
     //Given the root node of a parsing tree, this transforms it into H1 format
     static H1Export(node, depth = 0){
-      let outputString = Generator.H1EncodeDepth(depth) + node.type + '\n'
+      let outputString = H1.H1EncodeDepth(depth) + node.type + '\n'
   
       let childrenString = ''
       switch(node.type){
@@ -211,7 +211,7 @@ class H1{
         case 'optional':
         case 'entire':
           {
-            childrenString += Generator.H1Export(node.pattern, depth + 1)
+            childrenString += H1.H1Export(node.pattern, depth + 1)
           }
           break
         case 'or':
@@ -223,7 +223,7 @@ class H1{
             if (node.type == 'rule list') listPropertyName = 'rules'
   
             for (let i = 0; i < node[listPropertyName].length; i++){
-              childrenString += Generator.H1Export(node[listPropertyName][i], depth + 1)
+              childrenString += H1.H1Export(node[listPropertyName][i], depth + 1)
               if (i < node.rules.length - 1){
                 childrenString += '\n'
               }
@@ -232,15 +232,15 @@ class H1{
           break
         case 'rule':
           {
-            childrenString += Generator.H1EncodeDepth(depth + 1) + node.name + '\n'
-            childrenString += Generator.H1Export(node.pattern, depth + 1)
+            childrenString += H1.H1EncodeDepth(depth + 1) + node.name + '\n'
+            childrenString += H1.H1Export(node.pattern, depth + 1)
           }
           break
         case 'character class':
         case 'string literal':
         case 'rule name':
           {
-            childrenString += Generator.H1EncodeDepth(depth + 1) + node.string
+            childrenString += H1.H1EncodeDepth(depth + 1) + node.string
           }
           break
         default:

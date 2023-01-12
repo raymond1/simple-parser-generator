@@ -1,6 +1,9 @@
 <%
 transcribe
- src/generator/nodes.js 
+ src/generator/nodes.js
+ src/generator/H1.js
+ src/generator/M1.js
+ src/generator/H2.js
  src/generator/generator.js 
  src/generator/tree.js 
  src/generator/strings.js 

@@ -133,7 +133,7 @@ class H2{
     var return_node = RuleListNode.grammarize(string, parser)
 
     if (return_node == null){
-      console.log('Grammar is empty or there was an error in your grammar. Or, there is an error in this parser.')
+      console.log('H2 Import failed. Grammar is empty or there was an error in your grammar.')
     }
     return return_node
   }

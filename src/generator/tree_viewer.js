@@ -1,18 +1,43 @@
+/**
+ * Converts a tree into either a text-based representation or a DOM tree representation.
+ * 
+ */
 class TreeViewer{
-  constructor(tree, parentElement){
-    this.tree = tree
+  /**
+   * 
+   * @param {Object} root The root tree node
+   * @param {DOMElement} parentElement The DOM parent node where the root HTML element will be attached for display.
+   */
+  constructor(root = null, parentElement = null){
+    /** 
+     * The root of the TreeViewer object points to a root node of a tree of nodes.
+     * @member {Object} */
+    this.root = root
+    /** 
+     * The parentElement, if passed in is used to attach DOM elements when using the display function.
+     * If no parent element is passed in,
+     * @member {DOMElement} */
     this.parentElement = parentElement
-    if (parentElement){
-      this.domElement = document.createElement('pre')
-      this.parentElement.appendChild(this.domElement)
-    }
+    // this.domElement = document.createElement('pre')
+    // this.parentElement.appendChild(this.domElement)
   }
 
-  getOutputString(metadata){
-    if (metadata == null){
+  /**
+   * A recursively applied function
+   * 
+   * node is a node on a parse tree produced by the parse function.
+   * @param {*} node
+   * 
+   * Returns an output string representing the input tree rooted at node. If the node is null, then 
+   * "(null)\n" is returned.
+   * @returns {String}
+   */
+  getOutputString(node){
+    if (node == null){
       return '(null)\n'
     }
 
+    /*
     let starIndent = 0
     if (metadata){
       if (metadata['depth']){
@@ -57,23 +82,31 @@ class TreeViewer{
     if (Array.isArray(metadata)){
       outputString += "(array end)\n"
     }
-
+*/
     return outputString
   }
-  
-  display(metadata){
-    let outputString = ''
-    if (typeof metadata == 'undefined'){
-      metadata = this.tree.root
+  /**
+   * A set of key-value pairs used to configure the display function. The possible options are:
+   * 'text' and 'html'.
+   * If 'text' mode is selected, then output will be in the form of indented string blocks and the console will be
+   * used for display. If display is not desired, the function getOutputString can be used instead.
+   * 
+   * @param {Object} mode
+   * 
+   */
+  display(mode = 'text'){
+    if (mode == 'text'){
+      let outputString = ''
+      outputString = this.getOutputString()
+    }else if (mode == 'html'){
+      let outputTextNode = document.createTextNode(outputString)
+      this.domElement.appendChild(outputTextNode)
     }
-    outputString = this.getOutputString(metadata)
 
     //There are two display modes: to display in the console, or to display in the DOM on the browser
     if (!this.parentElement){
       console.log(outputString)
     }else{
-      let outputTextNode = document.createTextNode(outputString)
-      this.domElement.appendChild(outputTextNode)
     }
   }
 }

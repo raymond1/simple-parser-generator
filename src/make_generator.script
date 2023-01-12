@@ -1,2 +1,2 @@
-compile src/main.template releases/generator.js
+compile src/main.template releases/spg.js
 copyscript src/demos.copy

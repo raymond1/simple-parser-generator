@@ -103,3 +103,9 @@ Reading of a file starts from top to bottom. The first line is the name of a nod
   'string literal'
   'rule name',
   'rule'
+
+# Launch checklist
+1) package.json in demo folder should be updated to correct branch from "github:raymond1/simple-parser-generator#v2"
+2) demos should work
+3) documentation generation should be updated
+4) demo files should be present and checked in despite being ignored in github

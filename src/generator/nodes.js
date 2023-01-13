@@ -6,6 +6,7 @@ class Node{
     this.type = this.constructor.type //Show type in object for the debugger
     this.parser = metadata.parser
     this.id = this.parser.getId()
+    this.parse = this.match
   }
 
   //Implemented and overriden by child nodes. Given a node, coverts it into a string form

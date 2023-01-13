@@ -192,7 +192,8 @@ class H1{
     //Given a string in H1 format, loads the appropriate nodes into memory
     static H1Import(s, parser){
       let M1Code = H1.H1ConvertToM1(s)
-      M1.M1Import(M1Code, parser)
+console.log(M1Code)
+      return M1.M1Import(M1Code, parser)
     }
   
   

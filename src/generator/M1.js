@@ -101,7 +101,7 @@ class M1{
           let caret = s.indexOf(',') + 1
           let rules = M1.M1GetPatterns(s.substring(caret,s.length - 1), parser)
           ruleListNode.rules = rules
-          parser.grammar = ruleListNode
+          return ruleListNode
         }
         break
       case 'rule':

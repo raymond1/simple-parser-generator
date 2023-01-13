@@ -17,6 +17,7 @@ let grammar =
  */
 let parser = generator.generateParser(grammar, 'h1')
 let testProgram = 'aaaaaaaaaaaa'
+console.log(parser)
 
 let output = parser.parse(testProgram)
 let treeViewer = new TreeViewer()

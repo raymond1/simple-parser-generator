@@ -29,18 +29,18 @@ class M1{
   //If not found, then take entire string as the last pattern
   //dafsdf+1-1+1-1
   //Returns an array of pattern nodes
-  static M1GetPatterns(s, parser){
+  static M1GetPatterns(s, generator){
     let patterns = []
     let caret = 0
     
     let nextZeroLevelComma = M1.getNextZeroLevelComma(s)
     while(nextZeroLevelComma > 0){
       let nextNodeString = s.substring(caret,nextZeroLevelComma)
-      patterns.push(M1.M1Import(nextNodeString, parser))
+      patterns.push(M1.M1Import(nextNodeString, generator))
       caret = caret + nextNodeString.length
     }
 
-    patterns.push(M1.M1Import(s.substring(caret), parser))
+    patterns.push(M1.M1Import(s.substring(caret), generator))
     return patterns
 }
   //The return value is a number containing the index of the right square bracket
@@ -84,7 +84,7 @@ class M1{
   }
 
   //Takes in a string in M1 format and converts it into an in-memory representation of a parser
-  static M1Import(s, parser){
+  static M1Import(s, generator){
     //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
     //Get everything from [ to the first comma as the type of a node
 
@@ -92,14 +92,14 @@ class M1{
     switch(nodeType){
       case 'rule list':
         {
-          let ruleListNode = new RuleListNode({parser})
+          let ruleListNode = new RuleListNode({generator})
           //let nodeList
           //Need to get rule 1, rule 2, rule 3...
           //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
 
           //everything from the first comma to the last right bracket are to be processed as a series of nodes
           let caret = s.indexOf(',') + 1
-          let rules = M1.M1GetPatterns(s.substring(caret,s.length - 1), parser)
+          let rules = M1.M1GetPatterns(s.substring(caret,s.length - 1), generator)
           ruleListNode.rules = rules
           return ruleListNode
         }
@@ -109,58 +109,58 @@ class M1{
           //[rule,rule name,pattern]
           let firstComma = s.indexOf(',')
           let secondComma = s.indexOf(',',firstComma + 1)
-          let pattern = M1.M1GetPatterns(s.substring(secondComma+1, s.length - 1), parser)[0]
-          let ruleNode = new RuleNode({parser:parser, name: s.substring(firstComma+1,secondComma), pattern})
+          let pattern = M1.M1GetPatterns(s.substring(secondComma+1, s.length - 1), generator)[0]
+          let ruleNode = new RuleNode({generator:generator, name: s.substring(firstComma+1,secondComma), pattern})
           return ruleNode
         }
       case 'or':
         {
           //[or,pattern 1,pattern 2,pattern 3,...,pattern n]
           let firstComma = s.indexOf(',')
-          let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
-          let orNode = new OrNode({parser:parser, patterns})
+          let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
+          let orNode = new OrNode({generator:generator, patterns})
           return orNode
         }
       case 'and':
         {
           let firstComma = s.indexOf(',')
-          let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
-          let node = new AndNode({parser:parser, patterns})
+          let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
+          let node = new AndNode({generator:generator, patterns})
           return node  
         }
       case 'sequence':
         {
           let firstComma = s.indexOf(',')
-          let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)
-          let node = new SequenceNode({parser:parser, patterns})
+          let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
+          let node = new SequenceNode({generator:generator, patterns})
           return node  
         }
       case 'not':
         {
           let firstComma = s.indexOf(',')
-          let pattern = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
-          let node = new NotNode({parser:parser, pattern})
+          let pattern = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)[0]
+          let node = new NotNode({generator:generator, pattern})
           return node  
         }
       case 'optional':
         {
           let firstComma = s.indexOf(',')
-          let pattern = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
-          let node = new OptionalNode({parser:parser, pattern})
+          let pattern = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)[0]
+          let node = new OptionalNode({generator:generator, pattern})
           return node  
         }
       case 'multiple':
         {
           let firstComma = s.indexOf(',')
-          let pattern = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), parser)[0]
-          let node = new MultipleNode({parser:parser, pattern})
+          let pattern = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)[0]
+          let node = new MultipleNode({generator:generator, pattern})
           return node  
         }
       case 'character class':
         {
           let firstComma = s.indexOf(',')
           let string = M1.M1Unescape(s.substring(firstComma + 1, s.length - 1))
-          let node = new CharacterClassNode({parser:parser, string})
+          let node = new CharacterClassNode({generator:generator, string})
           return node  
         }
       case 'string literal':

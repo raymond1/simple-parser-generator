@@ -8,11 +8,7 @@ class TreeViewer{
    * @param {Object} root The root tree node
    * @param {DOMElement} parentElement The DOM parent node where the root HTML element will be attached for display.
    */
-  constructor(root = null, parentElement = null){
-    /** 
-     * The root of the TreeViewer object points to a root node of a tree of nodes.
-     * @member {Object} */
-    this.root = root
+  constructor(parentElement = null){
     /** 
      * The parentElement, if passed in is used to attach DOM elements when using the display function.
      * If no parent element is passed in,
@@ -26,36 +22,33 @@ class TreeViewer{
    * A recursively applied function
    * 
    * node is a node on a parse tree produced by the parse function.
-   * @param {*} node
+   * @param {Node} node
+   * 
+   * metadata is a set of key-value pairs containing arguments for this function.
+   * It is of the form:
+   * {
+   *  depth:number
+   * }
+   * Here, depth is the depth of a node in the output tree
+   * @param {Object} metadata
    * 
    * Returns an output string representing the input tree rooted at node. If the node is null, then 
    * "(null)\n" is returned.
    * @returns {String}
    */
-  getOutputString(node){
-    if (node == null){
+  getOutputString(node, metadata = {depth:0}){
+    if (node === null){
       return '(null)\n'
     }
 
-    /*
-    let starIndent = 0
-    if (metadata){
-      if (metadata['depth']){
-        starIndent = metadata['depth']
-      }
-    }
-    let outputString = '  '.repeat(starIndent) + '*****************************\n'
-
-    if (Array.isArray(metadata)){
-      outputString += "(array begin)\n"
+    if (typeof node == 'undefined'){
+      return '(undefined)\n'
     }
 
-    if (typeof metadata == 'undefined'){
-      outputString += "(undefined)\n"
-    }
+    let outputString = ' '.repeat(metadata.depth) + '*****************************\n'
 
-    for (let key in metadata){
-      let keyValue = metadata[key]
+    for (let key in node){
+      let keyValue = node[key]
 
       //If the keyValue is an object,
       if (typeof keyValue == 'object'){
@@ -70,21 +63,25 @@ class TreeViewer{
             }
           }
         }
-        else
+        else if (key == 'parent')
         {
-          outputString += '  '.repeat(starIndent) + key + ":" + keyValue.id + '\n'
+          //display parent's id value
+          let parentIdValue = '(null)'
+
+          if (keyValue != null){
+            parentIdValue = keyValue.id + ''
+          }
+          outputString += ' '.repeat(metadata.depth) + key + ":" + parentIdValue + '\n'
+
         }
       }else{
-        outputString += '  '.repeat(starIndent) + key + ":" + keyValue + '\n'
+        outputString += ' '.repeat(metadata.depth) + key + ":" + keyValue + '\n'
       }
     }
 
-    if (Array.isArray(metadata)){
-      outputString += "(array end)\n"
-    }
-*/
     return outputString
   }
+
   /**
    * A set of key-value pairs used to configure the display function. The possible options are:
    * 'text' and 'html'.
@@ -94,20 +91,21 @@ class TreeViewer{
    * @param {Object} mode
    * 
    */
-  display(mode = 'text'){
+  display(mode = 'text', parser){
+    // //There are two display modes: to display in the console, or to display in the DOM on the browser
+    // if (!this.parentElement){
+    //   console.log(outputString)
+    // }else{
+    // }
+
     if (mode == 'text'){
-      let outputString = ''
-      outputString = this.getOutputString()
-    }else if (mode == 'html'){
+      console.log(this.getOutputString(parser))
+    }
+    /*
+    else if (mode == 'html'){
       let outputTextNode = document.createTextNode(outputString)
       this.domElement.appendChild(outputTextNode)
-    }
-
-    //There are two display modes: to display in the console, or to display in the DOM on the browser
-    if (!this.parentElement){
-      console.log(outputString)
-    }else{
-    }
+    }*/
   }
 }
 

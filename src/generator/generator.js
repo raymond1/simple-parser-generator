@@ -27,32 +27,22 @@ class Generator{
   }
 
   static registerNodeTypes(){
-    Generator.nodeTypes = []
-    Generator.nodeTypes.push(SequenceNode)
-    Generator.nodeTypes.push(OrNode)
-    Generator.nodeTypes.push(AndNode)
-    Generator.nodeTypes.push(MultipleNode)
-    Generator.nodeTypes.push(NotNode)
-    Generator.nodeTypes.push(OptionalNode)
-    Generator.nodeTypes.push(CharacterClassNode)
-    Generator.nodeTypes.push(StringLiteralNode)
-    Generator.nodeTypes.push(EntireNode)
-    //Order matters for getnodetype
-    Generator.nodeTypes.push(RuleNameNode)
-    Generator.nodeTypes.push(RuleNode)
-    Generator.nodeTypes.push(RuleListNode)
-
-    //Note that the rule for the rule list does not have to be in this list because no reference to it will can be made within one of its rules
-    //and so it will never get triggered during parsing of the input grammar
+    Generator.nodeTypes = {
+      'character class': CharacterClassNode,
+      'string literal':StringLiteralNode,
+      'sequence':SequenceNode,
+      'or':OrNode,
+      'and':AndNode,
+      'multiple':MultipleNode,
+      'not':NotNode,
+      'optional':OptionalNode,
+      'entire':EntireNode
+    }
   }
 
   //Returns an array of all node types known by the parser
   static getNodeTypeNames(){
-    let nodeTypeNames = []
-    for (let nodeType of Generator.nodeTypes){
-      nodeTypeNames.push(nodeType.type)
-    }
-    return nodeTypeNames
+    return Object.keys(Generator.nodeTypes)
   }
 
   getMatchCount(){
@@ -146,6 +136,14 @@ class Generator{
 
   set rawMatches(value){
     this._rawMatches = value
+  }
+  
+  /**
+   * Takes in one of the official node type names and returns an object of that node type.
+   * @param {String} nodeType 
+   */
+  createNode(nodeType){
+
   }
 }
 

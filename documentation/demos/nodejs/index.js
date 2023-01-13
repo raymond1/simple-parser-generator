@@ -1,6 +1,5 @@
-import Generator from './spg.js'
+import {Generator, TreeViewer} from './spg.js'
 let generator = new Generator()
-
 let grammar =
 `character class
  ab`
@@ -17,12 +16,10 @@ let grammar =
  */
 let parser = generator.generateParser(grammar, 'h1')
 let testProgram = 'aaaaaaaaaaaa'
-console.log(parser)
 
 let output = parser.parse(testProgram)
 let treeViewer = new TreeViewer()
-treeViewer.root = output
-treeViewer.display()
+treeViewer.display('text', output)
 
 
 

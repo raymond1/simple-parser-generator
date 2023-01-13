@@ -19,65 +19,63 @@ class TreeViewer{
   }
 
   /**
-   * A recursively applied function
+   * A recursively applied function.
    * 
-   * node is a node on a parse tree produced by the parse function.
-   * @param {Node} node
-   * 
-   * metadata is a set of key-value pairs containing arguments for this function.
-   * It is of the form:
-   * {
-   *  depth:number
-   * }
-   * Here, depth is the depth of a node in the output tree
-   * @param {Object} metadata
+   * node is a node on a parse tree produced by the parse function. It is expected that nodes have
+   * the following properties
+   * @param {MatchNode} matchNode
    * 
    * Returns an output string representing the input tree rooted at node. If the node is null, then 
    * "(null)\n" is returned.
    * @returns {String}
    */
-  getOutputString(node, metadata = {depth:0}){
-    if (node === null){
+  getOutputString(matchNode){
+console.log('object keys of matchNode:')
+if (matchNode){
+  console.log(Object.keys(matchNode))
+}
+    if (matchNode === null){
       return '(null)\n'
     }
 
-    if (typeof node == 'undefined'){
+    if (typeof matchNode == 'undefined'){
       return '(undefined)\n'
     }
 
-    let outputString = ' '.repeat(metadata.depth) + '*****************************\n'
+    let outputString = ' '.repeat(matchNode.depth) + '************BEGIN************'+matchNode.depth+'\n'
 
-    for (let key in node){
-      let keyValue = node[key]
+    for (let key in matchNode){
+      let keyValue = matchNode[key]
 
-      //If the keyValue is an object,
-      if (typeof keyValue == 'object'){
-        if (key !='parent'){
-          if (keyValue !== null){
-            if (Array.isArray(keyValue)){
-              for (let j = 0; j < keyValue.length; j++){
-                outputString += this.getOutputString(keyValue[j])
-              }
-            }else{
-              outputString += this.getOutputString(keyValue)
+      switch(key){
+        case 'parent':
+          {
+            //display parent's id value
+            let parentIdValue = '(null)'
+  
+            if (keyValue != null){
+              parentIdValue = keyValue.id + ''
             }
-          }
-        }
-        else if (key == 'parent')
-        {
-          //display parent's id value
-          let parentIdValue = '(null)'
 
-          if (keyValue != null){
-            parentIdValue = keyValue.id + ''
+            outputString += ' '.repeat(matchNode.depth) + key + ":" + parentIdValue + '\n'
+  
           }
-          outputString += ' '.repeat(metadata.depth) + key + ":" + parentIdValue + '\n'
+          break
+        case 'subMatches':
+          for (let i = 0; i < matchNode['subMatches'].length;i++){
+            outputString += this.getOutputString(keyValue[i])
+          }
+          // outputString += ' '.repeat(matchNode.depth) + key + ':' + keyValue + '\n'
+          break;
+        default:
 
-        }
-      }else{
-        outputString += ' '.repeat(metadata.depth) + key + ":" + keyValue + '\n'
+          outputString += ' '.repeat(matchNode.depth) + key + ':' + keyValue + '\n'
+          //this.getOutputString(keyValue)
+          break
       }
     }
+
+    outputString += ' '.repeat(matchNode.depth) + '*************END*************'+matchNode.depth+'\n'
 
     return outputString
   }

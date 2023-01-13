@@ -45,10 +45,17 @@ class Generator{
     return Object.keys(Generator.nodeTypes)
   }
 
-  getMatchCount(){
-    let matchCount = this.matchCount
+  /*
+   * Returns the number of matches the parser has performed. Then, increases it by 1. Used to name 
+   * all the match nodes as they are generated.
+   * 
+   * Returns the number of matches the parser has performed.
+   * @returns {Number}
+   */
+  getAndIncrementMatchCount(){
+    let oldMatchCount = this.matchCount
     this.matchCount = this.matchCount + 1
-    return matchCount
+    return oldMatchCount
   }
 
   /*
@@ -90,6 +97,10 @@ class Generator{
 
     let _language = language.toUpperCase()
     let parser
+
+    if (['M1','H1','H2'].includes(_language)){
+      console.log(_language + ' parser detected.')
+    }
     if (_language == 'M1'){
       parser = Generator.M1Import(parserDescription, this)
     }else if (_language == 'H1'){
@@ -138,12 +149,24 @@ class Generator{
     this._rawMatches = value
   }
   
-  /**
+  /*
    * Takes in one of the official node type names and returns an object of that node type.
-   * @param {String} nodeType 
+   * Also sets the generator object for a node and the id.
+   * 
+   * 
+   * metadata is of the form:
+   * {
+   *  type:<node type>,
+   *  ...other attributes, like
+   *  string
+   * }
+   * @param {String} metadata 
    */
-  createNode(nodeType){
-
+  createNode(metadata){
+    let newNode = new Generator.nodeTypes[metadata.type](metadata)
+    newNode.id = this.getId()
+    newNode.generator = this
+    return newNode
   }
 }
 

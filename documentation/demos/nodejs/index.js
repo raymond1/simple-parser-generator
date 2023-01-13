@@ -1,8 +1,9 @@
 import {Generator, TreeViewer} from './spg.js'
 let generator = new Generator()
 let grammar =
-`character class
- ab`
+`not
+ character class
+  abc`
 /*
 'character class'
 'string literal'
@@ -15,7 +16,7 @@ let grammar =
 'entire'
  */
 let parser = generator.generateParser(grammar, 'h1')
-let testProgram = 'aaaaaaaaaaaa'
+let testProgram = 'defg'
 
 let output = parser.parse(testProgram)
 let treeViewer = new TreeViewer()

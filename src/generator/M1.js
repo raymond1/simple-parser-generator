@@ -90,28 +90,27 @@ class M1{
 
     let nodeType = M1.M1GetNodeType(s)
     switch(nodeType){
-      case 'rule list':
+      case 'character class':
         {
-          let ruleListNode = new RuleListNode({generator})
-          //let nodeList
-          //Need to get rule 1, rule 2, rule 3...
-          //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
-
-          //everything from the first comma to the last right bracket are to be processed as a series of nodes
-          let caret = s.indexOf(',') + 1
-          let rules = M1.M1GetPatterns(s.substring(caret,s.length - 1), generator)
-          ruleListNode.rules = rules
-          return ruleListNode
-        }
-        break
-      case 'rule':
-        {
-          //[rule,rule name,pattern]
           let firstComma = s.indexOf(',')
-          let secondComma = s.indexOf(',',firstComma + 1)
-          let pattern = M1.M1GetPatterns(s.substring(secondComma+1, s.length - 1), generator)[0]
-          let ruleNode = new RuleNode({generator:generator, name: s.substring(firstComma+1,secondComma), pattern})
-          return ruleNode
+          let string = M1.M1Unescape(s.substring(firstComma + 1, s.length - 1))
+          let node = generator.createNode({type:'character class', string})
+          return node  
+        }
+      case 'string literal':
+        {
+          let firstComma = s.indexOf(',')
+          let string = M1.M1Unescape(s.substring(firstComma + 1, s.length - 1))
+          let node = generator.createNode({type:'string literal', string})
+          return node  
+        }
+      case 'not':
+        {
+          let firstComma = s.indexOf(',')
+          let pattern = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)[0]
+          let node = generator.createNode({type:'not', nodes: [pattern]})
+console.log(node)
+          return node  
         }
       case 'or':
         {
@@ -135,13 +134,6 @@ class M1{
           let node = new SequenceNode({generator:generator, patterns})
           return node  
         }
-      case 'not':
-        {
-          let firstComma = s.indexOf(',')
-          let pattern = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)[0]
-          let node = new NotNode({generator:generator, pattern})
-          return node  
-        }
       case 'optional':
         {
           let firstComma = s.indexOf(',')
@@ -156,15 +148,30 @@ class M1{
           let node = new MultipleNode({generator:generator, pattern})
           return node  
         }
-      case 'character class':
-        {
-          let firstComma = s.indexOf(',')
-          let string = M1.M1Unescape(s.substring(firstComma + 1, s.length - 1))
-          let node = new CharacterClassNode({generator:generator, string})
-          return node  
-        }
-      case 'string literal':
-        break          
+      // case 'rule list':
+      //   {
+      //     let ruleListNode = new RuleListNode({generator})
+      //     //let nodeList
+      //     //Need to get rule 1, rule 2, rule 3...
+      //     //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
+
+      //     //everything from the first comma to the last right bracket are to be processed as a series of nodes
+      //     let caret = s.indexOf(',') + 1
+      //     let rules = M1.M1GetPatterns(s.substring(caret,s.length - 1), generator)
+      //     ruleListNode.rules = rules
+      //     return ruleListNode
+      //   }
+      //   break
+      // case 'rule':
+      //   {
+      //     //[rule,rule name,pattern]
+      //     let firstComma = s.indexOf(',')
+      //     let secondComma = s.indexOf(',',firstComma + 1)
+      //     let pattern = M1.M1GetPatterns(s.substring(secondComma+1, s.length - 1), generator)[0]
+      //     let ruleNode = new RuleNode({generator:generator, name: s.substring(firstComma+1,secondComma), pattern})
+      //     return ruleNode
+      //   }
+
       default:
         throw new Error('Unknown node type: ') + nodeType
         break;

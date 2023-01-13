@@ -9,14 +9,8 @@ class Node{
    * A set of key-value pairs. Must have a parser value in the 'parser' key.
    * @param {Generator} generator 
    */
-  constructor({generator}){
+  constructor(){
     this.type = this.constructor.type //Show type in object for the debugger
-    this.generator = generator
-    if (!this.generator){
-      throw new Error('No generator passed in during construction of Node object.')
-    }
-console.log(this.generator)
-    this.id = this.generator.getId()
   }
 
   //Implemented and overriden by child nodes. Given a node, coverts it into a string form
@@ -33,7 +27,7 @@ console.log(this.generator)
  * 
  * {
  *  matchFound,
- *  matches,
+ *  subMatches,
  *  matchString
  * }
  * 
@@ -41,7 +35,7 @@ console.log(this.generator)
  * */
 class CharacterClassNode extends Node{
   constructor(metadata){
-    super(metadata)
+    super()
     this.string = metadata.string
   }
 
@@ -89,6 +83,7 @@ class CharacterClassNode extends Node{
    * @returns 
    */
   parse(inputString, metadata = {depth: 0, parent: null}){
+
     let newMatchNode = new MatchNode()
     //matches if the inputString starts with characters from the character class
     let matchingString = ''
@@ -117,435 +112,11 @@ class CharacterClassNode extends Node{
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       id: this.id, 
-      serial: this.generator.getMatchCount(),
+      serial: this.generator.getAndIncrementMatchCount(),
       matchFound:  matchFound, 
       matchLength,
       matchString: inputString.substring(0, matchLength),
     })
-    return newMatchNode
-  }
-}
-
-class NotNode extends Node{
-  constructor(metadata){
-    super(metadata)
-    this.pattern = metadata.pattern
-  }
-  static type = 'not'
-
-  static headMatch(string){
-    return Generator.headMatchXWithBrackets(string, 'NOT')
-  }
-
-  static grammarize(string, parser){
-    var trimmed_string = string.trim()
-
-    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'NOT'.length)
-    if (first_few_characters_of_trimmed_string !== 'NOT')
-    {
-      return null
-    }
-
-    var location_of_first_left_bracket = trimmed_string.indexOf('[')
-    if (location_of_first_left_bracket < 0) return null
-
-    var location_of_last_right_bracket = Generator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
-    if (location_of_last_right_bracket < 0) return null
-    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
-    
-    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
-
-    var pattern = Generator.grammarize_PATTERN(string_in_between_square_brackets, parser)
-    if (pattern != null){
-      return new NotNode({'pattern': pattern, parser})
-    }
-
-    return null
-  }
-
-  M1Export(){
-    return `[${this.constructor.type},${this.pattern.M1Export()}]`
-  }
-
-  parse(inputString, metadata = {depth: 0, parent: null}){
-    var newMatchNode = new MatchNode()
-    let matchInfo = this.pattern.parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
-
-    Object.assign(
-      newMatchNode, {
-        parent: metadata.parent, 
-        depth: metadata.depth,
-        inputString: inputString.slice(), 
-        type: this['type'].slice(),
-        id: this.id, 
-        serial: this.generator.getMatchCount(),
-        matchFound:  !matchInfo.matchFound, 
-        matchLength: matchInfo.matchFound?0:matchInfo.matchLength, 
-        matches: [matchInfo],
-        matchString: inputString.substring(0, matchLength),
-
-        pattern: this.pattern
-      }
-    )
-
-    return newMatchNode
-  }
-}
-
-
-class SequenceNode extends Node{
-  constructor(metadata){
-    super(metadata)
-    this.patterns = metadata.patterns
-  }
-  static type = 'sequence'
-
-  static headMatch(string){
-    return Generator.headMatchXWithBrackets(string, SequenceNode.type)
-  }
-
-  static grammarize(string, parser){
-    var trimmed_string = string.trim()
-    if (trimmed_string.length < 'SEQUENCE[]'.length) return null
-
-    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,8)
-    if (first_few_characters_of_trimmed_string !== 'SEQUENCE')
-    {
-      return null
-    }
-
-    var location_of_first_left_bracket = trimmed_string.indexOf('[')
-    if (location_of_first_left_bracket < 0) return null
-
-    var location_of_last_right_bracket = Generator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
-    if (location_of_last_right_bracket < 0) return null
-    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
-    
-    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
-
-    let patterns = Generator.grammarize_PATTERN_LIST(string_in_between_square_brackets.trim(), parser)
-    if (patterns != null){
-      return new SequenceNode({'patterns':patterns, parser})
-    }
-
-    return null
-  }
-
-  M1Export(){
-    let patternsString = ''
-    this.patterns.forEach((pattern, index)=>{
-      if (index > 0){
-        patternString += ","
-      }
-      patternsString += `[${pattern.M1Export()}]`
-    })
-    let s = `[${patternsString}]`
-    return s
-  }
-
-  parse(inputString, metadata = {depth: 0, parent: null}){
-    var newMatchNode = new MatchNode()
-    let tempString = inputString
-    let totalMatchLength = 0
-
-    let matches = []
-    let matchInfo
-    for (let i = 0; i < this['patterns'].length; i++){
-      matchInfo = this.patterns[i].parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
-      matches.push(matchInfo)
-      if (!matchInfo.matchFound){
-        break;
-      }else{
-        totalMatchLength = totalMatchLength + matchInfo.matchLength
-        tempString = tempString.substring(matchInfo.matchLength)
-      }
-    }
-    let matchFound = matchInfo.matchFound
-    let matchLength = totalMatchLength
-
-    Object.assign(
-      newMatchNode, {
-        parent: metadata.parent, 
-        depth: metadata.depth,
-        inputString: inputString.slice(), 
-        type: this['type'].slice(),
-        id: this.id, 
-        serial: this.generator.getMatchCount(),
-        matchFound:  matchFound, 
-        matchLength: matchLength, 
-        matches,
-        matchString: inputString.substring(0, matchLength),
-      }
-    )
-
-    return newMatchNode
-  }
-}
-
-class OrNode extends Node{
-  constructor(metadata){
-    super(metadata)
-    this.patterns = metadata.patterns
-  }
-  static type = 'or'
-  
-  static headMatch(s){
-    return Generator.headMatchXWithBrackets(s, 'OR')
-  }
-
-  static grammarize(string, parser){
-    //An OR construct is either
-    //A) The word OR followed by [], or
-    //B)Just the [] by itself
-
-    var trimmed_string = string.trim()
-
-    if (trimmed_string.length < 3){ //minimum string needs to be []
-      return null
-    }
-
-    var location_of_first_left_bracket = trimmed_string.indexOf('[')
-    if (location_of_first_left_bracket < 0) return null
-
-    var location_of_matching_right_bracket = Generator.getMatchingRightSquareBracket(trimmed_string, location_of_first_left_bracket)
-    if (location_of_matching_right_bracket < 0) return null
-    if (location_of_matching_right_bracket != trimmed_string.length - 1) return null
-
-    var string_before_first_left_bracket = trimmed_string.substring(0,location_of_first_left_bracket).trim()
-    if (string_before_first_left_bracket != 'OR') return null
-
-    var string_in_between_two_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_matching_right_bracket)
-
-    var pattern_list = Generator.grammarize_PATTERN_LIST(string_in_between_two_square_brackets, parser)
-    if (pattern_list != null){
-      return new OrNode({'patterns':pattern_list, parser})
-    }
-
-    return null
-  }
-
-  M1Export(){
-    let patternsString = ''
-    this.patterns.forEach((pattern, index)=>{
-      if (index > 0) patternsString += ","
-      patternsString += pattern.M1Export()
-    })
-    let s = `[${this.constructor.type},${patternsString}]`
-    return s
-  }
-
-  parse(inputString,metadata = {depth: 0, parent: null}){
-    var newMatchNode = new MatchNode()
-
-    let matches = []
-    let matchInfo
-    for (let i = 0; i < this.patterns.length; i++){
-      matchInfo = this['patterns'][i].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
-      matches.push(matchInfo)
-      if (matchInfo.matchFound){
-        break
-      }
-    }
-    let matchFound = matchInfo.matchFound
-    let matchLength = matchInfo.matchLength
-
-    Object.assign(
-      newMatchNode, {
-        parent: metadata.parent, 
-        depth: metadata.depth,
-        inputString: inputString.slice(), 
-        type: this['type'].slice(),
-        id: this.id, 
-        serial: this.generator.getMatchCount(),
-        matchFound:  matchFound, 
-        matchLength: matchLength, 
-        matches,
-        matchString: inputString.substring(0, matchLength),
-      }
-    )
-
-    return newMatchNode
-  }
-}
-
-class AndNode extends Node{
-  constructor(metadata){
-    super(metadata)
-    this.patterns = metadata.patterns
-  }
-  static type = 'and'
-
-  static grammarize(string, parser){
-    var trimmed_string = string.trim()
-    var location_of_first_left_square_bracket = trimmed_string.indexOf('[')
-    if (location_of_first_left_square_bracket < 0) return null
-
-    var string_before_first_left_square_bracket = trimmed_string.substring(0, location_of_first_left_square_bracket)
-    if (string_before_first_left_square_bracket.trim() != 'AND') return null
-
-    var location_of_matching_right_square_bracket = Generator.getMatchingRightSquareBracket(trimmed_string, location_of_first_left_square_bracket)
-    if (location_of_matching_right_square_bracket < 0){
-      return null
-    }
-
-    if (location_of_matching_right_square_bracket + 1 != trimmed_string.length) return null
-    var string_between_square_brackets = trimmed_string.substring(location_of_first_left_square_bracket + 1, location_of_matching_right_square_bracket)
-
-    let patterns = Generator.grammarize_PATTERN_LIST(string_between_square_brackets.trim(), parser)
-    if (patterns != null){
-      return new AndNode({'patterns':patterns, parser})
-    }
-
-    return null
-  }
-
-  static headMatch(string){
-    return Generator.headMatchXWithBrackets(string, 'AND')
-  }
-
-  M1Export(){
-    let patternsString = ''
-    this.patterns.forEach((pattern, index)=>{
-      if (index > 0) patternsString += ","
-      patternsString += pattern.M1Export()
-    })
-    let s = `[${this.constructor.type},${patternsString}]`
-    return s
-  }
-
-  parse(inputString,metadata = {depth: 0, parent: null}){
-    var newMatchNode = new MatchNode()
-
-    let matches = []
-    let matchInfo
-    let andDetected = true
-    let smallestMatchLength = 0 //0 indicates no match
-    let tempMatchLength
-    let firstIteration = true
-      
-    for (let i = 0; i < this.patterns.length; i++){
-      matchInfo = this['patterns'][i].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
-      matches.push(matchInfo)
-      if (!matchInfo.matchFound){
-        andDetected = false
-        smallestMatchLength = 0
-        break
-      }else{
-        if (firstIteration){
-          smallestMatchLength = matchInfo.matchLength
-          firstIteration = false
-        }
-        else{
-          if (matchInfo.matchLength < smallestMatchLength){
-            smallestMatchLength = matchInfo.matchLength
-          }
-        }
-      }
-
-    }
-      
-    //matchLength will be equal to the shortest match, or 0 if there was no match
-
-    let matchFound = andDetected
-    matchLength = smallestMatchLength
-
-    Object.assign(
-      newMatchNode, {
-        parent: metadata.parent, 
-        depth: metadata.depth,
-        inputString: inputString.slice(), 
-        type: this['type'].slice(),
-        id: this.id, 
-        serial: this.generator.getMatchCount(),
-        matchFound:  matchFound, 
-        matchLength: matchLength, 
-        matches,
-        matchString: inputString.substring(0, matchLength),
-      }
-    )
-
-    return newMatchNode
-  }
-}
-
-class MultipleNode extends Node{
-  constructor(metadata){
-    super(metadata)
-    this.pattern = metadata.pattern
-  }
-  static type = 'multiple'
-
-  static grammarize(string, parser){
-    var trimmed_string = string.trim()
-
-    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'MULTIPLE'.length)
-    if (first_few_characters_of_trimmed_string !== 'MULTIPLE')
-    {
-      return null
-    }
-
-    var location_of_first_left_bracket = trimmed_string.indexOf('[')
-    if (location_of_first_left_bracket < 0) return null
-
-    var location_of_last_right_bracket = Generator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
-    if (location_of_last_right_bracket < 0) return null
-    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
-    
-    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
-
-    var pattern = Generator.grammarize_PATTERN(string_in_between_square_brackets, parser)
-    if (pattern != null){
-      return new MultipleNode({pattern, parser})
-    }
-
-    return null
-  }
-
-  static headMatch(string){
-    return Generator.headMatchXWithBrackets(string, 'MULTIPLE')
-  }
-
-  M1Export(){
-    return `[multiple,${this.pattern.M1Export()}]`
-  }
-
-  parse(inputString, metadata = {depth: 0, parent: null}){
-    var newMatchNode = new MatchNode()
-    let tempString = inputString
-    let totalMatchLength = 0
-
-    let matches = []
-    let matchInfo = this.pattern.parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
-    if (matchInfo.matchFound){
-      matches.push(matchInfo)
-    }
-    while(matchInfo.matchFound){
-      totalMatchLength = totalMatchLength + matchInfo.matchLength
-      tempString = tempString.substring(matchInfo.matchLength)
-      matchInfo = this.pattern.parse(tempString,{depth: metadata.depth + 1, parent: this})
-      matches.push(matchInfo)
-    }
-  
-    let matchFound = false
-    if (matches.length > 0){
-      matchFound = true
-    }
-    
-    Object.assign(
-      newMatchNode, {
-        parent: metadata.parent, 
-        depth: metadata.depth,
-        inputString: inputString.slice(), 
-        type: this['type'].slice(),
-        id: this.id, 
-        serial: this.generator.getMatchCount(),
-        matchFound:  matchFound, 
-        matchLength: totalMatchLength,
-        matches,
-        matchString: inputString.substring(0, totalMatchLength),
-      }
-    )
-
     return newMatchNode
   }
 }
@@ -633,16 +204,17 @@ class StringLiteralNode extends Node{
       matchFound = true
     }
 
+    let matchLength = matchFound?this.string.length:0
     Object.assign(newMatchNode, {
       parent: metadata.parent, 
       depth: metadata.depth,
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       id: this.id, 
-      serial: this.generator.getMatchCount(),
+      serial: this.generator.getAndIncrementMatchCount(),
       matchFound:  matchFound, 
-      matchLength: matchFound?this.string.length:0,
-      matches,
+      matchLength,
+      subMatches: [],
       matchString: inputString.substring(0, matchLength),
       string: this.string
     })
@@ -650,6 +222,428 @@ class StringLiteralNode extends Node{
   }
 }
 
+class NotNode extends Node{
+  constructor(metadata){
+    super(metadata)
+    this.nodes = metadata.nodes
+  }
+  static type = 'not'
+
+  static headMatch(string){
+    return Generator.headMatchXWithBrackets(string, 'NOT')
+  }
+
+  // static grammarize(string, parser){
+  //   var trimmed_string = string.trim()
+
+  //   var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'NOT'.length)
+  //   if (first_few_characters_of_trimmed_string !== 'NOT')
+  //   {
+  //     return null
+  //   }
+
+  //   var location_of_first_left_bracket = trimmed_string.indexOf('[')
+  //   if (location_of_first_left_bracket < 0) return null
+
+  //   var location_of_last_right_bracket = Generator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+  //   if (location_of_last_right_bracket < 0) return null
+  //   if (location_of_last_right_bracket != trimmed_string.length - 1) return null
+    
+  //   var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
+
+  //   var pattern = Generator.grammarize_PATTERN(string_in_between_square_brackets, parser)
+  //   if (pattern != null){
+  //     return new NotNode({'nodes': [pattern], parser})
+  //   }
+
+  //   return null
+  // }
+
+  M1Export(){
+    return `[${this.constructor.type},${this.pattern.M1Export()}]`
+  }
+
+  parse(inputString, metadata = {depth: 0, parent: null}){
+    var newMatchNode = new MatchNode()
+    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+
+    let matchLength = matchInfo.matchFound?0:inputString.matchLength
+    Object.assign(
+      newMatchNode, {
+        parent: metadata.parent, 
+        depth: metadata.depth,
+        inputString: inputString.slice(), 
+        type: this['type'].slice(),
+        id: this.id, 
+        serial: this.generator.getAndIncrementMatchCount(),
+        matchFound:  !matchInfo.matchFound, 
+        matchLength,
+        subMatches: [matchInfo],
+        matchString: inputString.substring(0, matchLength),
+      }
+    )
+
+    return newMatchNode
+  }
+}
+
+
+class SequenceNode extends Node{
+  constructor(metadata){
+    super(metadata)
+    this.patterns = metadata.patterns
+  }
+  static type = 'sequence'
+
+  static headMatch(string){
+    return Generator.headMatchXWithBrackets(string, SequenceNode.type)
+  }
+
+  static grammarize(string, parser){
+    var trimmed_string = string.trim()
+    if (trimmed_string.length < 'SEQUENCE[]'.length) return null
+
+    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,8)
+    if (first_few_characters_of_trimmed_string !== 'SEQUENCE')
+    {
+      return null
+    }
+
+    var location_of_first_left_bracket = trimmed_string.indexOf('[')
+    if (location_of_first_left_bracket < 0) return null
+
+    var location_of_last_right_bracket = Generator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    if (location_of_last_right_bracket < 0) return null
+    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
+    
+    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
+
+    let patterns = Generator.grammarize_PATTERN_LIST(string_in_between_square_brackets.trim(), parser)
+    if (patterns != null){
+      return new SequenceNode({'patterns':patterns, parser})
+    }
+
+    return null
+  }
+
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0){
+        patternString += ","
+      }
+      patternsString += `[${pattern.M1Export()}]`
+    })
+    let s = `[${patternsString}]`
+    return s
+  }
+
+  parse(inputString, metadata = {depth: 0, parent: null}){
+    var newMatchNode = new MatchNode()
+    let tempString = inputString
+    let totalMatchLength = 0
+
+    let subMatches = []
+    let matchInfo
+    for (let i = 0; i < this['patterns'].length; i++){
+      matchInfo = this.patterns[i].parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
+      subMatches.push(matchInfo)
+      if (!matchInfo.matchFound){
+        break;
+      }else{
+        totalMatchLength = totalMatchLength + matchInfo.matchLength
+        tempString = tempString.substring(matchInfo.matchLength)
+      }
+    }
+    let matchFound = matchInfo.matchFound
+    let matchLength = totalMatchLength
+
+    Object.assign(
+      newMatchNode, {
+        parent: metadata.parent, 
+        depth: metadata.depth,
+        inputString: inputString.slice(), 
+        type: this['type'].slice(),
+        id: this.id, 
+        serial: this.generator.getAndIncrementMatchCount(),
+        matchFound:  matchFound, 
+        matchLength: matchLength, 
+        subMatches,
+        matchString: inputString.substring(0, matchLength),
+      }
+    )
+
+    return newMatchNode
+  }
+}
+
+class OrNode extends Node{
+  constructor(metadata){
+    super(metadata)
+    this.patterns = metadata.patterns
+  }
+  static type = 'or'
+  
+  static headMatch(s){
+    return Generator.headMatchXWithBrackets(s, 'OR')
+  }
+
+  static grammarize(string, parser){
+    //An OR construct is either
+    //A) The word OR followed by [], or
+    //B)Just the [] by itself
+
+    var trimmed_string = string.trim()
+
+    if (trimmed_string.length < 3){ //minimum string needs to be []
+      return null
+    }
+
+    var location_of_first_left_bracket = trimmed_string.indexOf('[')
+    if (location_of_first_left_bracket < 0) return null
+
+    var location_of_matching_right_bracket = Generator.getMatchingRightSquareBracket(trimmed_string, location_of_first_left_bracket)
+    if (location_of_matching_right_bracket < 0) return null
+    if (location_of_matching_right_bracket != trimmed_string.length - 1) return null
+
+    var string_before_first_left_bracket = trimmed_string.substring(0,location_of_first_left_bracket).trim()
+    if (string_before_first_left_bracket != 'OR') return null
+
+    var string_in_between_two_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_matching_right_bracket)
+
+    var pattern_list = Generator.grammarize_PATTERN_LIST(string_in_between_two_square_brackets, parser)
+    if (pattern_list != null){
+      return new OrNode({'patterns':pattern_list, parser})
+    }
+
+    return null
+  }
+
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0) patternsString += ","
+      patternsString += pattern.M1Export()
+    })
+    let s = `[${this.constructor.type},${patternsString}]`
+    return s
+  }
+
+  parse(inputString,metadata = {depth: 0, parent: null}){
+    var newMatchNode = new MatchNode()
+
+    let subMatches = []
+    let matchInfo
+    for (let i = 0; i < this.patterns.length; i++){
+      matchInfo = this['patterns'][i].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+      subMatches.push(matchInfo)
+      if (matchInfo.matchFound){
+        break
+      }
+    }
+    let matchFound = matchInfo.matchFound
+    let matchLength = matchInfo.matchLength
+
+    Object.assign(
+      newMatchNode, {
+        parent: metadata.parent, 
+        depth: metadata.depth,
+        inputString: inputString.slice(), 
+        type: this['type'].slice(),
+        id: this.id, 
+        serial: this.generator.getAndIncrementMatchCount(),
+        matchFound:  matchFound, 
+        matchLength: matchLength, 
+        subMatches,
+        matchString: inputString.substring(0, matchLength),
+      }
+    )
+
+    return newMatchNode
+  }
+}
+
+class AndNode extends Node{
+  constructor(metadata){
+    super(metadata)
+    this.patterns = metadata.patterns
+  }
+  static type = 'and'
+
+  static grammarize(string, parser){
+    var trimmed_string = string.trim()
+    var location_of_first_left_square_bracket = trimmed_string.indexOf('[')
+    if (location_of_first_left_square_bracket < 0) return null
+
+    var string_before_first_left_square_bracket = trimmed_string.substring(0, location_of_first_left_square_bracket)
+    if (string_before_first_left_square_bracket.trim() != 'AND') return null
+
+    var location_of_matching_right_square_bracket = Generator.getMatchingRightSquareBracket(trimmed_string, location_of_first_left_square_bracket)
+    if (location_of_matching_right_square_bracket < 0){
+      return null
+    }
+
+    if (location_of_matching_right_square_bracket + 1 != trimmed_string.length) return null
+    var string_between_square_brackets = trimmed_string.substring(location_of_first_left_square_bracket + 1, location_of_matching_right_square_bracket)
+
+    let patterns = Generator.grammarize_PATTERN_LIST(string_between_square_brackets.trim(), parser)
+    if (patterns != null){
+      return new AndNode({'patterns':patterns, parser})
+    }
+
+    return null
+  }
+
+  static headMatch(string){
+    return Generator.headMatchXWithBrackets(string, 'AND')
+  }
+
+  M1Export(){
+    let patternsString = ''
+    this.patterns.forEach((pattern, index)=>{
+      if (index > 0) patternsString += ","
+      patternsString += pattern.M1Export()
+    })
+    let s = `[${this.constructor.type},${patternsString}]`
+    return s
+  }
+
+  parse(inputString,metadata = {depth: 0, parent: null}){
+    var newMatchNode = new MatchNode()
+
+    let subMatches = []
+    let matchInfo
+    let andDetected = true
+    let smallestMatchLength = 0 //0 indicates no match
+    let tempMatchLength
+    let firstIteration = true
+      
+    for (let i = 0; i < this.patterns.length; i++){
+      matchInfo = this['patterns'][i].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+      subMatches.push(matchInfo)
+      if (!matchInfo.matchFound){
+        andDetected = false
+        smallestMatchLength = 0
+        break
+      }else{
+        if (firstIteration){
+          smallestMatchLength = matchInfo.matchLength
+          firstIteration = false
+        }
+        else{
+          if (matchInfo.matchLength < smallestMatchLength){
+            smallestMatchLength = matchInfo.matchLength
+          }
+        }
+      }
+
+    }
+      
+    //matchLength will be equal to the shortest match, or 0 if there was no match
+
+    let matchFound = andDetected
+    matchLength = smallestMatchLength
+
+    Object.assign(
+      newMatchNode, {
+        parent: metadata.parent, 
+        depth: metadata.depth,
+        inputString: inputString.slice(), 
+        type: this['type'].slice(),
+        id: this.id, 
+        serial: this.generator.getAndIncrementMatchCount(),
+        matchFound:  matchFound, 
+        matchLength: matchLength, 
+        subMatches,
+        matchString: inputString.substring(0, matchLength),
+      }
+    )
+
+    return newMatchNode
+  }
+}
+
+class MultipleNode extends Node{
+  constructor(metadata){
+    super(metadata)
+    this.pattern = metadata.pattern
+  }
+  static type = 'multiple'
+
+  static grammarize(string, parser){
+    var trimmed_string = string.trim()
+
+    var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'MULTIPLE'.length)
+    if (first_few_characters_of_trimmed_string !== 'MULTIPLE')
+    {
+      return null
+    }
+
+    var location_of_first_left_bracket = trimmed_string.indexOf('[')
+    if (location_of_first_left_bracket < 0) return null
+
+    var location_of_last_right_bracket = Generator.getMatchingRightSquareBracket(trimmed_string,location_of_first_left_bracket)
+    if (location_of_last_right_bracket < 0) return null
+    if (location_of_last_right_bracket != trimmed_string.length - 1) return null
+    
+    var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
+
+    var pattern = Generator.grammarize_PATTERN(string_in_between_square_brackets, parser)
+    if (pattern != null){
+      return new MultipleNode({pattern, parser})
+    }
+
+    return null
+  }
+
+  static headMatch(string){
+    return Generator.headMatchXWithBrackets(string, 'MULTIPLE')
+  }
+
+  M1Export(){
+    return `[multiple,${this.pattern.M1Export()}]`
+  }
+
+  parse(inputString, metadata = {depth: 0, parent: null}){
+    var newMatchNode = new MatchNode()
+    let tempString = inputString
+    let totalMatchLength = 0
+
+    let subMatches = []
+    let matchInfo = this.pattern.parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
+    if (matchInfo.matchFound){
+      subMatches.push(matchInfo)
+    }
+    while(matchInfo.matchFound){
+      totalMatchLength = totalMatchLength + matchInfo.matchLength
+      tempString = tempString.substring(matchInfo.matchLength)
+      matchInfo = this.pattern.parse(tempString,{depth: metadata.depth + 1, parent: this})
+      subMatches.push(matchInfo)
+    }
+  
+    let matchFound = false
+    if (subMatches.length > 0){
+      matchFound = true
+    }
+    
+    Object.assign(
+      newMatchNode, {
+        parent: metadata.parent, 
+        depth: metadata.depth,
+        inputString: inputString.slice(), 
+        type: this['type'].slice(),
+        id: this.id, 
+        serial: this.generator.getAndIncrementMatchCount(),
+        matchFound:  matchFound, 
+        matchLength: totalMatchLength,
+        subMatches,
+        matchString: inputString.substring(0, totalMatchLength),
+      }
+    )
+
+    return newMatchNode
+  }
+}
 
 class OptionalNode extends Node{
   constructor(metadata){
@@ -697,9 +691,9 @@ class OptionalNode extends Node{
     let newMatchNode = new MatchNode()
     let matchInfo = this.pattern.parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
-    let matches = []
+    let subMatches = []
     let matchLength = 0
-    matches.push(matchInfo)
+    subMatches.push(matchInfo)
 
     Object.assign(newMatchNode, {
       parent: metadata.parent, 
@@ -707,10 +701,10 @@ class OptionalNode extends Node{
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       id: this.id, 
-      serial: this.generator.getMatchCount(),
+      serial: this.generator.getAndIncrementMatchCount(),
       matchFound:  true, 
       matchLength: matchInfo.matchLength,
-      matches,
+      subMatches,
       matchString: inputString.substring(0, matchLength),
     })
     return newMatchNode
@@ -764,9 +758,9 @@ class EntireNode extends Node{
     let newMatchNode = new MatchNode()
     let matchInfo = this.pattern.parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
-    let matches = []
+    let subMatches = []
     let matchLength = 0
-    matches.push(matchInfo)
+    subMatches.push(matchInfo)
 
     let matchFound = false
     if (matchInfo.length == inputString.length) matchFound = true
@@ -777,10 +771,10 @@ class EntireNode extends Node{
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       id: this.id, 
-      serial: this.generator.getMatchCount(),
+      serial: this.generator.getAndIncrementMatchCount(),
       matchFound:  matchFound, 
       matchLength: matchInfo.matchLength,
-      matches,
+      subMatches,
       matchString: inputString.substring(0, matchLength),
     })
     return newMatchNode
@@ -791,7 +785,7 @@ class EntireNode extends Node{
 class MatchNode{
   constructor(){
     //Defaults will be overridden during matching
-    this.matches = []
+    this.subMatches = []
     this.matchFound = false
     this.matchLength = 0
   }

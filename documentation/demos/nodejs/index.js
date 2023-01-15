@@ -1,22 +1,39 @@
 import {Generator, TreeViewer} from './spg.js'
 let generator = new Generator()
 let grammar =
-`not
- character class
-  abc`
+`sequence
+ string literal
+  a
+ string literal
+  ce`
 /*
 'character class'
 'string literal'
-'or'
-'sequence'
-'and'
-'multiple'
 'not'
 'optional'
 'entire'
+'or'
+'and'
+
+'sequence'
+'multiple'
  */
+//Singles are not,optional,entire,
+//terminals character class, string literal
+//Problem with or disabiguation
+//or [JUMP x,p2,p3]
+
+//x
+//if(x is)
+
+//multiif/switch
+//switch
+
+//sort[p1-then-X,p2-then-y,p3-then-z]
+
+//algorithm-then[algorithm]
 let parser = generator.generateParser(grammar, 'h1')
-let testProgram = 'defg'
+let testProgram = 'ace'
 
 let output = parser.parse(testProgram)
 let treeViewer = new TreeViewer()

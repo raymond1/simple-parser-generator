@@ -42,7 +42,7 @@ if (matchNode){
       return '(undefined)\n'
     }
 
-    let outputString = ' '.repeat(matchNode.depth) + '************BEGIN************'+matchNode.depth+'\n'
+    let outputString = ' '.repeat(matchNode.depth) + '*****BEGIN*' + matchNode.type+'*'+matchNode.depth+'\n'
 
     for (let key in matchNode){
       let keyValue = matchNode[key]

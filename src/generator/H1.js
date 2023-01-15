@@ -56,7 +56,7 @@ class H1{
       let nodeTypeNames = Generator.getNodeTypeNames()
       if (nodeTypeNames.indexOf(nodeName) == -1){
         //error
-        throw new Error('Unknown node type: ' + nodeName)
+        throw new Error('Unknown node type(H1GetChildNuggets): ' + nodeName)
       }
   
       if (['string literal','character class'].indexOf(nodeName) > -1){
@@ -128,6 +128,7 @@ class H1{
       return nodeName
     }
   
+    //This function works for only one root node. It fails if there are two or more root nodes.
     //A string in H1 form starts with a node name on a single line
     //followed by a property or
     //one or more nodes.
@@ -192,6 +193,7 @@ class H1{
     //Given a string in H1 format, loads the appropriate nodes into memory
     static H1Import(s, parser){
       let M1Code = H1.H1ConvertToM1(s)
+console.log('h1 converted to m1 is:' + M1Code)
       return M1.M1Import(M1Code, parser)
     }
   

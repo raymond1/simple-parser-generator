@@ -36,7 +36,8 @@ class Generator{
       'multiple':MultipleNode,
       'not':NotNode,
       'optional':OptionalNode,
-      'entire':EntireNode
+      'entire':EntireNode,
+      'split':SplitNode
     }
   }
 

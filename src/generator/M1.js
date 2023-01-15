@@ -94,60 +94,10 @@ class M1{
 
   //Takes in a string in M1 format and converts it into an in-memory representation of a parser
   static M1Import(s, generator){
-    //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
-    //Get everything from [ to the first comma as the type of a node
-
-    let nodeType = M1.M1GetNodeType(s)
-    switch(nodeType){
-      case 'character class':
-      case 'string literal':
-        {
-          let firstComma = s.indexOf(',')
-          let string = M1.M1Unescape(s.substring(firstComma + 1, s.length - 1))
-          let node = generator.createNode({type:nodeType, string})
-          return node  
-        }
-      case 'not':
-      case 'entire':
-      case 'optional':
-      case 'multiple':
-      case 'or':
-      case 'and':
-      case 'sequence':
-        {
-          let firstComma = s.indexOf(',')
-          let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
-          let node = generator.createNode({type:nodeType, nodes: patterns})
-          return node
-        }
-      // case 'rule list':
-      //   {
-      //     let ruleListNode = new RuleListNode({generator})
-      //     //let nodeList
-      //     //Need to get rule 1, rule 2, rule 3...
-      //     //[rule list,[rule,NUMBER,[multiple,[character class,0123456789]]]]
-
-      //     //everything from the first comma to the last right bracket are to be processed as a series of nodes
-      //     let caret = s.indexOf(',') + 1
-      //     let rules = M1.M1GetPatterns(s.substring(caret,s.length - 1), generator)
-      //     ruleListNode.rules = rules
-      //     return ruleListNode
-      //   }
-      //   break
-      // case 'rule':
-      //   {
-      //     //[rule,rule name,pattern]
-      //     let firstComma = s.indexOf(',')
-      //     let secondComma = s.indexOf(',',firstComma + 1)
-      //     let pattern = M1.M1GetPatterns(s.substring(secondComma+1, s.length - 1), generator)[0]
-      //     let ruleNode = new RuleNode({generator:generator, name: s.substring(firstComma+1,secondComma), pattern})
-      //     return ruleNode
-      //   }
-
-      default:
-        throw new Error('Unknown node type: ') + nodeType
-        break;
-    }
+    let firstComma = s.indexOf(',')
+    let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
+    let node = generator.createNode({type:nodeType, nodes: patterns})
+    return node
   }
 
   //Given a string s in M1 format, this function returns the string between the first left bracket and the first comma

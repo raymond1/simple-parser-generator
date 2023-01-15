@@ -68,7 +68,9 @@ if (matchNode){
           // outputString += ' '.repeat(matchNode.depth) + key + ':' + keyValue + '\n'
           break;
         default:
-
+          if (keyValue == ''){
+            keyValue = '(empty string)'
+          }
           outputString += ' '.repeat(matchNode.depth) + key + ':' + keyValue + '\n'
           //this.getOutputString(keyValue)
           break

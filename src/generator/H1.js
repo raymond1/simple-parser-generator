@@ -55,6 +55,7 @@ class H1{
       
       let nodeTypeNames = Generator.getNodeTypeNames()
       if (nodeTypeNames.indexOf(nodeName) == -1){
+debugger
         //error
         throw new Error('Unknown node type(H1GetChildNuggets): ' + nodeName)
       }

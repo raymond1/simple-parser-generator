@@ -115,7 +115,6 @@ class M1{
       case 'and':
       case 'sequence':
         {
-          //[or,pattern 1,pattern 2,pattern 3,...,pattern n]
           let firstComma = s.indexOf(',')
           let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
           let node = generator.createNode({type:nodeType, nodes: patterns})

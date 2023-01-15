@@ -362,7 +362,7 @@ class EntireNode extends Node{
 class SequenceNode extends Node{
   constructor(metadata){
     super(metadata)
-    this.patterns = metadata.patterns
+    this.nodes = metadata.nodes
   }
   static type = 'sequence'
 
@@ -637,11 +637,11 @@ class AndNode extends Node{
 class MultipleNode extends Node{
   constructor(metadata){
     super(metadata)
-    this.pattern = metadata.pattern
+    this.nodes = metadata.nodes
   }
   static type = 'multiple'
-
-  static grammarize(string, parser){
+/*
+  static grammarize(string, generator){
     var trimmed_string = string.trim()
 
     var first_few_characters_of_trimmed_string = trimmed_string.substring(0,'MULTIPLE'.length)
@@ -659,20 +659,20 @@ class MultipleNode extends Node{
     
     var string_in_between_square_brackets = trimmed_string.substring(location_of_first_left_bracket + 1, location_of_last_right_bracket)
 
-    var pattern = Generator.grammarize_PATTERN(string_in_between_square_brackets, parser)
+    var pattern = Generator.grammarize_PATTERN(string_in_between_square_brackets, generator)
     if (pattern != null){
-      return new MultipleNode({pattern, parser})
+      return new MultipleNode({pattern, generator})
     }
 
     return null
   }
-
+*/
   static headMatch(string){
     return Generator.headMatchXWithBrackets(string, 'MULTIPLE')
   }
 
   M1Export(){
-    return `[multiple,${this.pattern.M1Export()}]`
+    return `[multiple,${this.nodes[0].M1Export()}]`
   }
 
   parse(inputString, metadata = {depth: 0, parent: null}){
@@ -681,14 +681,14 @@ class MultipleNode extends Node{
     let totalMatchLength = 0
 
     let subMatches = []
-    let matchInfo = this.pattern.parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
     if (matchInfo.matchFound){
       subMatches.push(matchInfo)
     }
     while(matchInfo.matchFound){
       totalMatchLength = totalMatchLength + matchInfo.matchLength
       tempString = tempString.substring(matchInfo.matchLength)
-      matchInfo = this.pattern.parse(tempString,{depth: metadata.depth + 1, parent: this})
+      matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, parent: this})
       subMatches.push(matchInfo)
     }
   

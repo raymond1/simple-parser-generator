@@ -1,11 +1,10 @@
 import {Generator, TreeViewer} from './spg.js'
 let generator = new Generator()
 let grammar =
-`sequence
+`multiple
  string literal
   a
- string literal
-  ce`
+`
 /*
 'character class'
 'string literal'
@@ -14,8 +13,8 @@ let grammar =
 'entire'
 'or'
 'and'
-
 'sequence'
+
 'multiple'
  */
 //Singles are not,optional,entire,
@@ -33,7 +32,7 @@ let grammar =
 
 //algorithm-then[algorithm]
 let parser = generator.generateParser(grammar, 'h1')
-let testProgram = 'ace'
+let testProgram = 'aaaaa'
 
 let output = parser.parse(testProgram)
 let treeViewer = new TreeViewer()

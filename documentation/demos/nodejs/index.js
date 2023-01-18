@@ -1,13 +1,17 @@
 import {Generator, TreeViewer} from './spg.js'
 let generator = new Generator()
 let grammar = `split
- character class
-  aaa
+ sequence
+  character class
+   aaa
+  jump
+   test
+ name
+  test
+  string literal
+   ccc
  string literal
-  ccc
- string literal
-  ddd
-`
+  ddd`
 /*`split
  multiple
   jump

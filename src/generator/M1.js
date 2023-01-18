@@ -95,8 +95,19 @@ class M1{
   //Takes in a string in M1 format and converts it into an in-memory representation of a parser
   static M1Import(s, generator){
     let firstComma = s.indexOf(',')
-    let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
-    let node = generator.createNode({type:nodeType, nodes: patterns})
+    let nodeType = s.substring(1,firstComma)
+    let node
+    switch(nodeType){
+      case 'string literal':
+      case 'character class':
+        node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, s.length - 1)]})
+        return 
+        break
+      default:
+        let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
+        node = generator.createNode({type:nodeType, nodes: patterns})
+        break
+    }
     return node
   }
 

@@ -37,7 +37,9 @@ class Generator{
       'not':NotNode,
       'optional':OptionalNode,
       'entire':EntireNode,
-      'split':SplitNode
+      'split':SplitNode,
+      'name':NamedNode,
+      'jump':JumpNode
     }
   }
 

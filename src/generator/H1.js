@@ -55,7 +55,6 @@ class H1{
       
       let nodeTypeNames = Generator.getNodeTypeNames()
       if (nodeTypeNames.indexOf(nodeName) == -1){
-debugger
         //error
         throw new Error('Unknown node type(H1GetChildNuggets): ' + nodeName)
       }
@@ -163,11 +162,7 @@ debugger
       let nodeName = H1.H1GetNodeName(s)
       let childrenString = ''
   
-      if (nodeName == 'rule'){
-        let depth = H1.H1GetDepth(s)
-        childrenString += childNuggets[0].substring(depth + 1) + ','
-        childrenString += H1.H1ConvertToM1(childNuggets[1])
-      }else if (nodeName == 'character class' || nodeName == 'string literal'){
+      if (nodeName == 'character class' || nodeName == 'string literal'){
         let depth = H1.H1GetDepth(s)
         let lines = s.split('\n')
         childrenString += lines[1].substring(depth + 1)

@@ -783,6 +783,68 @@ class SplitNode extends Node{
   }
 }
 
+//A name node associates a name and a node together
+//The first child of a name node is a string
+//The second child of a name node is a node
+class NameNode extends Node{
+  static type = 'name'
+
+  constructor(metadata){
+    super(metadata)
+    this.nodes = metadata.nodes
+  }
+
+  parse(inputString, metadata={depth:0,parent:null}){
+    let newMatchNode = new MatchNode()
+    let matchInfo = this.nodes[1].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let subMatches = []
+    subMatches.push(matchInfo)
+    
+    Object.assign(newMatchNode, {
+      parent: metadata.parent, 
+      depth: metadata.depth,
+      inputString: inputString.slice(), 
+      type: this['type'].slice(),
+      id: this.id, 
+      serial: this.generator.getAndIncrementMatchCount(),
+      subMatches,
+      matchString: inputString,
+    })
+    return newMatchNode
+  }
+}
+
+//A jump node is associated with the jump target, which is a string stored in this.nodes[0] representing a node id
+//The jump node and the name node both need to exist before the connection between them can be finalized
+class JumpNode extends Node{
+  static type = 'jump'
+
+  constructor(metadata){
+    super(metadata)
+    this.nodes = metadata.nodes
+  }
+
+  parse(inputString, metadata={depth:0,parent:null}){
+    let newMatchNode = new MatchNode()
+    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let subMatches = []
+    subMatches.push(matchInfo)
+    
+    Object.assign(newMatchNode, {
+      parent: metadata.parent, 
+      depth: metadata.depth,
+      inputString: inputString.slice(), 
+      type: this['type'].slice(),
+      id: this.id, 
+      serial: this.generator.getAndIncrementMatchCount(),
+      subMatches,
+      matchString: inputString,
+    })
+    return newMatchNode
+  }
+}
+
+
 
 //This is the type of object that is emitted during the parsing operation by the parser
 class MatchNode{

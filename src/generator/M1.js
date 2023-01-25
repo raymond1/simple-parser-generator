@@ -98,16 +98,24 @@ class M1{
     let nodeType = s.substring(1,firstComma)
     let node
     switch(nodeType){
+      case 'name':
+        //[name,asdfasdf,target]
+        let afterFirstComma = s.substring(firstComma + 1)
+        let secondComma = afterFirstComma.indexOf(',') + firstComma
+        node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, secondComma), s.substring(secondComma,s.length - 1)]})
+        break
+      case 'jump':
       case 'string literal':
       case 'character class':
         node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, s.length - 1)]})
-        return 
         break
       default:
         let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
         node = generator.createNode({type:nodeType, nodes: patterns})
         break
     }
+
+    //Need to find a way to make jump nodes
     return node
   }
 

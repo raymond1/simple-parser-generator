@@ -1,6 +1,7 @@
 import {Generator, TreeViewer} from './spg.js'
 let generator = new Generator()
-let grammar = `split
+let grammar = 
+`split
  sequence
   character class
    aaa
@@ -103,7 +104,7 @@ comment
 
 //algorithm-then[algorithm]
 let parser = generator.generateParser(grammar, 'h1')
-let testProgram = 'aaaaa'
+let testProgram = 'aaacccddd'
 
 let output = parser.parse(testProgram)
 let treeViewer = new TreeViewer()

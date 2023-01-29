@@ -30,10 +30,6 @@ class TreeViewer{
    * @returns {String}
    */
   getOutputString(matchNode){
-console.log('object keys of matchNode:')
-if (matchNode){
-  console.log(Object.keys(matchNode))
-}
     if (matchNode === null){
       return '(null)\n'
     }
@@ -91,7 +87,7 @@ if (matchNode){
    * @param {Object} mode
    * 
    */
-  display(mode = 'text', parser){
+  display(mode = 'text', matchNode){
     // //There are two display modes: to display in the console, or to display in the DOM on the browser
     // if (!this.parentElement){
     //   console.log(outputString)
@@ -99,7 +95,7 @@ if (matchNode){
     // }
 
     if (mode == 'text'){
-      console.log(this.getOutputString(parser))
+      console.log(this.getOutputString(matchNode))
     }
     /*
     else if (mode == 'html'){

@@ -43,13 +43,13 @@ class M1{
     
     while(endCaret > startCaret){
       let nugget = s.substring(startCaret,endCaret)
-      patterns.push(M1.M1Import(nugget, generator))
+      patterns.push(M1.M1ImportInternal(nugget, generator))
       startCaret = endCaret + 1
       let commaOffset = M1.getNextZeroLevelComma(s.substring(startCaret))
       endCaret = startCaret + commaOffset
     }
 
-    patterns.push(M1.M1Import(s.substring(startCaret), generator))
+    patterns.push(M1.M1ImportInternal(s.substring(startCaret), generator))
     return patterns
 }
   //The return value is a number containing the index of the right square bracket
@@ -92,8 +92,8 @@ class M1{
     return s2
   }
 
-  //Takes in a string in M1 format and converts it into an in-memory representation of a parser
-  static M1Import(s, generator){
+  static M1ImportInternal(s,generator){
+    //Stage 1 transforms M1 format to an in-memory format
     let firstComma = s.indexOf(',')
     let nodeType = s.substring(1,firstComma)
     let node
@@ -101,10 +101,12 @@ class M1{
       case 'name':
         //[name,asdfasdf,target]
         let afterFirstComma = s.substring(firstComma + 1)
-        let secondComma = afterFirstComma.indexOf(',') + firstComma
-        node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, secondComma), s.substring(secondComma,s.length - 1)]})
+        let secondComma = afterFirstComma.indexOf(',') + 1 + firstComma 
+        node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, secondComma),
+           M1.M1ImportInternal(s.substring(secondComma + 1,s.length - 1), generator)]})
         break
       case 'jump':
+        //Jump nodes are incomplete at this stage because they do not have a reference yet to the name nodes and must be reprocessed
       case 'string literal':
       case 'character class':
         node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, s.length - 1)]})
@@ -114,9 +116,14 @@ class M1{
         node = generator.createNode({type:nodeType, nodes: patterns})
         break
     }
-
-    //Need to find a way to make jump nodes
     return node
+  }
+
+  //Takes in a string, s, in M1 format and converts it into an in-memory representation of a parser
+  static M1Import(s, generator){
+    let rootNode = M1.M1ImportInternal(s,generator)
+    Generator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
+    return rootNode
   }
 
   //Given a string s in M1 format, this function returns the string between the first left bracket and the first comma

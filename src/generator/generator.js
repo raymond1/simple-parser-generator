@@ -16,6 +16,8 @@ class Generator{
   constructor(){
     this.idCounter = 0
     this.matchCount = 0 //enumerates the matches
+    this.nameNodes = {}
+    this.jumpNodes = []
   }
 
   /**
@@ -38,7 +40,7 @@ class Generator{
       'optional':OptionalNode,
       'entire':EntireNode,
       'split':SplitNode,
-      'name':NamedNode,
+      'name':NameNode,
       'jump':JumpNode
     }
   }
@@ -130,6 +132,7 @@ class Generator{
    * Takes in an input string and feeds it into the in-memory parser after setGrammar has been run.
    * 
    */
+  /*
   parse(inputString){
     if (this.grammar){
       let matchInformationNodes = this.grammar.match(inputString)
@@ -150,7 +153,7 @@ class Generator{
 
   set rawMatches(value){
     this._rawMatches = value
-  }
+  }*/
   
   /*
    * Takes in one of the official node type names and returns an object of that node type.
@@ -167,9 +170,26 @@ class Generator{
    */
   createNode(metadata){
     let newNode = new Generator.nodeTypes[metadata.type](metadata)
+    switch (metadata.type){
+      case 'name':
+        this.nameNodes[metadata.nodes[0]] = newNode
+        break
+      case 'jump':
+        this.jumpNodes.push(newNode)
+    }
     newNode.id = this.getId()
     newNode.generator = this
     return newNode
+  }
+
+  //jumpNodes is an array of jump nodes containing a single node that is a string specifying the name of a name node
+  //nameNodes is a map from names of name nodes to the name node itself
+  //and the second property of each object is the name node itself
+  static connectJumpNodesToNameNodes(jumpNodes, nameNodesMap){
+    for (let jumpNode of jumpNodes){
+      let tempNode = nameNodesMap[jumpNode.nodes[0]]
+      jumpNode.nodes[0] = tempNode
+    }
   }
 }
 

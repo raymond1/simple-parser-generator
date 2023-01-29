@@ -59,9 +59,13 @@ class H1{
         throw new Error('Unknown node type(H1GetChildNuggets): ' + nodeName)
       }
   
-      if (['string literal','character class'].indexOf(nodeName) > -1){
+      if (['string literal','character class', 'jump'].indexOf(nodeName) > -1){
         //Take the next line
         childNodes.push(lines[1].substring(firstNodeDepth+1))
+      }
+      else if (nodeName == 'name'){
+        childNodes.push(lines[1].substring(firstNodeDepth+1))
+        childNodes.push(lines[2].substring(firstNodeDepth+1))
       }
       else{
         //For all other nodes, return an array of the child node strings
@@ -73,11 +77,9 @@ class H1{
             break
           }
   
-          let newChild = false
           if (lineDepth == firstNodeDepth + 1){
             numberOfChildren++
             childNodes.push('')
-            newChild = true
           }
     
           if (lineDepth >= firstNodeDepth + 1){
@@ -162,10 +164,18 @@ class H1{
       let nodeName = H1.H1GetNodeName(s)
       let childrenString = ''
   
-      if (nodeName == 'character class' || nodeName == 'string literal'){
+      if (nodeName == 'character class' || nodeName == 'string literal'|| nodeName == 'jump'){
         let depth = H1.H1GetDepth(s)
         let lines = s.split('\n')
         childrenString += lines[1].substring(depth + 1)
+      }else if (nodeName == 'name'){
+//   name
+//    asfdsf
+//    adfsadfdsf
+//     asdfasdfasdf
+        let lines = s.split('\n')
+        let secondLineBreak = s.indexOf('\n', lines[0].length + 1 + 1)
+        childrenString += childNuggets[0]+ ',' + H1.H1ConvertToM1(s.substring(secondLineBreak + 1))
       }
       else{
         for (let i = 0; i < childNuggets.length; i++){

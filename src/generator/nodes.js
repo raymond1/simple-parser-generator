@@ -26,7 +26,6 @@ class Node{
  * 
  * 
  * {
- *  matchFound,
  *  subMatches,
  *  matchString
  * }
@@ -35,7 +34,7 @@ class Node{
  * */
 class CharacterClassNode extends Node{
   constructor(metadata){
-    super()
+    super(metadata)
     this.nodes = metadata.nodes
   }
 
@@ -102,7 +101,6 @@ class CharacterClassNode extends Node{
     if (matchingString.length > 0){
       matchLength = matchingString.length
     }
-
 
     Object.assign(newMatchNode, {
       parent: metadata.parent, 
@@ -195,12 +193,11 @@ class StringLiteralNode extends Node{
   parse(inputString, metadata = {depth: 0, parent: null}){
     let newMatchNode = new MatchNode()
     //matches if inputString starts with the string passed in during object construction
-    let matchFound = false
+    let matchLength = 0
     if (inputString.substring(0, this.nodes[0].length) == this.nodes[0]){
-      matchFound = true
+      matchLength = this.nodes[0].length
     }
 
-    let matchLength = matchFound?this.nodes[0].length:0
     Object.assign(newMatchNode, {
       parent: metadata.parent, 
       depth: metadata.depth,
@@ -261,7 +258,7 @@ class NotNode extends Node{
     var newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
-    let matchLength = matchInfo.matchFound?0:inputString.matchLength
+    let matchLength = (matchInfo.matchString !== '')?0:inputString.matchLength
     Object.assign(
       newMatchNode, {
         parent: metadata.parent, 
@@ -330,9 +327,8 @@ class EntireNode extends Node{
     let matchLength = 0
     subMatches.push(matchInfo)
 
-    let matchFound = false
     if (matchInfo.matchString.matchLength == inputString.length){
-      matchFound = true
+      matchLength = matchInfo.matchString.matchLength
     }
 
     Object.assign(newMatchNode, {
@@ -409,7 +405,7 @@ class SequenceNode extends Node{
     for (let i = 0; i < this['nodes'].length; i++){
       matchInfo = this.nodes[i].parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
       subMatches.push(matchInfo)
-      if (!matchInfo.matchFound){
+      if (matchInfo.matchString === ''){
         break;
       }else{
         totalMatchLength = totalMatchLength + matchInfo.matchString.length
@@ -495,7 +491,7 @@ class OrNode extends Node{
     for (let i = 0; i < this.nodes.length; i++){
       matchInfo = this['nodes'][i].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
       subMatches.push(matchInfo)
-      if (matchInfo.matchFound){
+      if (matchInfo.matchString === ''){
         break
       }
     }
@@ -568,15 +564,13 @@ class AndNode extends Node{
 
     let subMatches = []
     let matchInfo
-    let andDetected = true
     let smallestMatchLength = 0 //0 indicates no match
     let firstIteration = true
 
     for (let i = 0; i < this.nodes.length; i++){
       matchInfo = this.nodes[i].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
       subMatches.push(matchInfo)
-      if (!matchInfo.matchFound){
-        andDetected = false
+      if (matchInfo.matchString === ''){
         smallestMatchLength = 0
         break
       }else{
@@ -661,20 +655,16 @@ class MultipleNode extends Node{
 
     let subMatches = []
     let matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
-    if (matchInfo.matchFound){
+    if (matchInfo.matchString !== ''){
       subMatches.push(matchInfo)
     }
-    while(matchInfo.matchFound){
+    while(matchInfo.matchString !== ''){
       totalMatchLength = totalMatchLength + matchInfo.matchString.matchLength
       tempString = tempString.substring(matchInfo.matchString.matchLength)
       matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, parent: this})
       subMatches.push(matchInfo)
     }
   
-    if (subMatches.length > 0){
-      matchFound = true
-    }
-    
     Object.assign(
       newMatchNode, {
         parent: metadata.parent, 
@@ -777,7 +767,7 @@ class SplitNode extends Node{
       id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
-      matchString: inputString,
+      matchString: matchInfo.matchString.slice(),
     })
     return newMatchNode
   }
@@ -808,7 +798,7 @@ class NameNode extends Node{
       id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
-      matchString: inputString,
+      matchString: matchInfo.matchString.slice(),
     })
     return newMatchNode
   }
@@ -838,13 +828,11 @@ class JumpNode extends Node{
       id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
-      matchString: inputString,
+      matchString: matchInfo.matchString.slice(),
     })
     return newMatchNode
   }
 }
-
-
 
 //This is the type of object that is emitted during the parsing operation by the parser
 class MatchNode{

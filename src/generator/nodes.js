@@ -327,8 +327,8 @@ class EntireNode extends Node{
     let matchLength = 0
     subMatches.push(matchInfo)
 
-    if (matchInfo.matchString.matchLength == inputString.length){
-      matchLength = matchInfo.matchString.matchLength
+    if (matchInfo.matchString.length == inputString.length){
+      matchLength = matchInfo.matchString.length
     }
 
     Object.assign(newMatchNode, {

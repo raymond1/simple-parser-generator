@@ -64,7 +64,7 @@ class TreeViewer{
           // outputString += ' '.repeat(matchNode.depth) + key + ':' + keyValue + '\n'
           break;
         default:
-          if (keyValue == ''){
+          if (keyValue === ''){
             keyValue = '(empty string)'
           }
           outputString += ' '.repeat(matchNode.depth) + key + ':' + keyValue + '\n'

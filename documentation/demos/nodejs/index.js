@@ -1,110 +1,23 @@
 import {Generator, TreeViewer} from './spg.js'
 let generator = new Generator()
 let grammar = 
-`split
- sequence
-  character class
-   aaa
-  jump
-   test
- name
-  test
-  string literal
-   ccc
- string literal
-  ddd`
-/*`split
- multiple
-  jump
-   n1
- string literal
-  character class
- string literal
-  string literal
- string literal
-  not
- string literal
-  option
- string literal
-  entire
- string literal
-  or
- string literal
-  and
- string literal
+`entire
+ split
   sequence
- label
-  n1
-  string literal
-   multiple
-
-sequence[
-  rule 1,
-  name
-   sdfasdfasdf,
-]
-
-no operation list
- name
-  asdfasdf
- name
-  afasdff
-
-run_first_item
- a
- b
- c
- d
-
-attach_attribute[asdfasdf]
-
-name
- asdfasfasdf
- rule
-  multiple
+   character class
+    aaa
+   jump
+    test
    string literal
-    a
-multiple
- jump
-  rule
-
-sequence
- if x
-  jump s
- jump t
-
-comment
- asdfasdfasdf sdf asdf a asdfs dend(n)asdfsadfsfdfdf
- <node>
-`
-*/
-/*
-'character class'
-'string literal'
-'not'
-'optional'
-'entire'
-'or'
-'and'
-'sequence'
-'multiple'
- */
-//Singles are not,optional,entire,
-//terminals character class, string literal
-//Problem with or disabiguation
-//or [JUMP x,p2,p3]
-
-//x
-//if(x is)
-
-//multiif/switch
-//switch
-
-//sort[p1-then-X,p2-then-y,p3-then-z]
-
-//algorithm-then[algorithm]
+    xxx
+  name
+   test
+   string literal
+    ccc
+  string literal
+   ddd`
 let parser = generator.generateParser(grammar, 'h1')
-let testProgram = 'aaacccddd'
+let testProgram = 'aaacccxxx'
 
 let output = parser.parse(testProgram)
 let treeViewer = new TreeViewer()

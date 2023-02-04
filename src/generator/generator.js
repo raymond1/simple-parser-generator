@@ -63,97 +63,24 @@ class Generator{
     return oldMatchCount
   }
 
-  /*
-   * Detects the file format for a given string. Returns "M1", "H1" or "H2" based off of a heuristic analyzing the start of a file.
-   # Returns "unknown" for all other file types.
-   * 
-   * @param {A String object holding an input grammar in H2, H1 or M1 format.} s 
-   * @param {A Generator object that will be generating the parser.} parser 
-   * @returns {'String'}
-   */
-  static detectImportLanguage(s, parser){
-    //[rule list,
-    //rule list
-    //<rule name> = <rule>
-    if (s.substring(0,'[rule list'.length) == '[rule list'){
-      return 'M1'
-    }else if (s.substring(0, 'rule list'.length) == 'rule list'){
-      return 'H1'
-    }else if (RuleNode.headMatch(s, parser) != null){
-      return 'H2'
-    }else{
-      return 'unknown'
-    }
-  }
-
   /**
    * Generates an in-memory parser using a string description in M1, H1 or H2 formats.
    * 
-   * The definition for a parser in either M1, H1 or H2 format
+   * The definition for a parser in H1 format
    * @param {String} parserDescription
    *
-   * One of 'M1', 'H1', or 'H2' in lower case or upper case.
-   * @param {String} language 
    */
-  generateParser(parserDescription, language){
-    if (!language){
-      throw new Error("No input language specified.")
-    }
+  generateParser(parserDescription){
+    let parser = Generator.H1Import(parserDescription, this)
 
-    let _language = language.toUpperCase()
-    let parser
-
-    if (['M1','H1','H2'].includes(_language)){
-      console.log(_language + ' parser detected.')
-    }
-    if (_language == 'M1'){
-      parser = Generator.M1Import(parserDescription, this)
-    }else if (_language == 'H1'){
-      parser = Generator.H1Import(parserDescription, this)
-    }else if (_language == 'H2'){
-      parser = Generator.H2Import(parserDescription, this)
-    }else{
-      throw new Error("Invalid input language. Should be 'H1', 'M1' or 'H2'(either lower or upper case).")
-    }
-    
     return parser
   }
-
 
   getId(){
     let currentCounter = this.idCounter
     this.idCounter = this.idCounter + 1
     return currentCounter
   }
-
-
-  /*
-   * 
-   * Takes in an input string and feeds it into the in-memory parser after setGrammar has been run.
-   * 
-   */
-  /*
-  parse(inputString){
-    if (this.grammar){
-      let matchInformationNodes = this.grammar.match(inputString)
-      let matchInformationTree = new Tree(matchInformationNodes)
-      this.rawMatches = matchInformationTree
-      return this.rawMatches
-      // let ruleMatchesTree = matchInformationTree.getRuleMatchesOnly()
-      // return ruleMatchesTree  
-    }
-    else{
-      console.log('No grammar has been loaded into the parser.')
-    }
-  }
-
-  get rawMatches(){
-    return this._rawMatches
-  }
-
-  set rawMatches(value){
-    this._rawMatches = value
-  }*/
   
   /*
    * Takes in one of the official node type names and returns an object of that node type.
@@ -199,4 +126,3 @@ Generator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CH
 
 Generator.H1Import = H1.H1Import
 Generator.M1Import = M1.M1Import
-Generator.H2Import = H2.H2Import

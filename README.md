@@ -1,6 +1,6 @@
 # Simple Parser Generator
 
-This repository contains code for the Simple Parser Generator(SPG), which is a parser generator that generates parsers that can run on the V1 virtual machine, which is defined in the documentation file V1.md. The SPG was designed to be easily portable to arbitrary programming environments and its small size allows it to be useful for learning and teaching. Also due to its small size, the system is extremely extensible.
+This repository contains code for the Simple Parser Generator(SPG), which is a parser generator that generates parsers that can run on the V1 virtual machine, which is defined in the documentation file V1.md. The SPG is designed to be easily portable to arbitrary programming environments and its small size allows it to be useful for learning and teaching. Also due to its small size, the system is extremely extensible.
 
 In addition to the SPG, this repository also includes information on the H1 and M1 file formats, which can both be used as alternatives to JSON for serialization. H1, in particular, is a very promising human-readable file format that can potentially have many applications due to its minimalistic and nature, concise definition, human readability, well-defined escape sequences and ease of implementation.
 
@@ -8,7 +8,7 @@ In addition to the SPG, this repository also includes information on the H1 and 
 
 The Simple Parser Generator takes in a parser specification in the H1 language defined in the file [H1.md](documentation/H1.md). The string content from an H1 file is read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, configured and connected with each other, ready to take in input to produce output tokens.
 
-# Installation and testing
+# Installation
 
 ## NodeJS
 1. Make a new package.json file.
@@ -18,18 +18,6 @@ The Simple Parser Generator takes in a parser specification in the H1 language d
 ```
 import Generator from 'simple-parser-generator'
 ```
-5. Testing (Optional)
-After the import line , add the lines
-```
-let generator = new Generator()
-generator.installCheck()
-```
-6. Activate the index.js file from NodeJS with the command:
-```
-node index.js
-```
-
-If the software was successfully installed, you should see the message: 'Simple Generator Generator is installed.' 
 
 ## Browsers
 1. Set up a web server that can serve HTML and JS pages with the correct Content-Type headers.

@@ -1,14 +1,12 @@
 # Simple Parser Generator
 
-The Simple Parser Generator is a JavaScript parser generator that allows the use of several input languages to describe a parser. The parsers generated are serializable and can be ported to any platform that implements the V1 virtual machine. This portability is accomplished by using a micro-parser architecture where multiple small and simple parsers are connected together to generate a larger, more complex parser.
+This repository contains code for the Simple Parser Generator(SPG), which is a parser generator that generates parsers that can run on the V1 virtual machine, which is defined in the documentation file V1.md. The SPG was designed to be easily portable to arbitrary programming environments and its small size allows it to be useful for learning and teaching. Also due to its small size, the system is extremely extensible.
+
+In addition to the SPG, this repository also includes information on the H1 and M1 file formats, which can both be used as alternatives to JSON for serialization. H1, in particular, is a very promising human-readable file format that can potentially have many applications due to its minimalistic and nature, concise definition, human readability, well-defined escape sequences and ease of implementation.
 
 # How it works
 
-The Simple Parser Generator takes in a parser specification in either the M1, H1, or H2 languages(the M1, H1 and H2 languages are specified in the documentation folder, in the files [H1.md](documentation/H1.md), [M1.md](documentation/M1.md), and [H2.md](documentation/H2.md)). These files are read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, ready to take an input string and convert it into tokens.
-
-Because these micro-parsers are portable and can be implemented in basically any sufficiently powerful programming language, they are essentially a type of virtual machine. This means that any programming language that implements all the micro-parsers could potentially operate the same parser loaded into memory from a different language. The M1 file format is meant to be a portable machine format still readable by humans that can serialize parsers written in one language and allow them to be deserialized and loaded into memory using another programming language that implements all the micro-parsers used in the first language.
-
-The collection of micro-parsers that need to be implemented are collectively called the V1 virtual machine.
+The Simple Parser Generator takes in a parser specification in the H1 language defined in the file [H1.md](documentation/H1.md). The string content from an H1 file is read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, configured and connected with each other, ready to take in input to produce output tokens.
 
 # Installation and testing
 

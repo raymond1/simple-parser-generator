@@ -5,13 +5,5 @@ vendor
 src/server/root_certificates/*.pem
 thinking*.txt
 releases
-documentation/demos/basic_usage/spg.js
-documentation/demos/browser_installation/spg.js
-documentation/demos/calculator/spg.js
-documentation/demos/debug/spg.js
-documentation/demos/nodejs_installation/spg.js
-documentation/demos/nodejs_install/spg.js
-documentation/demos/nodejs/spg.js
-documentation/demos/ui/spg.js
-documentation/demos/vuedemo/spg.js
 documentation/api
+TODO.txt

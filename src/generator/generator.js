@@ -126,3 +126,6 @@ Generator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CH
 
 Generator.H1Import = H1.H1Import
 Generator.M1Import = M1.M1Import
+
+export {Generator}
+export default Generator

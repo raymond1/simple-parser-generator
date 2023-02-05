@@ -9,11 +9,12 @@ In addition to the SPG, this repository also includes information on the H1 and 
 The Simple Parser Generator takes in a parser specification in the H1 language defined in the file [H1.md](documentation/H1.md). The string content from an H1 file is read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, configured and connected with each other, ready to take in input to produce output tokens.
 
 # Installation
+The instructions below are just one method of installation. The SPG is simply a JavaScript file you can include in your project. Thus, you can modify the instructions to suit your needs. The following instructions are simply meant as a guide.
 
 ## NodeJS
-1. Make a new package.json file.
-2. Set the type attribute in the package.json file to module.
-3. npm install git+https://github.com/raymond1/simple-parser-generator.git
+1. Make a new package.json. This can be done with the command npm init and pressing enter through all the prompts to use the default options.
+2. Add or set the "type" attribute in the package.json file to the value module.
+3. npm install git+https://github.com/raymond1/simple-parser-generator.git#v2
 4. Create a file called index.js and add the following line
 ```
 import Generator from 'simple-parser-generator'

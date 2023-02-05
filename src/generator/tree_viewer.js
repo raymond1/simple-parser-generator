@@ -172,3 +172,5 @@ class DOMTreeNode{
     ul.style.backgroundColor = "#fff"
   }
 }
+
+export {TreeViewer}

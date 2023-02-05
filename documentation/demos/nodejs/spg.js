@@ -1918,6 +1918,4 @@ class DOMTreeNode{
     ul.style.backgroundColor = "#fff"
   }
 }
-export {Generator, TreeViewer}
-export default Generator
 

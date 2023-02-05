@@ -17,7 +17,7 @@ The instructions below are just one method of installation. The SPG is simply a 
 3. npm install git+https://github.com/raymond1/simple-parser-generator.git#v2
 4. Create a file called index.js and add the following line
 ```
-import Generator from 'simple-parser-generator'
+import {Generator} from 'simple-parser-generator'
 ```
 
 ## Browsers

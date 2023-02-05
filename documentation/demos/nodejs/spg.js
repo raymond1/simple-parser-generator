@@ -1190,14 +1190,7 @@ console.log('h1 converted to m1 is:' + M1Code)
   }
 
 }
-//Possibly defunct
-
-//Transforms a tree node into a different type of tree
-class T1{
-  static transform(){
-    
-  }
-}/**
+/**
  * The Generator class generates in-memory parsers, allows for the export of such parsers into M1 or H1 format 
  * and allows for the import of these formats back into an in-memory parser.
  * 
@@ -1325,6 +1318,9 @@ Generator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CH
 
 Generator.H1Import = H1.H1Import
 Generator.M1Import = M1.M1Import
+
+export {Generator}
+export default Generator
 class Utilities{
 	static array_merge(array1,array2){
 		let returnArray = []
@@ -1919,3 +1915,4 @@ class DOMTreeNode{
   }
 }
 
+export {TreeViewer}

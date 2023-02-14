@@ -1,12 +1,17 @@
 # Simple Parser Generator
 
-This repository contains code for the Simple Parser Generator(SPG), which is a parser generator that generates parsers that can run on the V1 virtual machine, which is defined in the documentation file V1.md. The SPG is designed to be easily portable to arbitrary programming environments and its small size allows it to be useful for learning and teaching. Also due to its small size, the system is extremely extensible.
+This repository contains code for the Simple Parser Generator(SPG), which is a parser generator that generates parsers that can run on a virtual machine designed for simplicity and portability. Its small size makes it a possible tool for teaching programming language creation and is extremely extensible and inherently understandable in its behaviour.
 
-In addition to the SPG, this repository also includes information on the H1 and M1 file formats, which can both be used as alternatives to JSON for serialization. H1, in particular, is a very promising human-readable file format that can potentially have many applications due to its minimalistic and nature, concise definition, human readability, well-defined escape sequences and ease of implementation.
+The repository includes documentation for the V1 virtual machine that the SPG runs on, the very useful H1 file format for describing parsers, and the M1 file format, which is used internally in the workings of the machine. 
+
+Currently, the Simple Parser Generator is in its second generation. It is smaller, more portable, and the H1 file format is an improvement over the original input language for the parser generator. It is hoped that this version may hint at some possibilities of even better parser generators that may be possible.
+
+As a side note, the H1 language is based on a very interesting concept that in some ways is simpler than JSON and can be used as a potential alternative.
 
 # How it works
+The Simple Parser Generator is a JavaScript object. It reads in a parser specification written in the H1 language as a string and converts the parser specification into an in-memory JavaScript object. This new JavaScript object has a method for parsing, meaning that it can read in a string representing a programming language containing hierachical constructs, analyze it and generate a stream of output information objects describing the various components of the programming language.
 
-The Simple Parser Generator takes in a parser specification in the H1 language defined in the file [H1.md](documentation/H1.md). The string content from an H1 file is read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, configured and connected with each other, ready to take in input to produce output tokens.
+The H1 language is described here: [H1.md](documentation/H1.md). The output The string content from an H1 file is read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, configured and connected with each other, ready to take in input to produce output tokens.
 
 # Installation
 The instructions below are just one method of installation. The SPG is simply a JavaScript file you can include in your project. Thus, you can modify the instructions to suit your needs. The following instructions are simply meant as a guide.
@@ -21,7 +26,7 @@ At this point, the simple parser generator should be installed. To use it, creat
 import {Generator} from 'simple-parser-generator'
 ```
 
-## Browsers
+## Installation for Browsers
 1. Set up a web server that can serve HTML and JS pages with the correct Content-Type headers.
 2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving it from.
 3. Clone the https://github.com/raymond1/simple-parser-generator#v2 repository.
@@ -168,11 +173,9 @@ serial:2
 
 Each node starts with a number of asterisks followed by the string 'BEGIN', followed by another star, and then the node name and another star, and then the depth of the node. Each node ends with a series of asterisks followed by the string 'END' followed by some asterisks, followed by the node depth. The node depth is also represented by the number of leading spaces on a line.
 
-In between the *****BEGIN**** and ********END******** lines, you will see some properties of each node. matchString is the string that is mached against the input string. inputString is the input string. type is the type of a node. Depth is the depth of the node. id is a unique number assigned to each node. Serial is the order that a node was detected in during parsing. parent is the parent of the node that was detected.
+In between the *****BEGIN**** and ********END******** lines, you will see some properties of each node. matchString is the string that is mached against the input string. inputString is the input string. type is the type of a node. Depth is the depth of the node. id is a unique number assigned to each node. Serial is the order that a node was detected in during parsing(the first node has a serial value of 1, the second node detected has a value of 2, et. cetera et. cetera). Parent is the parent of the node that was detected.
 
 An alternative to using the TreeViewer is to use a debugger.
-
-
 
 ## API
 
@@ -180,16 +183,12 @@ The API documentation for pubicly available GeneratorGenerator methods is availa
 let parser = Generator.setGrammar(s)
 parser.parse(s)
 
-# Details on the different file formats
-
-Documentation on the various file formats is available in the documentation folder. 
-
 # Status
 
 The Simple Generator Generator is currently in its second generation and is undergoing testing and bug fixes. 
 
 ## Demo programs
  
-Demo programs are available in the documentation/demos folder. As long as you can get the demos folder served and the files are served with the correct MIME types, then the demos should work in theory.
+Demo programs are available in the documentation/demos folder. The demos will probably work if you can serve the demos folder with the correct MIME types.
 
 The nodejs_installation demos should work on NodeJS.

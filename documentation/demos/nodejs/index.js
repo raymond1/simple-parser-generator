@@ -5,8 +5,8 @@ import {Generator, TreeViewer} from './spg.js'
 //Instantiate the generator object
 let generator = new Generator()
 
-//Set a grammar for your language in the H1 file format(see H1.md for details)
-let grammar = 
+//Set a parser definition for your language in the H1 file format(see H1.md for details)
+let parserDefinition = 
 `entire
  split
   sequence
@@ -23,8 +23,8 @@ let grammar =
   string literal
    ddd`
 
-//Generate an in-memory parser based off of the language you specified.
-let parser = generator.generateParser(grammar)
+//Generate an in-memory parser based off of the parser definition you specified.
+let parser = generator.generateParser(parserDefinition)
 
 //Specify an input test program as a string
 let testProgram = 'aaacccxxx'

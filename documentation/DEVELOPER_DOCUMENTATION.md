@@ -43,3 +43,6 @@ composer update
 2) demos should work
 3) documentation generation should be updated
 4) demo files should be present
+
+# How to generate the JSDoc documentation
+npx jsdoc -c jsdoc.json -d documentation/api

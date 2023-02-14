@@ -49,7 +49,7 @@ class CharacterClassNode extends Node{
    * 
    * @param {String} inputString 
    * @param {Object} metadata 
-   * @returns 
+   * @returns {String}
    */
   parse(inputString, metadata = {depth: 0, parent: null}){
 

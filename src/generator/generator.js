@@ -1,18 +1,11 @@
 /**
- * The Generator class generates in-memory parsers, allows for the export of such parsers into M1 or H1 format 
- * and allows for the import of these formats back into an in-memory parser.
- * 
- * Usage:
- * let generator = new Generator() //Construct a new parser generator
- * generator.generateParser(grammarDefinitionString) //set input grammar
- * let outputTree = paparserGeneratorrser.parse(inputString) //parse input string
- * 
- * In other words, the grammar that the parser needs to parse is passed into the constructor during the creation on the Generator object
- * Then, the parse function is run, taking in an string representing a small set of data given in the language specified by the language loaded by the Generator object during its construction
- * 
- * The Generator object is a parser generator.
+ * The Generator class is a parser generator that generates in-memory parsers, and allows for the export of such parsers into the M1 or H1 format 
+ * so that they can be imported in a different language environment.
  */
 class Generator{
+  /**
+   * @constructor
+   */
   constructor(){
     this.idCounter = 0
     this.matchCount = 0 //enumerates the matches
@@ -21,13 +14,17 @@ class Generator{
   }
 
   /**
-   * Uses console.log to verify that the software has been installed correctly. Running Generator.installCheck() should
-   * display a confirmation message that the software is installed.
+   * This function Uses console.log to verify that the software has been installed correctly. Running Generator.installCheck() should
+   * display the message 'Successfully installed.'.
    * */
   static installCheck(){
-    console.log('Simple Generator Generator is installed.')
+    console.log('Successfully installed.')
   }
 
+  /***
+   * This is a private function that initializes the Generator.nodeTypes property with a
+   * mapping between the 'friendly names' of nodes and the object classes.
+   */
   static registerNodeTypes(){
     Generator.nodeTypes = {
       'character class': CharacterClassNode,
@@ -45,16 +42,20 @@ class Generator{
     }
   }
 
-  //Returns an array of all node types known by the parser
+  /**
+   * Returns an array of strings listing the available node types recognized by this parser generator.
+   * 
+   * In other words: ['character class', 'string literal', 'sequence',...]
+   * @returns {Array}
+   */
   static getNodeTypeNames(){
     return Object.keys(Generator.nodeTypes)
   }
 
-  /*
-   * Returns the number of matches the parser has performed. Then, increases it by 1. Used to name 
+  /***
+   * Increments the number of matches the parser has performed. Then, returns one less than the number of matches. Used to uniquely identify
    * all the match nodes as they are generated.
    * 
-   * Returns the number of matches the parser has performed.
    * @returns {Number}
    */
   getAndIncrementMatchCount(){
@@ -64,18 +65,29 @@ class Generator{
   }
 
   /**
-   * Generates an in-memory parser using a string description in M1, H1 or H2 formats.
+   * CZZZ Need to be able to make this work with multiple input formats...
    * 
-   * The definition for a parser in H1 format
+   * Generates an in-memory parser using a string description in M1 or H1 format.
+   * 
+   * The definition for a parser in H1 or M1 format. See the documentation in M1.md or H1.md for more information.
    * @param {String} parserDescription
+   * 
+   * Either H1 or M1
+   * @param {String} format
    *
+   * Returns a parser, as described by the string parserDescription.
+   * @returns {Object}
    */
-  generateParser(parserDescription){
+  generateParser(parserDescription, format='H1'){
     let parser = Generator.H1Import(parserDescription, this)
 
     return parser
   }
 
+  /**
+   * 
+   * @returns CZZZ
+   */
   getId(){
     let currentCounter = this.idCounter
     this.idCounter = this.idCounter + 1
@@ -83,6 +95,7 @@ class Generator{
   }
   
   /*
+   * CZZZ
    * Takes in one of the official node type names and returns an object of that node type.
    * Also sets the generator object for a node and the id.
    * 
@@ -109,9 +122,12 @@ class Generator{
     return newNode
   }
 
-  //jumpNodes is an array of jump nodes containing a single node that is a string specifying the name of a name node
-  //nameNodes is a map from names of name nodes to the name node itself
-  //and the second property of each object is the name node itself
+  /**
+   * CZZZ
+   *   jumpNodes is an array of jump nodes containing a single node that is a string specifying the name of a name node
+  nameNodes is a map from names of name nodes to the name node itself
+  and the second property of each object is the name node itself
+   */
   static connectJumpNodesToNameNodes(jumpNodes, nameNodesMap){
     for (let jumpNode of jumpNodes){
       let tempNode = nameNodesMap[jumpNode.nodes[0]]

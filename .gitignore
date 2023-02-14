@@ -5,5 +5,8 @@ vendor
 src/server/root_certificates/*.pem
 thinking*.txt
 releases
+documentation/api/*
 documentation/api
+
+documentation/demos/nodejs/api_test.js
 TODO.txt

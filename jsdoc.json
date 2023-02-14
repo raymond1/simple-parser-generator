@@ -1,6 +1,6 @@
 {
 	"source": {
-		"include":["releases/generator.js"]
+		"include":["releases/spg.js"]
 	},
 	"templates":{
 		"default":{

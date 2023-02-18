@@ -152,7 +152,7 @@ class H1{
     //   string literal
     //    (space)fsfasfasdfsdfs
     //this function will convert it into M1 format
-    static H1ConvertToM1(s){
+    static convertToM1(s){
       //Valid H1 format means the first line is the name of a node type
       let nodeString = H1.H1GetNodeString(s)
       if (nodeString == ''){
@@ -175,14 +175,14 @@ class H1{
 //     asdfasdfasdf
         let lines = s.split('\n')
         let secondLineBreak = s.indexOf('\n', lines[0].length + 1 + 1)
-        childrenString += childNuggets[0]+ ',' + H1.H1ConvertToM1(s.substring(secondLineBreak + 1))
+        childrenString += childNuggets[0]+ ',' + H1.convertToM1(s.substring(secondLineBreak + 1))
       }
       else{
         for (let i = 0; i < childNuggets.length; i++){
           if (i > 0){
             childrenString += ','
           }
-          childrenString += H1.H1ConvertToM1(childNuggets[i])
+          childrenString += H1.convertToM1(childNuggets[i])
         }
       }
   
@@ -197,10 +197,10 @@ class H1{
     }
     
     //Given a string in H1 format, loads the appropriate nodes into memory
-    static H1Import(s, parser){
-      let M1Code = H1.H1ConvertToM1(s)
+    static import(s, generator){
+      let M1Code = H1.convertToM1(s)
 console.log('h1 converted to m1 is:' + M1Code)
-      return M1.M1Import(M1Code, parser)
+      return M1.M1Import(M1Code, generator)
     }
   
   
@@ -219,7 +219,7 @@ console.log('h1 converted to m1 is:' + M1Code)
         case 'optional':
         case 'entire':
           {
-            childrenString += H1.H1Export(node.pattern, depth + 1)
+            childrenString += H1.H1Export(node.nodes[0], depth + 1)
           }
           break
         case 'or':
@@ -241,14 +241,14 @@ console.log('h1 converted to m1 is:' + M1Code)
         case 'rule':
           {
             childrenString += H1.H1EncodeDepth(depth + 1) + node.name + '\n'
-            childrenString += H1.H1Export(node.pattern, depth + 1)
+            childrenString += H1.H1Export(node.nodes[0], depth + 1)
           }
           break
         case 'character class':
         case 'string literal':
         case 'rule name':
           {
-            childrenString += H1.H1EncodeDepth(depth + 1) + node.string
+            childrenString += H1.H1EncodeDepth(depth + 1) + node.nodes[0]
           }
           break
         default:

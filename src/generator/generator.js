@@ -65,28 +65,37 @@ class Generator{
   }
 
   /**
-   * CZZZ Need to be able to make this work with multiple input formats...
-   * 
    * Generates an in-memory parser using a string description in M1 or H1 format.
    * 
-   * The definition for a parser in H1 or M1 format. See the documentation in M1.md or H1.md for more information.
+   * The definition for a parser in H1 or M1 format. The format must match the value passed into the format parameter. See the documentation in M1.md or H1.md for more information on the M1 and H1 file formats.
    * @param {String} parserDescription
    * 
-   * Either H1 or M1
+   * format can be either 'H1' or 'M1'
    * @param {String} format
    *
    * Returns a parser, as described by the string parserDescription.
    * @returns {Object}
    */
   generateParser(parserDescription, format='H1'){
-    let parser = Generator.H1Import(parserDescription, this)
+    let parser
+    switch (format){
+      case 'H1':
+        parser = Generator.H1.import(parserDescription, this)
+        break
+      case 'M1':
+        parser = Generator.M1.import(parserDescription, this)
+        break
+      default:
+        break
+    }
 
     return parser
   }
 
-  /**
+  /***
+   * Generates and returns the next id value associated with the parser generator. The first id value is 0. Each time this function is called, the id value that will be returned will be incremented by 1.
    * 
-   * @returns CZZZ
+   * @returns {Number}
    */
   getId(){
     let currentCounter = this.idCounter
@@ -94,19 +103,24 @@ class Generator{
     return currentCounter
   }
   
-  /*
-   * CZZZ
-   * Takes in one of the official node type names and returns an object of that node type.
-   * Also sets the generator object for a node and the id.
+  /***
+   * This function takes in a metadata object specifying the official node type name of a node and returns
+   * the node of that node type.
+   * 
+   * Takes in one of the official node type names as a string and returns an object of that node type.
+   * 
+   * The new node has the following properties:
+   * type -> A string 
+   * id -> A unique integer
+   * generator -> A pointer to the generator object that created the node.
    * 
    * 
-   * metadata is of the form:
+   * The metadata parameter is an object of the form:
    * {
    *  type:<node type>,
    *  ...other attributes, like
-   *  string
    * }
-   * @param {String} metadata 
+   * @param {Object} metadata 
    */
   createNode(metadata){
     let newNode = new Generator.nodeTypes[metadata.type](metadata)
@@ -122,11 +136,12 @@ class Generator{
     return newNode
   }
 
-  /**
-   * CZZZ
-   *   jumpNodes is an array of jump nodes containing a single node that is a string specifying the name of a name node
-  nameNodes is a map from names of name nodes to the name node itself
-  and the second property of each object is the name node itself
+  /***
+   * This function takes in an array of jump nodes and a map going from jump nodes to name nodes, and uses this information
+   * to connect the jump node to the name node that it is jumping to. A connection is formed when the first
+   * node child of a jump node is set to the value of a name node object.
+   * 
+   * During parsing, a jump node succeeds if its name node target succeeds.
    */
   static connectJumpNodesToNameNodes(jumpNodes, nameNodesMap){
     for (let jumpNode of jumpNodes){
@@ -140,8 +155,8 @@ Generator.registerNodeTypes()
 Generator.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
 Generator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
 
-Generator.H1Import = H1.H1Import
-Generator.M1Import = M1.M1Import
+Generator.H1 = H1
+Generator.M1 = M1
 
 export {Generator}
 export default Generator

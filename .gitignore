@@ -9,4 +9,5 @@ documentation/api/*
 documentation/api
 
 documentation/demos/nodejs/api_test.js
+documentation/demos/nodejs/test2.js
 TODO.txt

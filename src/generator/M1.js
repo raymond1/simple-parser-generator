@@ -120,7 +120,7 @@ class M1{
   }
 
   //Takes in a string, s, in M1 format and converts it into an in-memory representation of a parser
-  static M1Import(s, generator){
+  static import(s, generator){
     let rootNode = M1.M1ImportInternal(s,generator)
     Generator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
     return rootNode
@@ -164,7 +164,7 @@ class M1{
   //If it is a rule node, add indentation for the second parameter
   //rule list
   //This function converts from machine format M1 into human-compatible format H1
-  static M1ConvertToH1(s, depth = 0){
+  static convertToH1(s, depth = 0){
     if (s.substring(0,1) != '['){
       return Generator.H1EncodeDepth(depth) + s.slice()
     }
@@ -181,16 +181,42 @@ class M1{
     let commaOffset = Generator.getNextZeroLevelComma(s.substring(caret)) 
     while(commaOffset > -1){
       let nextNodeString = s.substring(caret,commaOffset + caret)
-      outputString += Generator.M1ConvertToH1(nextNodeString, depth + 1) + '\n'
+      outputString += Generator.M1.convertToH1(nextNodeString, depth + 1) + '\n'
       caret = caret + nextNodeString.length + 1 //Skip to one character past the last found comma
       commaOffset = Generator.getNextZeroLevelComma(s.substring(caret))
     }
 
-    outputString += Generator.M1ConvertToH1(s.substring(caret,s.length - 1), depth + 1)
+    outputString += Generator.M1.convertToH1(s.substring(caret,s.length - 1), depth + 1)
     return outputString
   }
 
-  static M1Export(node, depth = 0){
+  static export(node, depth = 0){
+    switch(node.nodes.length){
+      case 'name':
+        return `[${node.type},${Generator.M1.escape(node.nodes[0])},${node.nodes[1].M1Export()}]`
+      case 'or':
+      case 'sequence':
+      case 'and':
+      case 'split':
+        let patternsString = ''
+        this.nodes.forEach((pattern, index)=>{
+          if (index > 0) patternsString += ","
+          patternsString += Generator.M1.export(pattern)
+        })
+        let s = `[${node.type},${patternsString}]`
+        return s      
+      
+      case 'not':
+      case 'entire':
+      case 'optional':
+        return `[${node.type},${node.nodes[0].M1Export()}]`
+    
+      case 'character class':
+      case 'string literal':
+      case 'jump':
+        return `[${node.type},${Generator.M1Escape(node.nodes[0])}]`
+    }
+
     return node.M1Export(depth)
   }
 

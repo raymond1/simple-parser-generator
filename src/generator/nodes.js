@@ -1,51 +1,42 @@
 /**
- * This is the type of node emitted internally by the parser.
- * Multiple nodes make up a graph stored in memory that dictate how the
- * parser operates.
- * metadata is just an alternative syntax to function parameters
+ * This class represents an atomic operation. When configured into a graph, Node objects form parsing programs that can
+ * accomplish complex tasks. Parsing, when performed by a node is also called 'matching'.
+ * 
+ * A Node object is not usually constructed directly, but is extended by another class that is directly constructed.
  * */
 class Node{
   /**
-   * A set of key-value pairs. Must have a parser value in the 'parser' key.
-   * @param {Generator} generator 
+   * This constructor is called by the subclass that extends it when an object of the subclass is instantiated.
+   * The type property of then becomes the type property of the class that it has become. For example,
+   * if the subclass of a Node is JumpNode, the command "new CharacterClassNode('a')" will set the type of a Node object to the
+   * type property of the CharacterClassNode class.
    */
-  constructor(){
+  constructor(metadata){
     this.type = this.constructor.type //Show type in object for the debugger
-  }
-
-  //Implemented and overriden by child nodes. Given a node, coverts it into a string form
-  M1Export(depth = 0){
-    throw new Exception('Error while exporting grammar: ' + node['type'] + ' M1Export not implemented.')
+    this.nodes = metadata.nodes
   }
 }
 
 /**
- * A CharacterClassNode is a node that is associated with an internal string, s1. It returns n letters, where
+ * A CharacterClassNode is a node that is associated with an internal string. When matching, it returns n letters, where
  * n is equal to the number of consecutive characters, starting from the head of the input string, that are
- * also found in the internal string s1.
+ * also found in the internal string.
  * 
- * 
- * {
- *  subMatches,
- *  matchString
- * }
- * 
- *
  * */
 class CharacterClassNode extends Node{
+  /**
+   * This constructor takes in a metadata object with a nodes property with nodes[0] equal to a string representing the character class that this node will match against
+   * @param {*} metadata 
+   */
   constructor(metadata){
     super(metadata)
-    this.nodes = metadata.nodes
   }
 
   static type = 'character class'
 
-  M1Export(){
-    return `[${this.constructor.type},${Generator.M1Escape(this.string)}]`
-  }
-
   /**
-   * The characterclass match function
+   * 
+   * The character class node match function returns 
    * 
    * @param {String} inputString 
    * @param {Object} metadata 
@@ -85,18 +76,27 @@ class CharacterClassNode extends Node{
   }
 }
 
+/**
+  CZZZ
+ * 
+ */
 class StringLiteralNode extends Node{
+  /**
+   * CZZ
+   * @param {} metadata 
+   */
   constructor(metadata){
     super(metadata)
-    this.nodes = metadata.nodes
   }
 
   static type = 'string literal'
 
-  M1Export(){
-    return `[${this.constructor.type},${Generator.M1Escape(this.nodes[0])}]`
-  }
-
+  /**
+   * CZZ
+   * @param {*} inputString 
+   * @param {*} metadata 
+   * @returns 
+   */
   parse(inputString, metadata = {depth: 0, parent: null}){
     let newMatchNode = new MatchNode()
     //matches if inputString starts with the string passed in during object construction
@@ -120,6 +120,9 @@ class StringLiteralNode extends Node{
   }
 }
 
+/**
+ * CZZZ
+ */
 class NotNode extends Node{
   constructor(metadata){
     super(metadata)
@@ -127,10 +130,12 @@ class NotNode extends Node{
   }
   static type = 'not'
 
-  M1Export(){
-    return `[${this.constructor.type},${this.pattern.M1Export()}]`
-  }
-
+  /**
+   * CZZ
+   * @param {*} inputString 
+   * @param {*} metadata 
+   * @returns 
+   */
   parse(inputString, metadata = {depth: 0, parent: null}){
     var newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
@@ -153,7 +158,10 @@ class NotNode extends Node{
   }
 }
 
-//Produces a match if the input string matches the inner pattern match
+/**
+ * CZZ
+ * Produces a match if the input string matches the inner pattern match
+ * */
 class EntireNode extends Node{
   constructor(metadata){
     super(metadata)
@@ -199,18 +207,6 @@ class SequenceNode extends Node{
   }
   static type = 'sequence'
 
-  M1Export(){
-    let patternsString = ''
-    this.nodes.forEach((pattern, index)=>{
-      if (index > 0){
-        patternString += ","
-      }
-      patternsString += `[${pattern.M1Export()}]`
-    })
-    let s = `[${patternsString}]`
-    return s
-  }
-
   parse(inputString, metadata = {depth: 0, parent: null}){
     var newMatchNode = new MatchNode()
     let tempString = inputString
@@ -254,16 +250,6 @@ class OrNode extends Node{
   }
   static type = 'or'
   
-  M1Export(){
-    let patternsString = ''
-    this.nodes.forEach((pattern, index)=>{
-      if (index > 0) patternsString += ","
-      patternsString += pattern.M1Export()
-    })
-    let s = `[${this.constructor.type},${patternsString}]`
-    return s
-  }
-
   parse(inputString,metadata = {depth: 0, parent: null}){
     var newMatchNode = new MatchNode()
 
@@ -301,16 +287,6 @@ class AndNode extends Node{
     this.nodes = metadata.nodes
   }
   static type = 'and'
-
-  M1Export(){
-    let patternsString = ''
-    this.nodes.forEach((pattern, index)=>{
-      if (index > 0) patternsString += ","
-      patternsString += pattern.M1Export()
-    })
-    let s = `[${this.constructor.type},${patternsString}]`
-    return s
-  }
 
   parse(inputString,metadata = {depth: 0, parent: null}){
     var newMatchNode = new MatchNode()
@@ -367,10 +343,6 @@ class MultipleNode extends Node{
   }
   static type = 'multiple'
 
-  M1Export(){
-    return `[multiple,${this.nodes[0].M1Export()}]`
-  }
-
   parse(inputString, metadata = {depth: 0, parent: null}){
     var newMatchNode = new MatchNode()
     let tempString = inputString
@@ -412,10 +384,6 @@ class OptionalNode extends Node{
   }
 
   static type = 'optional'
-
-  M1Export(){
-    return `[${this.constructor.type},${this.nodes[0].M1Export()}]`
-  }
 
   parse(inputString, metadata = {depth: 0, parent: null}){
     let newMatchNode = new MatchNode()

@@ -698,7 +698,7 @@ class H1{
     //   string literal
     //    (space)fsfasfasdfsdfs
     //this function will convert it into M1 format
-    static H1ConvertToM1(s){
+    static convertToM1(s){
       //Valid H1 format means the first line is the name of a node type
       let nodeString = H1.H1GetNodeString(s)
       if (nodeString == ''){
@@ -721,14 +721,14 @@ class H1{
 //     asdfasdfasdf
         let lines = s.split('\n')
         let secondLineBreak = s.indexOf('\n', lines[0].length + 1 + 1)
-        childrenString += childNuggets[0]+ ',' + H1.H1ConvertToM1(s.substring(secondLineBreak + 1))
+        childrenString += childNuggets[0]+ ',' + H1.convertToM1(s.substring(secondLineBreak + 1))
       }
       else{
         for (let i = 0; i < childNuggets.length; i++){
           if (i > 0){
             childrenString += ','
           }
-          childrenString += H1.H1ConvertToM1(childNuggets[i])
+          childrenString += H1.convertToM1(childNuggets[i])
         }
       }
   
@@ -743,10 +743,10 @@ class H1{
     }
     
     //Given a string in H1 format, loads the appropriate nodes into memory
-    static H1Import(s, parser){
-      let M1Code = H1.H1ConvertToM1(s)
+    static import(s, generator){
+      let M1Code = H1.convertToM1(s)
 console.log('h1 converted to m1 is:' + M1Code)
-      return M1.M1Import(M1Code, parser)
+      return M1.M1Import(M1Code, generator)
     }
   
   
@@ -765,7 +765,7 @@ console.log('h1 converted to m1 is:' + M1Code)
         case 'optional':
         case 'entire':
           {
-            childrenString += H1.H1Export(node.pattern, depth + 1)
+            childrenString += H1.H1Export(node.nodes[0], depth + 1)
           }
           break
         case 'or':
@@ -787,14 +787,14 @@ console.log('h1 converted to m1 is:' + M1Code)
         case 'rule':
           {
             childrenString += H1.H1EncodeDepth(depth + 1) + node.name + '\n'
-            childrenString += H1.H1Export(node.pattern, depth + 1)
+            childrenString += H1.H1Export(node.nodes[0], depth + 1)
           }
           break
         case 'character class':
         case 'string literal':
         case 'rule name':
           {
-            childrenString += H1.H1EncodeDepth(depth + 1) + node.string
+            childrenString += H1.H1EncodeDepth(depth + 1) + node.nodes[0]
           }
           break
         default:
@@ -926,7 +926,7 @@ console.log('h1 converted to m1 is:' + M1Code)
   }
 
   //Takes in a string, s, in M1 format and converts it into an in-memory representation of a parser
-  static M1Import(s, generator){
+  static import(s, generator){
     let rootNode = M1.M1ImportInternal(s,generator)
     Generator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
     return rootNode
@@ -970,7 +970,7 @@ console.log('h1 converted to m1 is:' + M1Code)
   //If it is a rule node, add indentation for the second parameter
   //rule list
   //This function converts from machine format M1 into human-compatible format H1
-  static M1ConvertToH1(s, depth = 0){
+  static convertToH1(s, depth = 0){
     if (s.substring(0,1) != '['){
       return Generator.H1EncodeDepth(depth) + s.slice()
     }
@@ -987,16 +987,42 @@ console.log('h1 converted to m1 is:' + M1Code)
     let commaOffset = Generator.getNextZeroLevelComma(s.substring(caret)) 
     while(commaOffset > -1){
       let nextNodeString = s.substring(caret,commaOffset + caret)
-      outputString += Generator.M1ConvertToH1(nextNodeString, depth + 1) + '\n'
+      outputString += Generator.M1.convertToH1(nextNodeString, depth + 1) + '\n'
       caret = caret + nextNodeString.length + 1 //Skip to one character past the last found comma
       commaOffset = Generator.getNextZeroLevelComma(s.substring(caret))
     }
 
-    outputString += Generator.M1ConvertToH1(s.substring(caret,s.length - 1), depth + 1)
+    outputString += Generator.M1.convertToH1(s.substring(caret,s.length - 1), depth + 1)
     return outputString
   }
 
-  static M1Export(node, depth = 0){
+  static export(node, depth = 0){
+    switch(node.nodes.length){
+      case 'name':
+        return `[${node.type},${Generator.M1.escape(node.nodes[0])},${node.nodes[1].M1Export()}]`
+      case 'or':
+      case 'sequence':
+      case 'and':
+      case 'split':
+        let patternsString = ''
+        this.nodes.forEach((pattern, index)=>{
+          if (index > 0) patternsString += ","
+          patternsString += Generator.M1.export(pattern)
+        })
+        let s = `[${node.type},${patternsString}]`
+        return s      
+      
+      case 'not':
+      case 'entire':
+      case 'optional':
+        return `[${node.type},${node.nodes[0].M1Export()}]`
+    
+      case 'character class':
+      case 'string literal':
+      case 'jump':
+        return `[${node.type},${Generator.M1Escape(node.nodes[0])}]`
+    }
+
     return node.M1Export(depth)
   }
 
@@ -1257,28 +1283,37 @@ class Generator{
   }
 
   /**
-   * CZZZ Need to be able to make this work with multiple input formats...
-   * 
    * Generates an in-memory parser using a string description in M1 or H1 format.
    * 
-   * The definition for a parser in H1 or M1 format. See the documentation in M1.md or H1.md for more information.
+   * The definition for a parser in H1 or M1 format. The format must match the value passed into the format parameter. See the documentation in M1.md or H1.md for more information on the M1 and H1 file formats.
    * @param {String} parserDescription
    * 
-   * Either H1 or M1
+   * format can be either 'H1' or 'M1'
    * @param {String} format
    *
    * Returns a parser, as described by the string parserDescription.
    * @returns {Object}
    */
   generateParser(parserDescription, format='H1'){
-    let parser = Generator.H1Import(parserDescription, this)
+    let parser
+    switch (format){
+      case 'H1':
+        parser = Generator.H1.import(parserDescription, this)
+        break
+      case 'M1':
+        parser = Generator.M1.import(parserDescription, this)
+        break
+      default:
+        break
+    }
 
     return parser
   }
 
-  /**
+  /***
+   * Generates and returns the next id value associated with the parser generator. The first id value is 0. Each time this function is called, the id value that will be returned will be incremented by 1.
    * 
-   * @returns CZZZ
+   * @returns {Number}
    */
   getId(){
     let currentCounter = this.idCounter
@@ -1286,19 +1321,24 @@ class Generator{
     return currentCounter
   }
   
-  /*
-   * CZZZ
-   * Takes in one of the official node type names and returns an object of that node type.
-   * Also sets the generator object for a node and the id.
+  /***
+   * This function takes in a metadata object specifying the official node type name of a node and returns
+   * the node of that node type.
+   * 
+   * Takes in one of the official node type names as a string and returns an object of that node type.
+   * 
+   * The new node has the following properties:
+   * type -> A string 
+   * id -> A unique integer
+   * generator -> A pointer to the generator object that created the node.
    * 
    * 
-   * metadata is of the form:
+   * The metadata parameter is an object of the form:
    * {
    *  type:<node type>,
    *  ...other attributes, like
-   *  string
    * }
-   * @param {String} metadata 
+   * @param {Object} metadata 
    */
   createNode(metadata){
     let newNode = new Generator.nodeTypes[metadata.type](metadata)
@@ -1314,11 +1354,12 @@ class Generator{
     return newNode
   }
 
-  /**
-   * CZZZ
-   *   jumpNodes is an array of jump nodes containing a single node that is a string specifying the name of a name node
-  nameNodes is a map from names of name nodes to the name node itself
-  and the second property of each object is the name node itself
+  /***
+   * This function takes in an array of jump nodes and a map going from jump nodes to name nodes, and uses this information
+   * to connect the jump node to the name node that it is jumping to. A connection is formed when the first
+   * node child of a jump node is set to the value of a name node object.
+   * 
+   * During parsing, a jump node succeeds if its name node target succeeds.
    */
   static connectJumpNodesToNameNodes(jumpNodes, nameNodesMap){
     for (let jumpNode of jumpNodes){
@@ -1332,8 +1373,8 @@ Generator.registerNodeTypes()
 Generator.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
 Generator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
 
-Generator.H1Import = H1.H1Import
-Generator.M1Import = M1.M1Import
+Generator.H1 = H1
+Generator.M1 = M1
 
 export {Generator}
 export default Generator

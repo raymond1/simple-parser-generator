@@ -144,12 +144,14 @@ class M1{
   //] becomes ENC(R)
   //[ becomes ENC(L)
   //, becomes ENC(C)
-  // (space) becomes ENC(S)
+  //(space) becomes ENC(S)
+  //(newline) becomes ENC(N)
   static M1Escape(s){
-    let s2 = s.replace(/\[/g, "ENC(L)")
-    s2 = s2.replace(/\]/g, "ENC(R)")
+    let s2 = s.replace(/\(/g, "ENC(L)")
+    s2 = s2.replace(/\)/g, "ENC(R)")
     s2 = s2.replace(/,/g, "ENC(C)")
     s2 = s2.replace(/ /g, "ENC(S)")
+    s2 = s2.replace(/\\n/g, "ENC(N)")
     return s2
   }
 

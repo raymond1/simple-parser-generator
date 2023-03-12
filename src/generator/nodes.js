@@ -64,7 +64,6 @@ class CharacterClassNode extends Node{
    * the first element of the nodes property, which is defined during class construction.
    * 
    * @param {String} inputString - The input string to parse.
-   * 
    * @returns {MatchNode}
    */
   parse(inputString, metadata = {depth: 0, parent: null}){
@@ -182,7 +181,7 @@ class NotNode extends Node{
   /**
    * This function returns 0 if its child node returns a positive number when fed with the input string.
    * Otherwise, it returns the length of the input string.
-   * @param {*} inputString - The input string.
+   * @param {String} inputString - The input string.
    * @returns {Number} - Returns 0 if child node's parse function returns a positive number. Otherwise, returns
    * the length of inputString.
    */
@@ -237,7 +236,7 @@ class EntireNode extends Node{
    * This function passes the input string to its child node's parse function. The return value from
    * the child node's parse function is n. If n is the same as the length of the input string,
    * then this function returns n. Otherwise, this 0 is returned.
-   * @param {String} inputString 
+   * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
   parse(inputString, metadata = {depth: 0, parent: null}){
@@ -305,7 +304,7 @@ class SequenceNode extends Node{
    * the sum of the lengths of the strings matched by the child nodes otherwise.
    * 
    * 
-   * @param {*} inputString 
+   * @param {String} inputString - The input string. 
    * @returns {Number} The sum of the matched strings of its child nodes if matching was successful
    */
   parse(inputString, metadata = {depth: 0, parent: null}){
@@ -381,7 +380,7 @@ class OrNode extends Node{
    *  matchString: equal to the substring of the input string of length equal to the the length of the first matching child node function.
    * }
    * @param {String} inputString - the input string.
-   * @returns 
+   * @returns {MatchNode}
    */
   parse(inputString,metadata = {depth: 0, parent: null}){
     var newMatchNode = new MatchNode()
@@ -447,7 +446,7 @@ class AndNode extends Node{
    * matchString: equal to the substring of inputString of length n, where n is equal to the length of the
    * smallest match of the child nodes of the 'and' node.
    * 
-   * @param {String} inputString 
+   * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
   parse(inputString,metadata = {depth: 0, parent: null}){
@@ -525,7 +524,7 @@ class MultipleNode extends Node{
    * matchFound: true if the child node of the multiple node matches at least once
    * matchLength: Equal to the value n, where n is the sum of the matchLength property of 
    * the child node's parse function when fed with an interation of the input string.
-   * @param {*} inputString - The input string
+   * @param {String} inputString - The input string
    * @returns {MatchNode}
    */
   parse(inputString, metadata = {depth: 0, parent: null}){
@@ -590,7 +589,7 @@ class OptionalNode extends Node{
    * matchFound: true
    * matchLength: equal to 0 if child node produces a matchFound value of false, equal to the
    * length of the child node's matchLength property if the child node's parse function produces a matchFound property of true.
-   * @param {*} inputString 
+   * @param {String} inputString - The input string.
    * @returns {MatchNode}
    */
   parse(inputString, metadata = {depth: 0, parent: null}){
@@ -635,7 +634,7 @@ class SplitNode extends Node{
    * Takes in an input string and returns a MatchNode object with the following properties:
    * matchFound: true if the nodes[0].parse(inputString) function returns true, false otherwise.
    * matchLength: Equal to the matchLength property of the nodes[0].parse(inputString) function
-   * @param {*} inputString 
+   * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
   parse(inputString, metadata={depth:0,parent:null}){
@@ -680,7 +679,7 @@ class NameNode extends Node{
    * The parse function takes in an input string and returns a MatchNode object with the following properties:
    * matchFound: true if its nodes[1] object's parse function returns true
    * matchLength: equal to the length of its child node's matchLength property
-   * @param {*} inputString 
+   * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
   parse(inputString, metadata={depth:0,parent:null}){
@@ -723,7 +722,7 @@ class JumpNode extends Node{
    * Takes in a string and returns a MatchNode object with the following properties:
    * matchFound: true if its child node returns matchFound true
    * matchLength: equal to the length of the child's matchFound property
-   * @param {String} inputString 
+   * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
   parse(inputString, metadata={depth:0,parent:null}){

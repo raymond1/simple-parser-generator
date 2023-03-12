@@ -1,22 +1,21 @@
 # Simple Parser Generator
 
-This repository contains code for the Simple Parser Generator(SPG), which is a parser generator that generates parsers that can run on a virtual machine designed for simplicity and portability. Its small size makes it a possible tool for teaching programming language creation and is extremely extensible and inherently understandable in its behaviour.
+## Introduction
+This repository contains code and documentation for the Simple Parser Generator(SPG), which is a system for generating parsers.
 
-The repository includes documentation for the V1 virtual machine that the SPG runs on, the very useful H1 file format for describing parsers, and the M1 file format, which is used internally in the workings of the machine. 
+### How it works
+The Simple Parser Generator is a JavaScript object. It reads in a parser specification written in the H1 language as a string and converts the parser specification into an in-memory JavaScript object. This new JavaScript object has a method for parsing and can be used as the basis for generating other programming languages.
 
-Currently, the Simple Parser Generator is in its second generation. It is smaller, more portable, and the H1 file format is an improvement over the original input language for the parser generator. It is hoped that this version may hint at some possibilities of even better parser generators that may be possible.
+### Status
+The Simple Parser Generator is in its second iteration, but it is still in an experimental phase. It has been tested and documented, and works, but has never been used to make a practical programming language.
 
-As a side note, the H1 language is based on a very interesting concept that in some ways is simpler than JSON and can be used as a potential alternative.
+Its architecture is well defined, and it is a very interesting and fairly well-documented system, but it may be better suited as a teaching tool for making compilers rather than for use as a production system.
 
-# How it works
-The Simple Parser Generator is a JavaScript object. It reads in a parser specification written in the H1 language as a string and converts the parser specification into an in-memory JavaScript object. This new JavaScript object has a method for parsing, meaning that it can read in a string representing a programming language containing hierachical constructs, analyze it and generate a stream of output information objects describing the various components of the programming language.
+## Installation
 
-The H1 language is described here: [H1.md](documentation/H1.md). The output The string content from an H1 file is read into memory, parsed, and converted into a collection of micro-parsers that are put into memory, configured and connected with each other, ready to take in input to produce output tokens.
+The SPG is contained a single JavaScript file, spg.js, that can be included using an import statement. spg.js contains several classes which can be imported using the import {class_1, class_2, class_3,...} syntax. The installation instructions for a NodeJS installation and for a browser installation is shown below.
 
-# Installation
-The instructions below are just one method of installation. The SPG is simply a JavaScript file you can include in your project. Thus, you can modify the instructions to suit your needs. The following instructions are simply meant as a guide.
-
-## NodeJS
+### NodeJS
 1. Make a new package.json. This can be done with the command npm init and pressing enter through all the prompts to use the default options.
 2. Add or set the "type" attribute in the package.json file to the value module.
 3. npm install git+https://github.com/raymond1/simple-parser-generator.git#v2
@@ -26,8 +25,8 @@ At this point, the simple parser generator should be installed. To use it, creat
 import {Generator} from 'simple-parser-generator'
 ```
 
-## Installation for Browsers
-1. Set up a web server that can serve HTML and JS pages with the correct Content-Type headers.
+### Browsers
+1. Set up a web server that can serve HTML and JavaScript pages with the correct Content-Type headers.
 2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving it from.
 3. Clone the https://github.com/raymond1/simple-parser-generator#v2 repository.
 4. Copy the file releases/spg.js into the folder that your web server is serving.
@@ -47,135 +46,202 @@ import {Generator} from 'simple-parser-generator'
 
 ## Tutorial
 
-After going through the installation steps above, you will have access to a Generator object. The following short tutorial demonstrates how to generate a parser using the SPG on the NodeJS platform. The steps below assume you have already run the NodeJS installation steps from above.
+After going through the installation steps above, you will have access to a Generator object. The following tutorial sample program is a minimalistic JavaScript stub program that explains from a data passing and API point of view how to generate a parser using the SPG on the NodeJS platform. Details on the conceptual model will be explained after describing the software workflow.
 
-### 0. Import the Generator class used to generate parsers
-Create a new index.js file. Add the following line to it to bring the 'Generator' JavaScript class into your namespace:
+### Tutorial Sample Program
+This sample program demonstrates the software workflow for making a simple parser and parsing an input string.
 ```
-import {Generator} from 'simple-parser-generator'
-```
+/* 1. Import the 'Generator' class used to convert a parser specification into an in-memory object capable of parsing.*/
+import {Generator} from 'simple-parser-generator' 
 
-### 1. Create the parser generator.
-After the import line, the parser generator is instantiated with the line 
-```
-let generator = new Generator()
-```
-
-### 2. Set the parser specification.
-
-A parser specification is a string specified in the H1 file format that describes a parser. See the file H1.md in this repository for more information on the H1 file format.
-
-For this tutorial, use the following parser specification:
-
-```
-let grammar = `sequence
- character class
-  ehlo
- string literal
-  world`
-```
-This specification that makes strings starting with any number of characters from the set {e,h,l,o} followed by the string 'world' a valid program. Example valid programs for this input grammar will Example matches will include 'hworld', 'heworldzzzzzz', 'helworld', 'hhhhhhhhhhhhhhhhworld' and 'helloworld'.
-
-### 3. Generate a parser that translates your input specification from a string format into an in-memory format
-```
-let parser = generator.generateParser(grammar)
-```
-
-The generator.generateParser function takes in a string representation of a parser in H1 format and returns a working parser object.
-
-### 4. Generate a test program for the parser you generated.
-
-```
-let testString = 'helloworld'
-```
-
-### 5. Feed the test program into your parser.
-```
-let output = parser.parse(testString)
-```
-
-This line will run the 'parse' function from the parser object, which takes in testString as input and generates a tree as the output. The variable 'output' will store the value of the tree produced from the 'parse' function, which will contain information on how the parser analyzed the input string at each step of parsing.
-
-### 6. Display the output from the parser in a text format
-A built-in tool for interpreting the output tree generated by a parser is provided in the TreeViewer class. To use it, first import the class. Do this by adding the following line to the top of your file:
-
-```
-import {TreeViewer} from 'simple-parser-generator'
-```
-
-Then, at the bottom of your file, instantiate a TreeViewer object and run the display function to display a text interpretaton of the output tree. The first parameter to the 'display' function should be 'text'. The second parameter should be the output object you generated from your parser, which should be the ```output``` variable from step 5.
-
-```
-let treeViewer = new TreeViewer()
-treeViewer.display('text', output)
-```
-
-The completed program is shown below:
-```
-import {TreeViewer} from 'simple-parser-generator'
-import {Generator} from 'simple-parser-generator'
-
+/* 2. Instantiate a new Generator object. */
 let generator = new Generator()
 
-let grammar = `sequence
- character class
-  elho
+/* 3. Specify the specification for a parser. This is done using the H1 programming language, which is documented
+in the file H1.md.*/
+let specification = 
+`string literal
+ world`
+
+/* 4. Generate a parser object by passing in the specification to the generator. This is done using the
+generate parser method. */
+let parser = generator.generateParser(specification)
+
+/* 5. Create an input string to be fed into your parser. Conceptually, if your parser specification is for the 
+CSV file format, then your input string would be a sample CSV file. If your parser specification describes what a valid
+PDF file should be like, then your input string would be a possible PDF file. Here, the input string is 'world' because
+the parser specification is simply to detect if a string starts with the text 'world'.*/
+let inputString = 'world'
+
+/* 6. Parse the input string and save the output in a variable(here, it is called 'output'). The 'parse' function is used to
+start parsing the input. It will generate a stream of data tokens which can then be
+interpreted to determine various attributes and features of the input string. The features that will be extracted will
+depend on the specification initially passed into the generator in step 4.*/
+let output = parser.parse(inputString)
+
+/* 7. At this point, the output variable will contain some information. The exact format of this information is described in more detail later on, but it is basically an array of informational objects that can be inspected using a debugger. */
+```
+
+### Understanding the syntax of the H1 parser specification file format
+
+The parser specification language used to describe a parser is called 'H1'. H1 is also called the "H1 file format", or the 'H1 language' and strings that are written in the H1 file format are called 'H1 files' or 'H1 strings'.
+
+H1 files consists of lines of text. Each line of text can be either an instruction or a piece of data. Together, all of the lines in an H1 file create a description of an in-memory tree consisting of nodes which are connected to other nodes and sometimes have attributes associated with them. In other words, the H1 language is used to describe tree structures. These tree structures are passed into the V1 virtual machine to create a parser.
+
+Here is a sample H1 file:
+
+```
+sequence
  string literal
-  world`
+  adsfasdf
+ multiple
+  character class
+   stvxa
 
-let parser = generator.generateParser(grammar)
-
-let testString = 'helloworld'
-
-let output = parser.parse(testString)
-
-let treeViewer = new TreeViewer()
-treeViewer.display('text', output)
 ```
 
-### Analyzing the output
+To determine the conceptual tree structure that this represents, the overall procedure is as follows:
 
-From the command prompt, run the index.js program you created:
+1. Use the H1 file to construct a tree called A1.
+2. Extract a second tree from A1 whose nodes consist of only instruction nodes which each have 0 or more attributes. Call this tree the A2 tree.
 
-```node index.js```
+For step 1, the leading spaces on each line stores the parent-child relationship information of the tree. The number of leading spaces before the first character on a line represents its depth in the tree. If a line has a depth of n, then it will be the child node of the first line that has a lower line number that has a depth of n-1.
 
-You will get an output that looks similar to the following:
-```
-*****BEGIN*sequence*0
- *****BEGIN*character class*1
- matchString:hello
- parent:2
- depth:1
- inputString:helloworld
- type:character class
- id:0
- serial:0
- *************END*************1
- *****BEGIN*string literal*1
- matchString:world
- parent:2
- depth:1
- inputString:world
- type:string literal
- id:1
- serial:1
- string:world
- *************END*************1
-matchString:helloworld
-parent:(null)
-depth:0
-inputString:helloworld
-type:sequence
-id:2
-serial:2
-*************END*************0
-```
+Lines with n leading spaces will be children of the first line above it that have n-1 leading spaces. If a line has a greater depth than the line immediately above it, then it is a child of that line.
 
-Each node starts with a number of asterisks followed by the string 'BEGIN', followed by another star, and then the node name and another star, and then the depth of the node. Each node ends with a series of asterisks followed by the string 'END' followed by some asterisks, followed by the node depth. The node depth is also represented by the number of leading spaces on a line.
+As an example, here is a table showing the relationship between the line number, depth and parent line for the sample H1 file from above:
 
-In between the *****BEGIN**** and ********END******** lines, you will see some properties of each node. matchString is the string that is mached against the input string. inputString is the input string. type is the type of a node. Depth is the depth of the node. id is a unique number assigned to each node. Serial is the order that a node was detected in during parsing(the first node has a serial value of 1, the second node detected has a value of 2, et. cetera et. cetera). Parent is the parent of the node that was detected.
+Line number | Depth | Parent line number
+----------------------------------------
+1           | 0     | None
+2           | 1     | 1
+3           | 2     | 2
+4           | 1     | 1
+5           | 2     | 4
+6           | 3     | 5
 
-An alternative to using the TreeViewer is to use a debugger.
+By convention, all nodes with a depth 0 are considered to be children of a theoretical node of depth -1, called the root node. This is just a convention so that you can say that all H1 files describe a single tree.
+
+One the A1 tree has been constructed, the tree's nodes are divided into 'data nodes' and 'instruction nodes'. The A2 tree will absorb all data nodes, which have no children, into their parent nodes as attributes.This A2 tree is the conceptual model of the list of instructions that lie in memory.
+
+Whether a node is a data node or an instruction node is context-sensitive and is determined using the algorithm described in the section [How to determine if a node is a data node or an instruction node](how-to-determine-if-a-node-is-a-data-node-or-an-instuction-node).
+
+### How to determine if a node is a data node or an instuction node
+
+If a node in the A1 tree has a depth of 0, then it should be an instruction node. For a node to be an instruction node means that the portion of the line in the H1 file that the A1 tree was derived that when stripped of leading spaces must contain an instruction node name. An instruction node name can be any one of the following:
+
+1. character class
+2. string literal
+3. not
+4. entire
+5. sequence
+6. or
+7. and
+8. multiple
+9. optional
+10. split
+11. name
+12. jump
+
+The above list acts like keywords in other languages. Each instruction node, also called an instruction type, has a schema rule associated with it, meaning that the number of children it has is specified, and the order of its children has a specific meaning. The schema rule for each instruction type is given in the following table:
+
+Type of node    | number of children | Type of child node or nodes
+-----------------------------------------------------
+character class | 1                  | Data
+string literal  | 1                  | Data
+not             | 1                  | Instruction
+entire          | 1                  | Instruction
+sequence        | 1 or more          | Instruction
+or              | 2 or more          | Instruction 
+and             | 2 or more          | Instruction
+multiple        | 1                  | Instruction
+optional        | 1                  | Instruction
+split           | 1 or more          | Instruction
+name            | 2                  | First child is a data node. Second child is an instruction
+jump            | 1                  | Data (must match with data from a name node)
+
+Assuming that the A1 tree starts with an instruction node and follows the schema rules, it is possible to start from the first node in an A1 tree, and, using the above table, proceed to determine whether each node in the A1 tree is an instruction or a data node.
+
+
+
+
+
+1. The character class node has only one child node, and that child node must be
+
+
+To determine whether a node from the A1 tree is a data node or an instruction node, it is first necessary to enumerate all the possible types of instruction nodes.
+
+The complete list of instruction nodes is:
+
+
+These instruction nodes are essentially equivalent to keywords used in other languages.
+
+If
+
+------------------------
+
+
+
+Besides the leading spaces, each line in the H1 file format contains only one piece of information. A line may contain either the name of an instruction or data encoded as an H1-encoded string string. If a line contains an instruction, it is called an 'instruction node' or simply an 'instruction'. Whether a line is an instruction or a piece of data is context sensitive.
+
+Interpretation starts from line 1 and then proceeds downwards. If a line is a non-terminal node, it means that it is a node that is capable of having one or more nodes as children. If a line is a terminal node, then it means that its only children will be data nodes.
+
+
+
+
+
+
+
+Each instruction from this list is called a 'node name', a 'node type', a 'node object' or a 'node'. If a line is not a node, then it contains a piece of data. Data lines store string information in an encoding called 'M1-escaped format'. Each piece of data is the child of exactly one node object.
+
+A node's children are called 'child elements' and can be either data or nodes.
+
+In M1-escaped format, special characters are replaced with a replacement string. The table of special characters and their replacements is shown below:
+
+character | replacement
+-----------------------
+(         | ENC(L)
+)         | ENC(R)
+,         | ENC(C)
+(space)   | ENC(S)
+(newline) | ENC(N)
+
+In addition, any unicode character can be encoded by the string ENC(X), where X is a non-negative base 10 number. In the H1 language, strings are encoded as unicode strings.
+
+Each node type requires 0, 1, or more child elements and influences the V1 virtual machine in different ways. The different nodes and their effects on the V1 virtual machine's execution is described in section [Programming a parser using the nodes of the H1 language](#programming-a-parser-using-the-nodes-of-the-h1-language).
+
+### Programming a parser using the nodes of the H1 language.
+Conceptually, the V1 virtual machine can be thought of as a kind of computer that takes in strings and outputs data objects called 'match nodes', also called 'output objects' or 'match objects'. The V1 virtual machine consists of the following components:
+
+1. An input string
+2. A caret pointing to a location on the input string
+3. A true or false flag called matchFound
+4. A string value called matchString
+5. A set of instructions consisting of an H1 file that has been converted into an in-memory representation of its nodes. When an H1 file has been converted into its in-memory representation, that in-memory representation is called the 'image' of the H1 file.
+6. A pointer in memory, called the program pointer that points to the current instruction.
+7. A storage area in memory that stores output objects
+
+### Initialization of a V2 virtual machine
+1. The input string is basically the input data that will be fed to the V1 virtual machine. It is programmed as in comment 6 of the tutorial sample program.
+
+2. The caret points initially to the first character of the input string.
+
+3. The matchFound flag of the V1 virtual machine is initially set to false.
+
+4. The string called matchString of the V1 virtual machine is initially set to the empty string, ''.
+
+5. The set of instructions loaded into a V1 virtual machine can be set as in comments 3 and 4 from the tutorial sample program.
+
+6. Initially, the program pointer points to the image of the first line from the H1 program loaded into memory.
+
+7. Initially, the storage location in memory that stores output objects is empty. This is basically a collection or an array or list that begins empty.
+
+### Execution of a the V2 virtual machine
+
+After the V2 virtual machine has been initialized, it can execute the instructions passed to it using the input string as its data set. Execution proceeds as follows:
+
+
+
 
 ## API
 

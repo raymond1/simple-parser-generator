@@ -46,7 +46,7 @@ import {Generator} from 'simple-parser-generator'
 
 ## Tutorial
 
-After going through the installation steps above, you will have access to a Generator object. The following tutorial sample program is a minimalistic JavaScript stub program that explains from a data passing and API point of view how to generate a parser using the SPG on the NodeJS platform. Details on the conceptual model will be explained after describing the software workflow.
+After going through the installation steps above, you will have access to a Generator object. The following tutorial sample program is a minimalistic JavaScript stub program that explains from a software development point of view how to generate a parser using the SPG on the NodeJS platform. Details on the conceptual model will be explained after describing the software workflow.
 
 ### Tutorial Sample Program
 This sample program demonstrates the software workflow for making a simple parser and parsing an input string.
@@ -88,7 +88,7 @@ The parser specification language used to describe a parser is called 'H1'. H1 i
 
 H1 files consists of lines of text. Each line of text can be either an instruction or a piece of data. Together, all of the lines in an H1 file create a description of an in-memory tree consisting of nodes which are connected to other nodes and sometimes have attributes associated with them. In other words, the H1 language is used to describe tree structures. These tree structures are passed into the V1 virtual machine to create a parser.
 
-Here is a sample H1 file:
+Here is a sample H1 file, which will be referred to as the F1 sample file or tutorial sample file:
 
 ```
 sequence
@@ -97,7 +97,6 @@ sequence
  multiple
   character class
    stvxa
-
 ```
 
 To determine the conceptual tree structure that this represents, the overall procedure is as follows:
@@ -143,26 +142,64 @@ If a node in the A1 tree has a depth of 0, then it should be an instruction node
 11. name
 12. jump
 
-The above list acts like keywords in other languages. Each instruction node, also called an instruction type, has a schema rule associated with it, meaning that the number of children it has is specified, and the order of its children has a specific meaning. The schema rule for each instruction type is given in the following table:
+The above list acts like keywords in other languages. Each instruction node, also called an instruction type, has a schema rule associated with it, meaning that the number of children it has is specified, and the order of its children has a specific meaning. The schema rule for each instruction type is given in the following table, called the V1 schema rule table:
 
 Type of node    | number of children | Type of child node or nodes
 -----------------------------------------------------
-character class | 1                  | Data
-string literal  | 1                  | Data
-not             | 1                  | Instruction
-entire          | 1                  | Instruction
-sequence        | 1 or more          | Instruction
-or              | 2 or more          | Instruction 
-and             | 2 or more          | Instruction
-multiple        | 1                  | Instruction
-optional        | 1                  | Instruction
-split           | 1 or more          | Instruction
-name            | 2                  | First child is a data node. Second child is an instruction
-jump            | 1                  | Data (must match with data from a name node)
+character class | 1                  | data
+string literal  | 1                  | data
+not             | 1                  | instruction
+entire          | 1                  | instruction
+sequence        | 1 or more          | instruction
+or              | 2 or more          | instruction 
+and             | 2 or more          | instruction
+multiple        | 1                  | instruction
+optional        | 1                  | instruction
+split           | 1 or more          | instruction
+name            | 2                  | First child is a data node. Second child is an instruction.
+jump            | 1                  | data (must match with data from a name node)
 
 Assuming that the A1 tree starts with an instruction node and follows the schema rules, it is possible to start from the first node in an A1 tree, and, using the above table, proceed to determine whether each node in the A1 tree is an instruction or a data node.
 
+For example, in the tutorial sample file, line 1 is a sequence node. In the schema rule table, sequences have one or more children. The type of these children is 'instruction'. Therefore, all of the children of the sequence node will be interpreted to be instructions. That means lines 2 and 4 are instructions.
 
+Line 2 is a string literal node. According to the schema rule table, string literal nodes have one data type child. Therefore, line 3, which is the child of line 2 must be a data line.
+
+Line 4 is a 'multiple' type node. According to the schema rule table, 'multiple' type nodes have one instruction child. Therefore, line 4's child line, which is line 5, is also an instruction.
+
+Line 5 is a 'character class' node. According to the schema rule table, 'character class' nodes have one child, which is a data type node. Therefore, line 6, which is the child of line 5, must be a data line.
+
+Any correctly formatted H1 file that obeys the V1 schema rules can thus be divided into data and instruction nodes/lines.
+
+### Constructing the A2 tree from the A1 tree
+The A2 tree consists of all the instruction nodes of the A1 tree with any data nodes absorbed as attributes of their parent instruction node. For example, in the tutorial sample H1 file, line 3, which is a data node, is interpreted to be a property of line 2, which is its parent instruction node, and line 6, which is a data node, is also interpreted to be a property of the node created from line 5.
+
+### Execution of the V1 virtual machine
+
+After the H1 file has been transformed into an A2 tree in memory and designated as the program that the V1 virtual machine will run and the input string has been associated with the V1 virtual machine, the V1 virtual machine is ready to run.
+
+Processing starts from the first A2 node, which is the first instruction node from the A1 tree. Depending on the type of node and the contents of the input string starting at the caret position, different actions will result.
+
+Type of node    | Effect | 
+-----------------------------------------------------
+character class | 1                  | data
+string literal  | 1                  | data
+not             | 1                  | instruction
+entire          | 1                  | instruction
+sequence        | 1 or more          | instruction
+or              | 2 or more          | instruction 
+and             | 2 or more          | instruction
+multiple        | 1                  | instruction
+optional        | 1                  | instruction
+split           | 1 or more          | instruction
+name            | 2                  | First child is a data node. Second child is an instruction.
+jump            | 1                  | data (must match with data from a name node)
+
+
+It is this A2 tree that forms the conceptual model of an H1 file that follows the V1 schema rule table.
+
+
+After the A1 tree has been created, and the nodes of the A1 tree have been divided into data and instruction nodes, the A2
 
 
 

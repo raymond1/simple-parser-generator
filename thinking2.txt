@@ -1,10 +1,8 @@
-Rule list
--Rule
---Rule name
----multiple
-----pattern
-------"string"
-
-
-
-
+```
+sequence
+ string literal
+  adsfasdf
+ multiple
+  character class
+   stvxa
+```

@@ -1,33 +1,52 @@
 # Simple Parser Generator
 
 ## Introduction
-This repository contains code and documentation for the Simple Parser Generator(SPG), which is a system for generating parsers.
+This Git repository contains code and documentation for the Simple Parser Generator(SPG), which is a system for generating parsers. This README serves as a kind of manual for using it, including details about installation, concepts, the internal language H1, examples, and details on the overall operation. The SPG currently only has a JavaScript implementation.
 
-### How it works
-The Simple Parser Generator is a JavaScript object. It reads in a parser specification written in the H1 language as a string and converts the parser specification into an in-memory JavaScript object. This new JavaScript object has a method for parsing and can be used as the basis for generating other programming languages.
+## General overview
+The SPG implements a V1 virtual machine which is a special minimilistic virtual machine that is meant to operate many small parsing nodes operating together. Parsers are written in the H1 language, and get loaded into memory by the SPG Generator object which converts a text representation of a parser into an in-memory parsing program that runs on the V1 virtual machine.
 
-### Status
-The Simple Parser Generator is in its second iteration, but it is still in an experimental phase. It has been tested and documented, and works, but has never been used to make a practical programming language.
+To understand how the SPG works, it is necessary to understand how the V1 virtual machine works.
 
-Its architecture is well defined, and it is a very interesting and fairly well-documented system, but it may be better suited as a teaching tool for making compilers rather than for use as a production system.
+## The V1 virtual machine.
+
+The V1 virtual machine is a kind of computer. It takes in a single input as a string and produces a JavaScript object as output.
+
+
+The SPG system uses abstractions to describe parsers:
+1) A virtual machine called V1
+2) The parser description language H1, which describes the workings of an in-memory parser that runs on the V1 virtual machine.
+3) A Generator object that converts parsers written in the H1 language into an in-memory parser that runs on the V1 virtual machine
+
+
+
+
+
+Parsers using the SPG system are described in the H1 language. The SPG and the SPG Generator object converts an H1 file or string into an in-memory parser that runs according to the V1 model 
+
 
 ## Installation
 
-The SPG is contained a single JavaScript file, spg.js, that can be included using an import statement. spg.js contains several classes which can be imported using the import {class_1, class_2, class_3,...} syntax. The installation instructions for a NodeJS installation and for a browser installation is shown below.
+The executable portion of the code is located in the file releases/spg.js, which can be obtained by cloning the github repository located at https://github.com/raymond1/simple-parser-generator/. The installation instructions for a NodeJS installation and for a browser installation are shown below.
 
-### NodeJS
-1. Make a new package.json. This can be done with the command npm init and pressing enter through all the prompts to use the default options.
-2. Add or set the "type" attribute in the package.json file to the value module.
-3. npm install git+https://github.com/raymond1/simple-parser-generator.git#v2
+### NodeJS installation instructions using NPM
+1. Make a new package.json file. This can be done with the command npm init and pressing enter through all the prompts to use the default options.
+2. Add or set the "type" attribute in the package.json file to the value "module".
+3. In a terminal, run the command
 
-At this point, the simple parser generator should be installed. To use it, create a file called index.js and add the following line:
+```
+npm install git+https://github.com/raymond1/simple-parser-generator.git#v2
+```
+
+4. At this point, the simple parser generator should be installed. To use it, create a file called index.js and use an import statement. For example:
+
 ```
 import {Generator} from 'simple-parser-generator'
 ```
 
-### Browsers
+### Browser installation instructions
 1. Set up a web server that can serve HTML and JavaScript pages with the correct Content-Type headers.
-2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving it from.
+2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving.
 3. Clone the https://github.com/raymond1/simple-parser-generator#v2 repository.
 4. Copy the file releases/spg.js into the folder that your web server is serving.
 5. In your index.html file, add the following just before the end of your body tag:
@@ -44,60 +63,146 @@ import {Generator} from 'simple-parser-generator'
     </script>
 ```
 
-## Tutorial
+## Quick start
 
-After going through the installation steps above, you will have access to a Generator object. The following tutorial sample program is a minimalistic JavaScript stub program that explains from a software development point of view how to generate a parser using the SPG on the NodeJS platform. Details on the conceptual model will be explained after describing the software workflow.
+After going through the installation steps above, you will have access to a Generator object. The following quick start sample program is a minimalistic JavaScript stub program that explains from a software development point of view how to generate a parser using the SPG on the NodeJS platform. Details on the conceptual model will be explained after describing the quick start software workflow.
 
-### Tutorial Sample Program
-This sample program demonstrates the software workflow for making a simple parser and parsing an input string.
+### Quick Start Sample Program
+This following quick start sample program demonstrates the software workflow for making a simple parser and using it to parse an input string. The comments will explain each line's purpose.
+
 ```
-/* 1. Import the 'Generator' class used to convert a parser specification into an in-memory object capable of parsing.*/
+/* 1. Import the 'Generator' class.*/
 import {Generator} from 'simple-parser-generator' 
 
 /* 2. Instantiate a new Generator object. */
 let generator = new Generator()
 
-/* 3. Specify the specification for a parser. This is done using the H1 programming language, which is documented
-in the file H1.md.*/
+/* 3. Specify the parser using the H1 programming language. */
 let specification = 
 `string literal
  world`
 
-/* 4. Generate a parser object by passing in the specification to the generator. This is done using the
-generate parser method. */
+/* 4. Generate a parser object from the specification. */
 let parser = generator.generateParser(specification)
 
-/* 5. Create an input string to be fed into your parser. Conceptually, if your parser specification is for the 
-CSV file format, then your input string would be a sample CSV file. If your parser specification describes what a valid
-PDF file should be like, then your input string would be a possible PDF file. Here, the input string is 'world' because
-the parser specification is simply to detect if a string starts with the text 'world'.*/
+/* 5. Create an input string to be fed into your parser. */
 let inputString = 'world'
 
-/* 6. Parse the input string and save the output in a variable(here, it is called 'output'). The 'parse' function is used to
-start parsing the input. It will generate a stream of data tokens which can then be
-interpreted to determine various attributes and features of the input string. The features that will be extracted will
-depend on the specification initially passed into the generator in step 4.*/
+/* 6. Parse the input string using the generated parser and save the output in a variable.*/
 let output = parser.parse(inputString)
 
-/* 7. At this point, the output variable will contain some information. The exact format of this information is described in more detail later on, but it is basically an array of informational objects that can be inspected using a debugger. */
+/* 7. At this point, the "output" variable will contain some information. The exact format of this information is described in more detail later on. */
 ```
 
-### Understanding the syntax of the H1 parser specification file format
+## Using the SPG.
 
-The parser specification language used to describe a parser is called 'H1'. H1 is also called the "H1 file format", or the 'H1 language' and strings that are written in the H1 file format are called 'H1 files' or 'H1 strings'.
+In order to use the SPG, it is necessary to understand how to specify the parser using the H1 language and also the output data generated by the parser. This next subsection describes the H1 file format.
 
-H1 files consists of lines of text. Each line of text can be either an instruction or a piece of data. Together, all of the lines in an H1 file create a description of an in-memory tree consisting of nodes which are connected to other nodes and sometimes have attributes associated with them. In other words, the H1 language is used to describe tree structures. These tree structures are passed into the V1 virtual machine to create a parser.
+### Basic Space Tree syntax of the H1 parser specification language
 
-Here is a sample H1 file, which will be referred to as the F1 sample file or tutorial sample file:
+The H1 language is used to describe parsers and is built upon the T1 Space Tree Notation(hereafter referred to simply as the Space Tree Notation) used to describe tree structures. The information from these tree structures are passed into the parser generator to create a parser.
+
+In order to understand the H1 language, it is necessary to first understand the Space Tree Notation. Syntactically, strings or files that conform to the Space Tree notation consists of lines of text. Each line of text contains a single piece of string information with zero or more leading spaces.
+
+Space Tree files look like this:
 
 ```
-sequence
- string literal
-  adsfasdf
- multiple
-  character class
-   stvxa
+<string>
+ <string>
+  <string>
+   <string>
+ <string>
+  <string>
+   <string>
+ <string>
+  <string>
+   <string>
+    <string>
+     <string>
+     <string>
+      <string>
+  <string>
 ```
+Conceptually, each line from a file or string written in Space Tree Notation represents a node in the tree, and the string data associated with each node in the tree is equal to the string contents of the line, without the leading spaces.
+
+The hierarchical relationship amongst the nodes in the tree is indicated by the number of leading spaces on the left of a line. In the terminology of the Space Tree Notation, the number of leading spaces on the left is known as the 'depth' of a line. 
+
+Two lines are considered siblings if they both have the same depth and there are no intervening lines which have a smaller depth number.
+
+A line A1 is the parent of line B1 if three conditions hold:
+1) the depth of B1 is equal to one greater than the depth of A1
+2) line B1 comes after line A1
+3) There are no intervening lines with a depth less than the depth of line A in between line A1 and line B1
+
+To illustrate how this hierarchical tree information and associated node data are enocded, consider the following file which conforms to the Space Tree Notation:
+
+```
+A
+ B
+  C
+ D
+  E
+   F
+```
+
+The following table shows the relationship between the line number, number of leading spaces, depth, parent line number and the node information associated with each line for the sample H1 file shown above:
+
+Line number | Depth | Parent line number | String information associated with the node
+--------------------------------------------------------------------------------------
+1           | 0     | None               | A
+2           | 1     | 1                  | B
+3           | 2     | 2                  | C
+4           | 1     | 1                  | D
+5           | 2     | 4                  | E
+6           | 3     | 5                  | F
+
+Although this gives a good basic understanding of how tree information is stored inside Space Tree files, there are some subtleties which have been glossed over, such as how to encode the space character at the beginning of a line, or how to encode the line feed character.
+
+This information will be produced in the future. For now, just avoid those characters. It is not necessary to understand these subtleties in order to understand the general workings of the H1 file format used by the SPG.
+
+### The H1 file format
+
+The H1 language uses the Space Tree Notation to express tree information but this tree information must additionally conform to a schema in order to be a valid H1 file.
+
+Conceptually, the H1 language is an abstraction of a tree of instruction nodes. The SPG will take in an H1 file or string and convert it into an in-memory tree of instruction nodes. Then, when parsing begins, the instruction nodes will be run in sequence starting with the first one, and continuing on to the next instruction until there are no more instructions to be executed.
+
+The first line in the H1 file format must begin with a string that comes from a fixed list of instruction literals. Instruction literals are one of the following:
+
+List of instruction literals:
+1. character class
+2. string literal
+3. not
+4. entire
+5. sequence
+6. or
+7. and
+8. multiple
+9. optional
+10. split
+11. name
+12. jump
+
+These instruction literals represent the atomic operations that will be executed by the SPG virtual machine during parsing. The SPG virtual machine is called the V1 virtual machine, and the different instructions have different effects on the virtual machine.
+
+In order to understand the effects of each of the instructions that are possible, it is first necessary to understand some background about the V1 virtual machine.
+
+
+
+
+
+
+to generate an operational in-memory parser. Some atomic operations will require zero child nodes, and others will require more. Some of the atomic operations requiring child nodes will require a string piece of information, and others will require another atomic operation as a child node.
+
+
+-----------------------
+
+
+
+
+Schema
+
+-----------
+
 
 To determine the conceptual tree structure that this represents, the overall procedure is as follows:
 
@@ -108,7 +213,7 @@ For step 1, the leading spaces on each line stores the parent-child relationship
 
 Lines with n leading spaces will be children of the first line above it that have n-1 leading spaces. If a line has a greater depth than the line immediately above it, then it is a child of that line.
 
-As an example, here is a table showing the relationship between the line number, depth and parent line for the sample H1 file from above:
+As an example, here is a table showing the relationship between the line number, depth and parent line number for the sample H1 file from above:
 
 Line number | Depth | Parent line number
 ----------------------------------------

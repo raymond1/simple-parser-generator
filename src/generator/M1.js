@@ -36,27 +36,27 @@ class M1{
   //If not found, then take entire string as the last pattern
   //dafsdf+1-1+1-1
   //Returns an array of pattern nodes
-  static M1GetPatterns(s, generator){
+  static getPatterns(s, generator){
     let patterns = []
     let startCaret = 0
     let endCaret = M1.getNextZeroLevelComma(s)
     
     while(endCaret > startCaret){
       let nugget = s.substring(startCaret,endCaret)
-      patterns.push(M1.M1ImportInternal(nugget, generator))
+      patterns.push(M1.importInternal(nugget, generator))
       startCaret = endCaret + 1
       let commaOffset = M1.getNextZeroLevelComma(s.substring(startCaret))
       endCaret = startCaret + commaOffset
     }
 
-    patterns.push(M1.M1ImportInternal(s.substring(startCaret), generator))
+    patterns.push(M1.importInternal(s.substring(startCaret), generator))
     return patterns
 }
   //The return value is a number containing the index of the right square bracket
   //counting from the left starting from 0
   //If s starts with a left bracket, then find the matching right bracket
   //If it doesn't, it should be some sort of string literal, so find either a comma or a right bracket
-  static M1GetOneNodeSpot(s){
+  static getOneNodeSpot(s){
     if (s.substring(0,1)=='['){
       //return index of matching ]
       return M1.getMatchingRightSquareBracket(s,0)
@@ -84,7 +84,7 @@ class M1{
   //Converts ENC(L) into [
   //Converts ENC(C) into ,
   //Converts ENC(S) into  (space)
-  static M1Unescape(s){
+  static unescape(s){
     let s2 = s.replace(/ENC(R)/g, ']')
     s2 = s2.replace(/ENC(L)/g, '[')
     s2 = s2.replace(/ENC(C)/g, ',')
@@ -92,7 +92,7 @@ class M1{
     return s2
   }
 
-  static M1ImportInternal(s,generator){
+  static importInternal(s,generator){
     //Stage 1 transforms M1 format to an in-memory format
     let firstComma = s.indexOf(',')
     let nodeType = s.substring(1,firstComma)
@@ -103,7 +103,7 @@ class M1{
         let afterFirstComma = s.substring(firstComma + 1)
         let secondComma = afterFirstComma.indexOf(',') + 1 + firstComma 
         node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, secondComma),
-           M1.M1ImportInternal(s.substring(secondComma + 1,s.length - 1), generator)]})
+           M1.importInternal(s.substring(secondComma + 1,s.length - 1), generator)]})
         break
       case 'jump':
         //Jump nodes are incomplete at this stage because they do not have a reference yet to the name nodes and must be reprocessed
@@ -112,7 +112,7 @@ class M1{
         node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, s.length - 1)]})
         break
       default:
-        let patterns = M1.M1GetPatterns(s.substring(firstComma + 1, s.length - 1), generator)
+        let patterns = M1.getPatterns(s.substring(firstComma + 1, s.length - 1), generator)
         node = generator.createNode({type:nodeType, nodes: patterns})
         break
     }
@@ -121,14 +121,14 @@ class M1{
 
   //Takes in a string, s, in M1 format and converts it into an in-memory representation of a parser
   static import(s, generator){
-    let rootNode = M1.M1ImportInternal(s,generator)
+    let rootNode = M1.importInternal(s,generator)
     Generator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
     return rootNode
   }
 
   //Given a string s in M1 format, this function returns the string between the first left bracket and the first comma
   //E.g. In the M1 string [rule list, [multiple,[character class,23432424]]]
-  static M1GetNodeType(s){
+  static getNodeType(s){
     if (s.substring(0,1) != '['){
       throw new Error('Invalid M1 format. \'[\' expected at position 0, but not found.')
     }
@@ -146,7 +146,7 @@ class M1{
   //, becomes ENC(C)
   //(space) becomes ENC(S)
   //(newline) becomes ENC(N)
-  static M1Escape(s){
+  static escape(s){
     let s2 = s.replace(/\(/g, "ENC(L)")
     s2 = s2.replace(/\)/g, "ENC(R)")
     s2 = s2.replace(/,/g, "ENC(C)")
@@ -195,7 +195,7 @@ class M1{
   static export(node, depth = 0){
     switch(node.nodes.length){
       case 'name':
-        return `[${node.type},${Generator.M1.escape(node.nodes[0])},${node.nodes[1].M1Export()}]`
+        return `[${node.type},${Generator.M1.escape(node.nodes[0])},${node.nodes[1].export()}]`
       case 'or':
       case 'sequence':
       case 'and':
@@ -211,15 +211,15 @@ class M1{
       case 'not':
       case 'entire':
       case 'optional':
-        return `[${node.type},${node.nodes[0].M1Export()}]`
+        return `[${node.type},${node.nodes[0].export()}]`
     
       case 'character class':
       case 'string literal':
       case 'jump':
-        return `[${node.type},${Generator.M1Escape(node.nodes[0])}]`
+        return `[${node.type},${Generator.escape(node.nodes[0])}]`
     }
 
-    return node.M1Export(depth)
+    return node.export(depth)
   }
 
 }

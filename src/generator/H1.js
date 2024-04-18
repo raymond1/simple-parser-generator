@@ -200,7 +200,7 @@ class H1{
     static import(s, generator){
       let M1Code = H1.convertToM1(s)
 console.log('h1 converted to m1 is:' + M1Code)
-      return M1.M1Import(M1Code, generator)
+      return M1.import(M1Code, generator)
     }
   
   

@@ -1,8 +1,0 @@
-```
-sequence
- string literal
-  adsfasdf
- multiple
-  character class
-   stvxa
-```

@@ -27,7 +27,7 @@ npm run dev
 ```
 from the root folder.
 
-# How to update the generate_webite.php script
+# How to update the generate_website.php script
 After making changes to the script, go into the document-compiling-cms folder, add and commit your changes and then use the command:
 ```
 git push origin <new tag version>
@@ -46,3 +46,5 @@ composer update
 
 # How to generate the JSDoc documentation
 npx jsdoc -c jsdoc.json -d documentation/api
+
+# Style guide

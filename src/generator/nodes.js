@@ -11,14 +11,14 @@ class Node{
    * if the subclass of a Node is JumpNode, the command "new CharacterClassNode('a')" will set the type of a Node object to the
    * type property of the CharacterClassNode class.
    */
-  constructor(){
+  constructor(metadata){
     this.type = this.constructor.type //Show type in object for the debugger
     this.nodes = metadata.nodes
   }
 
   //Implemented and overriden by child nodes. Given a node, coverts it into a string form
-  M1Export(depth = 0){
-    throw new Exception('Error while exporting grammar: ' + node['type'] + ' M1Export not implemented.')
+  export(depth = 0){
+    throw new Exception('Error while exporting grammar: ' + node['type'] + ' export not implemented.')
   }
 }
 
@@ -53,8 +53,8 @@ class CharacterClassNode extends Node{
    * */
   static type = 'character class'
 
-  M1Export(){
-    return `[${this.constructor.type},${Generator.M1Escape(this.string)}]`
+  export(){
+    return `[${this.constructor.type},${Generator.escape(this.string)}]`
   }
 
   /**
@@ -122,8 +122,8 @@ class StringLiteralNode extends Node{
    */
   static type = 'string literal'
 
-  M1Export(){
-    return `[${this.constructor.type},${Generator.M1Escape(this.nodes[0])}]`
+  export(){
+    return `[${this.constructor.type},${Generator.escape(this.nodes[0])}]`
   }
 
   /**
@@ -174,8 +174,8 @@ class NotNode extends Node{
    */
   static type = 'not'
 
-  M1Export(){
-    return `[${this.constructor.type},${this.pattern.M1Export()}]`
+  export(){
+    return `[${this.constructor.type},${this.pattern.export()}]`
   }
 
   /**
@@ -228,8 +228,8 @@ class EntireNode extends Node{
    */
   static type = 'entire'
 
-  M1Export(){
-    return `[${this.constructor.type},${this.nodes[0].M1Export()}]`
+  export(){
+    return `[${this.constructor.type},${this.nodes[0].export()}]`
   }
 
   /**
@@ -283,13 +283,13 @@ class SequenceNode extends Node{
    */
   static type = 'sequence'
 
-  M1Export(){
+  export(){
     let patternsString = ''
     this.nodes.forEach((pattern, index)=>{
       if (index > 0){
         patternString += ","
       }
-      patternsString += `[${pattern.M1Export()}]`
+      patternsString += `[${pattern.export()}]`
     })
     let s = `[${patternsString}]`
     return s
@@ -362,11 +362,11 @@ class OrNode extends Node{
    */
   static type = 'or'
   
-  M1Export(){
+  export(){
     let patternsString = ''
     this.nodes.forEach((pattern, index)=>{
       if (index > 0) patternsString += ","
-      patternsString += pattern.M1Export()
+      patternsString += pattern.export()
     })
     let s = `[${this.constructor.type},${patternsString}]`
     return s
@@ -430,11 +430,11 @@ class AndNode extends Node{
    */
   static type = 'and'
 
-  M1Export(){
+  export(){
     let patternsString = ''
     this.nodes.forEach((pattern, index)=>{
       if (index > 0) patternsString += ","
-      patternsString += pattern.M1Export()
+      patternsString += pattern.export()
     })
     let s = `[${this.constructor.type},${patternsString}]`
     return s
@@ -515,8 +515,8 @@ class MultipleNode extends Node{
    */
   static type = 'multiple'
 
-  M1Export(){
-    return `[multiple,${this.nodes[0].M1Export()}]`
+  export(){
+    return `[multiple,${this.nodes[0].export()}]`
   }
 
   /**
@@ -580,8 +580,8 @@ class OptionalNode extends Node{
    */
   static type = 'optional'
 
-  M1Export(){
-    return `[${this.constructor.type},${this.nodes[0].M1Export()}]`
+  export(){
+    return `[${this.constructor.type},${this.nodes[0].export()}]`
   }
 
   /**

@@ -1,28 +1,23 @@
 # Simple Parser Generator
 
 ## Introduction
-This Git repository contains code and documentation for the Simple Parser Generator(SPG), which is a system for generating parsers. This README serves as a kind of manual for using it, including details about installation, concepts, the internal language H1, examples, and details on the overall operation. The SPG currently only has a JavaScript implementation.
+This Git repository contains code and documentation for the Simple Parser Generator(SPG), which is a system for generating parsers. This README serves is the primary documentation and includes details about installation, concepts, the internal language H1, examples, and details on the overall operation. The SPG currently only has a JavaScript implementation.
 
 ## General overview
-The SPG implements a V1 virtual machine which is a special minimilistic virtual machine that is meant to operate many small parsing nodes operating together. Parsers are written in the H1 language, and get loaded into memory by the SPG Generator object which converts a text representation of a parser into an in-memory parsing program that runs on the V1 virtual machine.
+The SPG implements a V1 virtual machine which is a type of virtual machine that exists in memory and can be configured to work as a parser. Parsers are written in the H1 language, and get loaded into memory by the SPG Generator object which converts a text representation of a parser into an in-memory parsing program that runs on the V1 virtual machine.
 
-To understand how the SPG works, it is necessary to understand how the V1 virtual machine works.
+Understanding the V1 virtual machine is a good place to start for understanding how the SPG works.
 
 ## The V1 virtual machine.
 
-The V1 virtual machine is a kind of computer. It takes in a single input as a string and produces a JavaScript object as output.
-
+The V1 virtual machine is a kind of computer. It takes in a single string as input and produces a JavaScript object as output.
 
 The SPG system uses abstractions to describe parsers:
 1) A virtual machine called V1
 2) The parser description language H1, which describes the workings of an in-memory parser that runs on the V1 virtual machine.
 3) A Generator object that converts parsers written in the H1 language into an in-memory parser that runs on the V1 virtual machine
 
-
-
-
-
-Parsers using the SPG system are described in the H1 language. The SPG and the SPG Generator object converts an H1 file or string into an in-memory parser that runs according to the V1 model 
+Parsers using the SPG system are described in the H1 language. The SPG and the SPG Generator object converts an H1 file or string into an in-memory parser that runs according to the V1 model.
 
 
 ## Installation

@@ -1,33 +1,32 @@
 # Simple Parser Generator
 
 ## Introduction
-This repository contains code and documentation for the Simple Parser Generator(SPG), which is a system for generating parsers.
+The Simple Parser Generator(SPG) is a system for generating parsers. There is currently only a JavaScript implementation, but the SPG is meant to be a highly portable system.
 
-### How it works
-The Simple Parser Generator is a JavaScript object. It reads in a parser specification written in the H1 language as a string and converts the parser specification into an in-memory JavaScript object. This new JavaScript object has a method for parsing and can be used as the basis for generating other programming languages.
-
-### Status
-The Simple Parser Generator is in its second iteration, but it is still in an experimental phase. It has been tested and documented, and works, but has never been used to make a practical programming language.
-
-Its architecture is well defined, and it is a very interesting and fairly well-documented system, but it may be better suited as a teaching tool for making compilers rather than for use as a production system.
+This README is meant to provide enough information for someone to start using the SPG. It includes details about installation, concepts, the internal language H1, examples, and details on the overall operation. Additional documentation is available in the documentation folder in the .md Markdown files.
 
 ## Installation
 
-The SPG is contained a single JavaScript file, spg.js, that can be included using an import statement. spg.js contains several classes which can be imported using the import {class_1, class_2, class_3,...} syntax. The installation instructions for a NodeJS installation and for a browser installation is shown below.
+The executable portion of the code is located in the file releases/spg.js, which can be obtained by cloning the github repository located at https://github.com/raymond1/simple-parser-generator/. The installation instructions for a NodeJS installation and for a browser installation are shown below.
 
-### NodeJS
-1. Make a new package.json. This can be done with the command npm init and pressing enter through all the prompts to use the default options.
-2. Add or set the "type" attribute in the package.json file to the value module.
-3. npm install git+https://github.com/raymond1/simple-parser-generator.git#v2
+### NodeJS installation instructions using NPM
+1. Make a new package.json file. This can be done with the command npm init and pressing enter through all the prompts to use the default options.
+2. Add or set the "type" attribute in the package.json file to the value "module".
+3. In a terminal, run the command
 
-At this point, the simple parser generator should be installed. To use it, create a file called index.js and add the following line:
+```
+npm install git+https://github.com/raymond1/simple-parser-generator.git
+```
+
+4. At this point, the simple parser generator should be installed. To use it, create a file called index.js and use an import statement. For example:
+
 ```
 import {Generator} from 'simple-parser-generator'
 ```
 
-### Browsers
+### Browser installation instructions
 1. Set up a web server that can serve HTML and JavaScript pages with the correct Content-Type headers.
-2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving it from.
+2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving.
 3. Clone the https://github.com/raymond1/simple-parser-generator#v2 repository.
 4. Copy the file releases/spg.js into the folder that your web server is serving.
 5. In your index.html file, add the following just before the end of your body tag:
@@ -44,90 +43,94 @@ import {Generator} from 'simple-parser-generator'
     </script>
 ```
 
-## Tutorial
+## Quick start sample program
+After going through the installation steps above, you will have access to a Generator object. The following quick start sample program is a minimalistic JavaScript stub program that explains from a software development point of view how to generate a parser using the SPG on the NodeJS platform.
 
-After going through the installation steps above, you will have access to a Generator object. The following tutorial sample program is a minimalistic JavaScript stub program that explains from a software development point of view how to generate a parser using the SPG on the NodeJS platform. Details on the conceptual model will be explained after describing the software workflow.
-
-### Tutorial Sample Program
-This sample program demonstrates the software workflow for making a simple parser and parsing an input string.
 ```
-/* 1. Import the 'Generator' class used to convert a parser specification into an in-memory object capable of parsing.*/
 import {Generator} from 'simple-parser-generator' 
-
-/* 2. Instantiate a new Generator object. */
 let generator = new Generator()
-
-/* 3. Specify the specification for a parser. This is done using the H1 programming language, which is documented
-in the file H1.md.*/
 let specification = 
 `string literal
  world`
 
-/* 4. Generate a parser object by passing in the specification to the generator. This is done using the
-generate parser method. */
 let parser = generator.generateParser(specification)
 
-/* 5. Create an input string to be fed into your parser. Conceptually, if your parser specification is for the 
-CSV file format, then your input string would be a sample CSV file. If your parser specification describes what a valid
-PDF file should be like, then your input string would be a possible PDF file. Here, the input string is 'world' because
-the parser specification is simply to detect if a string starts with the text 'world'.*/
 let inputString = 'world'
-
-/* 6. Parse the input string and save the output in a variable(here, it is called 'output'). The 'parse' function is used to
-start parsing the input. It will generate a stream of data tokens which can then be
-interpreted to determine various attributes and features of the input string. The features that will be extracted will
-depend on the specification initially passed into the generator in step 4.*/
 let output = parser.parse(inputString)
-
-/* 7. At this point, the output variable will contain some information. The exact format of this information is described in more detail later on, but it is basically an array of informational objects that can be inspected using a debugger. */
 ```
 
-### Understanding the syntax of the H1 parser specification file format
+The exact structure of the output object will be described later on, but you can view it with a debugger.
 
-The parser specification language used to describe a parser is called 'H1'. H1 is also called the "H1 file format", or the 'H1 language' and strings that are written in the H1 file format are called 'H1 files' or 'H1 strings'.
+## How the Simple Parser Generator operates
+The Simple Parser Generator has two stages of operation. In the first stage, called the 'parser generation stage', the SPG will take in a string input in the form of an H1 specification. In the second stage, called the 'run-time operation stage', or 'parsing stage', the generated parser itself will take in an input string and will begin parsing. 
 
-H1 files consists of lines of text. Each line of text can be either an instruction or a piece of data. Together, all of the lines in an H1 file create a description of an in-memory tree consisting of nodes which are connected to other nodes and sometimes have attributes associated with them. In other words, the H1 language is used to describe tree structures. These tree structures are passed into the V1 virtual machine to create a parser.
+To initiate the parser generation stage, the Generator class's 'generateParser' method is called with an H1 specification as the input. The output of the Generator.generateParser method will be a parser. To initiate the parsing operation with the parser that is returned, the parser's 'parse' function is called, passing in an input string. The output of the parsing operation will a series of parsing output objects which will hold information on where different syntactical components are located in the input string.
 
-Here is a sample H1 file, which will be referred to as the F1 sample file or tutorial sample file:
+During the parser generation stage, the SPG will analyze the H1 specification passed in. An H1 specification describes a tree of instructions indicating how a parser is to be constructed. Each instruction in the H1 specification will be transformed by the SPG into in-memory objects that can be thought of as mini-parsers, or mini-programs, each capable of performing specific parsing-related tasks, such as recognizing fixed sequences of strings, or recognizing that a string starts with characters from a specific set. The mini-parsers will be arranged into a tree form, and the root element of that tree will be the parser returned by the Generator.generateParser function.
+
+During the parsing stage, the parser that was returned from the Generator.generateParser function will take in an input string, and the input string will be passed to the root mini-parser of the parser. The parser's root will process the input string using the 'parse' function, store some output information and then proceed to pass operation down to is descendents. Depending on what the exact instructions are in the tree, operation may or may not terminate, but the end result of the parser's parse operation will typically be syntactical information.
+
+## Understanding what a mini-parser is
+
+A mini-parser is an object and can be thought of as an abstract machine that performs a string function and returns an object containing syntactical information related to the parsing process. There are many different types of mini-parsers, and each of them have a unique name and behaviour; however, all mini-parsers share some common behaviours, and so, it there are some concepts and terminology that are common to all of them.
+
+There is a fixed set of mini-parsers, and they function as lego-blocks. Complex parsers are all built from these simpler mini-parsers, and they are the only method of defining a parser available. If there is a function that is missing from the list of mini-parsers provided, you are out of luck until someone implements it and updates the SPG. However, these mini-parsers are carefully chosen so that by learning the behaviour of all of the mini-parsers, you will be able to generate a very large range of parsers.
+
+In an abstract sense, all mini-parsers conform to the basic data flow input-output structure:
+
+Input string -> mini-parser -> output object
+
+In other words, you pass in a string to a mini-parser, and you get an output object as the result.
+
+Internally, when a string is passed to the mini-parser, its 'parse' function is invoked. The 'parse' function of a mini-parser is also called its 'matching function'. When the matching function is called, it can possibly rely on the results of child mini-parsers. In other words, a mini-parser known as A can pass input to its children mini-parsers B, C and D before it finishes parsing. B, C and D can in turn also pass input to their own children that all need to finish processing before the 'parse' function of A completes.
+
+The behaviour of all of the available mini-parsers is explained in the API section below, but it is useful to first consider an example before reading the API section because there is some terminology that makes understanding these parsers simpler to explain. 
+
+### Example parser formed from mini-parsers.
+
+Let's say you have an input string that comes from a human being, and you want to determine whether or not it starts with the string 'A' followed by the string 'B'. There are multiple ways to do this, but the method illustrated below will give a good idea of how the SPG works.
+
+Using H1 notation, you could accomplish the task like this:
 
 ```
 sequence
  string literal
-  adsfasdf
- multiple
-  character class
-   stvxa
+  A
+ string literal
+  B
 ```
 
-To determine the conceptual tree structure that this represents, the overall procedure is as follows:
+Here, this H1 specification is specifying that the root mini-parser is of type 'sequence'. The sequence mini-parser in turn has two children which are both 'string literal' mini-parsers. The first child mini-parser has a child text 'A', meaning that it has been configured to detect the string literal 'A'. The second child mini-parser of the sequence node has child text 'B', which configures it to detect the string literal 'B'.
 
-1. Use the H1 file to construct a tree called A1.
-2. Extract a second tree from A1 whose nodes consist of only instruction nodes which each have 0 or more attributes. Call this tree the A2 tree or the instruction node tree.
+Mini-parsers are sometimes called 'nodes' because of the tree-like structure they get arranged in. The above H1 file gets turned into the following tree of mini-parsers:
 
-For step 1, the leading spaces on each line stores the parent-child relationship information of the tree. The number of leading spaces before the first character on a line represents its depth in the tree. If a line has a depth of n, then it will be the child node of the first line that has a lower line number that has a depth of n-1.
+sequence
+|
+|--string literal
+|
+|--string literal
 
-Lines with n leading spaces will be children of the first line above it that have n-1 leading spaces. If a line has a greater depth than the line immediately above it, then it is a child of that line.
+The first string literal child is configured to detect 'A'. The second is configured to detect 'B', but that is not shown here because those pieces of text are not mini-parsers. Those pieces of text are only used during the parser generation stage to configure a mini-parser for its run-time operation.
 
-As an example, here is a table showing the relationship between the line number, depth and parent line for the sample H1 file from above:
+### Terminology
 
-Line number | Depth | Parent line number
-----------------------------------------
-1           | 0     | None
-2           | 1     | 1
-3           | 2     | 2
-4           | 1     | 1
-5           | 2     | 4
-6           | 3     | 5
+'matching function':
 
-By convention, all nodes with a depth 0 are considered to be children of a theoretical node of depth -1, called the root node. This is just a convention so that you can say that all H1 files describe a single tree.
+Conceptually, each mini-parser has a matching function which is executed when an input string is passed in. This matching function determines takes in the input string and produces and object containing syntactical information. Internally, the matching function is implemented in JavaScript by implementing a mini-parser's 'parse' function. Note: there is no mini-parser class in the code. Instead, there is a Node class.
 
-One the A1 tree has been constructed, the tree's nodes are divided into 'data nodes' and 'instruction nodes'. The A2 tree will absorb all data nodes, which have no children, into their parent nodes as attributes.This A2 tree is the conceptual model of the list of instructions that lie in memory.
+'match string'/'output string':
 
-Whether a node is a data node or an instruction node is context-sensitive and is determined using the algorithm described in the section [How to determine if a node is a data node or an instruction node](how-to-determine-if-a-node-is-a-data-node-or-an-instuction-node).
+When a mini-parser applies its matching function to the input string and an output object is produced, the property of the output object with the key 'matchString' refers to the concept of a so-called 'match string', which is the portion of the input string that matches the criteria of the mini-parser. A 'match string' is sometimes called an 'output string'.
 
-### How to determine if a node is data or an instruction
+'match'/'matched'/'return a match'/'input string will match' and other similar terms:
 
-If a node in the A1 tree has a depth of 0, then it should be an instruction node. For a node to be an instruction node means that the portion of the line in the H1 file that the A1 tree was derived that when stripped of leading spaces must contain an instruction node name. An instruction node name can be any one of the following:
+If a mini-parser is said to 'match' or 'return a match' with an input string, it means that when the input string is sent to the mini-parser, the output object it produces contains a property called matchFound which is equal to true. The term 'unmatched string' refers to the string that remains after skipping the first n characters of the input string, where n is equal to the matchLength property of the output object.
+
+## How to write a parsing specification using the H1 string format
+
+An H1 specification will describe a tree of mini-parsers. Each mini-parser and the tree itself will be specified using Space Tree notation, which you can learn about here: [https://github.com/raymond1/space-tree](https://github.com/raymond1/space-tree).
+
+The list of available mini-parsers includes:
 
 1. character class
 2. string literal
@@ -142,245 +145,502 @@ If a node in the A1 tree has a depth of 0, then it should be an instruction node
 11. name
 12. jump
 
-The above list acts like keywords in other languages. Each instruction node has a schema rule associated with it, meaning that the number of children it has is specified, and the order of its children has a specific meaning. The schema rule for each instruction type is given in the following table, called the V1 schema rule table:
+These mini-parsers will be described below, along with examples of how to specify them using Space Tree notation. Sometimes, a mini-parser will require additional descendent nodes in order to make sense. These requirements will be listed in the section called 'Structure' in the mini-parser descriptions shown below.
 
-Type of node    | number of children | Type of child node or nodes
------------------------------------------------------
-character class | 1                  | data
-string literal  | 1                  | data
-not             | 1                  | instruction
-entire          | 1                  | instruction
-sequence        | 1 or more          | instruction
-or              | 2 or more          | instruction 
-and             | 2 or more          | instruction
-multiple        | 1                  | instruction
-optional        | 1                  | instruction
-split           | 1 or more          | instruction
-name            | 2                  | First child is a data node. Second child is an instruction.
-jump            | 1                  | data (must match with data from a name node)
+The API-like description of the mini-parsers relies on some terminology that will be described here:
 
-Assuming that the A1 tree starts with an instruction node and follows the schema rules, it is possible to start from the first node in an A1 tree, and, using the above table, proceed to determine whether each node in the A1 tree is an instruction or a data node.
+### 'character class' mini-parser
+Description:
 
-For example, in the tutorial sample file, line 1 is a sequence node. In the schema rule table, sequences have one or more children. The type of these children is 'instruction'. Therefore, all of the children of the sequence node will be interpreted to be instructions. That means lines 2 and 4 are instructions.
+This mini-parser will determine how many and which characters from the front of the input string match with a set of characters.
 
-Line 2 is a string literal node. According to the schema rule table, string literal nodes have one data type child. Therefore, line 3, which is the child of line 2 must be a data line.
-
-Line 4 is a 'multiple' type node. According to the schema rule table, 'multiple' type nodes have one instruction child. Therefore, line 4's child line, which is line 5, is also an instruction.
-
-Line 5 is a 'character class' node. According to the schema rule table, 'character class' nodes have one child, which is a data type node. Therefore, line 6, which is the child of line 5, must be a data line.
-
-Any correctly formatted H1 file that obeys the V1 schema rules can thus be divided into data and instruction nodes/lines.
-
-### Constructing the A2 tree from the A1 tree
-The A2 tree consists of all the instruction nodes of the A1 tree with any data nodes absorbed as attributes of their parent instruction node. For example, in the tutorial sample H1 file, line 3, which is a data node, is interpreted to be a property of line 2, which is its parent instruction node, and line 6, which is a data node, is also interpreted to be a property of the node created from line 5.
-
-### Operation of the V1 virtual machine
-
-The V1 virtual machine holds several pieces of stateful information. The description of how the V1 virtual machine's state changes from one state to another sums up the workings of the machine.
-
-The 3 main pieces of stateful of the V1 virtual machine are the following:
-
-1. The input string.
-2. An A2 tree in memory consisting of instruction nodes whose description was derived from an H1 file and which may contain internal state themselves.
-3. An output object storage area in memory that stores output objects generated during the execution of the V1 virtual machine.
-
-The output objects generated by the storage area hold parsing information, which is information about which segments of the input string belong to which internal structure. This is stored in tree format, so the output objects represent a tree.
-
-Passing in different values for the input string and the H1 file will result in different output objects being generated. The exact output objects that will be generated will depend on what input string and which instruction nodes make up the A2 tree that is passed in.
-
-###
-
-Execution starts on the first instruction node of the A2 tree and proceeds from there. In general, unless a node is a character class node or a string literal node, its results will depend on the results of other nodes.
-
-
-
-
-
-
-
-
-
-
-
-Execution starts from the first node of the A2 tree.
-
-
-As execution progresses, the output 
-
-In addition
-2. A numeric index called the input string pointer, which points to a particular character on the input string.
-matchFound
-matchString
-
-In addition, each node in the A2 tree can potentially store internal state, leading to complex interactions between nodes
-
-The input string, the input string pointer, matchFound, matchString, the A2 tree and the program pointer are all initially undefined. They become defined after the V1 virtual machine has been initialized with an input string and an H1 file.
-
-Once the V1 virtual machine has been initialized with both an input string and H1 file, the machine automatically initializes its input string pointer to be 0, sets matchFound to be false, matchString to be false, sets its A2 tree to be the A2 image of the H1 file, sets the program pointer to the first instruction of the A2 tree, and has an empty output object storage area.
-
-Then, when the V1 virtual machine's parse function is triggered, the first instruction node begins execution. Depending on what the node is, the V1 machine will be affected differently. Many instructions can only finish computing once their child instructions finish computing.
-
-It's best to use an example to show how this works.
-
-
-
-
-
-
-
-
-
-
-
-initialization proceeds as follows:
-
-
-
-All these values are undefined
-### Initialization of the V1 virtual machine
-
-A V1 virtual machine starts with its input string undefined. The input string caret is set to the value 0. The true or false flag called matchFound is set to false. The string value called matchString is set to the empty string. The A2 tree is initially empty. 
-
-1. The input string is basically the input data that will be fed to the V1 virtual machine. It is programmed as in comment 6 of the tutorial sample program.
-
-2. The caret points initially to the first character of the input string.
-
-3. The matchFound flag of the V1 virtual machine is initially set to false.
-
-4. The string called matchString of the V1 virtual machine is initially set to the empty string, ''.
-
-5. The set of instructions loaded into a V1 virtual machine can be set as in comments 3 and 4 from the tutorial sample program.
-
-6. Initially, the program pointer points to the image of the first line from the H1 program loaded into memory.
-
-7. Initially, the storage location in memory that stores output objects is empty. This is basically a collection or an array or list that begins empty.
-
-
-
------------------------------------------
-
-
-
-
-
-
-
-
-The nodes and their effects on the V1 virtual machine are listed in the [Nodes API section](nodes-api).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Nodes API
-
-1. Character Class
-
-string indicator: 'character class'
-match length: equal to the number of characters.
-caret: 
-
-Type of node
-
+Structure:
+```
 character class
+ <a set of characters of a character class>
+```
 
-Effect:
-Takes in a 
+The 'character class' mini-parser should have one child node. The node text for that child node is a configuration parameter called the 'character class set', which a non-empty set of characters used for comparing with the input text to determine if the input text begins with characters from it.
 
-                    | data
+Example Space Tree notation:
+```
+character class
+ 0123456789abcdefg
+```
 
+Input:
+A string.
 
-string literal  |                    | data
-not             |                    | instruction
-entire          |                    | instruction
-sequence        |                    | instruction
-or              |           | instruction 
-and             |           | instruction
-multiple        |                   | instruction
-optional        |                   | instruction
-split           |           | instruction
-name            | 2                  | First child is a data node. Second child is an instruction.
-jump            | 1                  | data (must match with data from a name node)
+Output object:
 
+{
+  matchString,
+  matchFound
+}
 
-It is this A2 tree that forms the conceptual model of an H1 file that follows the V1 schema rule table.
+matchFound will be true if the number of characters in matchString is greater than 0. It will be false otherwise. 
 
+matchString will be the string equal to the the first n characters of the input string, where n is equal to the maximum number of consecutive characters starting from index 0 of the input string which can be found inside the character class set. If n is 0, matchString will be the empty string.
 
-After the A1 tree has been created, and the nodes of the A1 tree have been divided into data and instruction nodes, the A2
+For example, if the input string is 'aaazzz', and the character class set is 'abc', then the output object will be {matchFound: true, matchString: 'aaa'}. If the input string is 'def', the output object will be {matchFound: false, matchString: ''}.
 
+### 'string literal' mini-parser
 
+Description:
 
-1. The character class node has only one child node, and that child node must be
+This mini-parser will determine whether the input string starts with the specified substring.
 
+Structure:
 
-To determine whether a node from the A1 tree is a data node or an instruction node, it is first necessary to enumerate all the possible types of instruction nodes.
+```
+string literal
+ <a string>
+```
 
-The complete list of instruction nodes is:
+The 'string literal' mini-parser should have one child node referred to as the 'target text'. The target text will be compared with the input string to determine if the input string starts with the target text.
 
+Example Space Tree notation:
+```
+string literal
+ Hello world
+```
 
-These instruction nodes are essentially equivalent to keywords used in other languages.
+Input:
+A string.
 
-If
+Output object:
 
-------------------------
+{
+  matchString,
+  matchFound
+}
 
+matchFound will be true if the the input text starts with the target text.
 
+matchString will be equal to the target text if the input string starts with the target text. Otherwise, matchString will be the empty string.
 
-Besides the leading spaces, each line in the H1 file format contains only one piece of information. A line may contain either the name of an instruction or data encoded as an H1-encoded string string. If a line contains an instruction, it is called an 'instruction node' or simply an 'instruction'. Whether a line is an instruction or a piece of data is context sensitive.
+### 'not' mini-parser
 
-Interpretation starts from line 1 and then proceeds downwards. If a line is a non-terminal node, it means that it is a node that is capable of having one or more nodes as children. If a line is a terminal node, then it means that its only children will be data nodes.
+Description:
 
+During the parsing phase, this mini-parser will return an output object with a matchFound property which negates the matchFound property of the output of its child mini-parser.
 
+Structure:
 
+```
+not
+ <child mini-parser>
+```
 
+The 'not' mini-parser should have one child node that is also a mini-parser.
 
+Example Space Tree notation:
+```
+not
+ string literal
+  xyz
+```
 
+Input:
+A string.
 
-Each instruction from this list is called a 'node name', a 'node type', a 'node object' or a 'node'. If a line is not a node, then it contains a piece of data. Data lines store string information in an encoding called 'M1-escaped format'. Each piece of data is the child of exactly one node object.
+Output object:
 
-A node's children are called 'child elements' and can be either data or nodes.
+{
+  matchString,
+  matchFound
+}
 
-In M1-escaped format, special characters are replaced with a replacement string. The table of special characters and their replacements is shown below:
+matchFound will be a boolean equal to the negation of the child node's output object's matchFound property. 
 
-character | replacement
------------------------
-(         | ENC(L)
-)         | ENC(R)
-,         | ENC(C)
-(space)   | ENC(S)
-(newline) | ENC(N)
+matchString will be equal to the empty string if the child node's output objects matchFound property is equal to true. It will equal the entire input string otherwise.
 
-In addition, any unicode character can be encoded by the string ENC(X), where X is a non-negative base 10 number. In the H1 language, strings are encoded as unicode strings.
+### 'entire' mini-parser
 
-Each node type requires 0, 1, or more child elements and influences the V1 virtual machine in different ways. The different nodes and their effects on the V1 virtual machine's execution is described in section [Programming a parser using the nodes of the H1 language](#programming-a-parser-using-the-nodes-of-the-h1-language).
+Description:
 
+This mini-parser will determine whether the child node's input string and the matchString property from the child node's output object are the same.
 
-## API
+Structure:
 
-The API documentation for pubicly available GeneratorGenerator methods is available in the [API documentation](documentation/api/index.html file).
-let parser = Generator.setGrammar(s)
-parser.parse(s)
+```
+entire
+ <child mini-parser>
+```
 
-# Status
+The 'entire' mini-parser should have one child node that is also a mini-parser.
 
-The Simple Generator Generator is currently in its second generation and is undergoing testing and bug fixes. 
+Example Space Tree notation:
+```
+entire
+ string literal
+  xyz
+```
 
-## Demo programs
- 
-Demo programs are available in the documentation/demos folder. The demos will probably work if you can serve the demos folder with the correct MIME types.
+Input:
+A string.
 
-The nodejs_installation demos should work on NodeJS.
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound will be true if the input string is the same as the child node's output object's matchString property. It will be false otherwise.
+
+matchString will be equal to the input string if matchFound is true. It will be the empty string otherwise.
+
+### 'sequence' mini-parser
+
+Description:
+
+This mini-parser will have one or more children and will send the input string to each of its children, one by one, starting from the first child node and proceeding downwards. If any of its child nodes fail to match with the input string, this mini-parser itself will fail to match. If all of its child nodes match successfully, then this mini-parser also matches successfully.
+
+Structure:
+
+```
+sequence
+ <child mini-parser 1>
+ <child mini-parser 2>
+ <child mini-parser 3>
+ ...
+ <child mini-parser n>
+```
+
+The 'sequence' mini-parser should have one or more child node mini-parsers.
+
+Example Space Tree notation:
+```
+sequence
+ string literal
+  xyz
+ character class
+  ab
+```
+
+In this example, the sequence of the string literal 'xyz' must be followed by one of the letters from the set of 'a' and 'b'.
+
+Input:
+A string.
+
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound will be determined as follows:
+Step 1) Number the children of the sequence mini parser from 1 to n.
+Step 2) Let a number m be equal to 1.
+Step 3) Let the string s be equal to the input string.
+Step 4) Check if the mth child node matches with s. If the answer is no, matchFound is false.
+If the answer is yes, then proceed to step 5.
+Step 5) Check if there are any remaining children. If the answer is no, then matchFound is true. If the answer is yes, then
+set s to be the string that remains unmatched after the mth child node was checked for a match. (In other words, s is set to be the same as it was before, except with the first k characters dropped, where k is the value of the matchLength property from the output object of the mth child node.) Also, increment m by 1. Then, go to step 4.
+
+matchString will be determined as follows:
+Step 1) Number the children of the sequence mini parser from 1 to n.
+Step 2) Let a number m be equal to 1.
+Step 3) Let output_string be equal to the empty string.
+Step 3) Let the string s be equal to the input string.
+Step 4) Check if the mth child node matches with s. If the answer is no, matchString is set to the empty string.
+If the answer is yes, concatenate output_string with the first matchLength characters of the mth output object and then proceed to step 5.
+Step 5) Check if there are any remaining children. If the answer is no, then return outputString. If the answer is yes, then
+set s to be the string that remains unmatched after the mth child node was checked for a match. (In other words, s is set to be the same as it was before, except with the first k characters dropped, where k is the value of the matchLength property from the output object of the mth child node.) Also, increment m by 1. Then, go to step 4.
+
+### 'or' mini-parser
+
+Description:
+
+This mini-parser will have one or more children and will return a match if any of its children match with the input string.
+
+Structure:
+
+```
+or
+ <child mini-parser 1>
+ <child mini-parser 2>
+ <child mini-parser 3>
+ ...
+ <child mini-parser n>
+```
+
+The 'or' mini-parser should have one or more child node mini-parsers.
+
+Example Space Tree notation:
+```
+or
+ string literal
+  a
+ string literal
+  b
+```
+
+In this example, if the input string starts with either a or b, then there will be a match.
+
+Input:
+A string.
+
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound will be true if any of the mini-parser's children match with the input string. Otherwise, it will be false.
+
+matchString will be equal to the empty string if matchFound is false. Otherwise, it will be equal to the first n characters of the input string, where n is equal to the maximum of all of the child node matchLength properties where a child node matched with the input string. 
+
+### 'and' mini-parser
+
+Description:
+
+This mini-parser will have one or more children and will return a match if all of its children match with the input string. 
+
+Structure:
+
+```
+and
+ <child mini-parser 1>
+ <child mini-parser 2>
+ <child mini-parser 3>
+ ...
+ <child mini-parser n>
+```
+
+The 'and' mini-parser should have one or more child node mini-parsers.
+
+Example Space Tree notation:
+```
+and
+ string literal
+  A
+ character class
+  A0123456789
+```
+
+In this example, if the input string starts with either 'A' and it is one of the characters 'A0123456789', then there will be a match. In other words, the first letter of the input string must be an 'A'.
+
+Input:
+A string.
+
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound will be true if all of the mini-parser's children match with the input string. Otherwise, it will be false.
+
+matchString will be equal to the empty string if matchFound is false. Otherwise, it will be equal to the length shortest match found out of all child nodes matched.
+
+### 'multiple' mini-parser
+
+Description:
+
+The 'multiple' mini-parser will have one child node and will return a match if its child node matches with the input string. The child node of the 'multiple' mini-parser will continue to match against the unmatched part of the input string repeatedly until no more matches are found. Each time a match is found, it will be will be accumulated into the output string stored in the matchString property.
+
+Structure:
+
+```
+multiple
+ <child mini-parser>
+```
+
+The 'multiple' mini-parser should have one child node.
+
+Example Space Tree notation:
+```
+multiple
+ character class
+  0123456789
+```
+
+In the above example, if the input string will match if it starts with one or more numerals from the following character class set: {'0','1','2','3','4','5','6','7','8','9'}. Examples of matching strings include: '0', '00', '1234567'. The following strings will not match: 'A', 'B', 'C'.
+
+Input:
+A string.
+
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound is calculated in a method equivalent to the following way: Apply the child node's matching function to the input string. If there is a match, matchFound will be set to true. Otherwise, it is false.
+
+matchString can be calculated in the following way:
+1) Let matchWasFound be a boolean value set to false.
+2) Let s be an empty string.
+3) Apply the matching function of the child node with the input string. If there is a match, concatenate s with the contents of the child node's match string and repeat step 3. If no match is found, return the value of s as the output string.
+
+### 'optional' mini-parser
+
+Description:
+
+The 'optional' mini-parser will always produce a match. It's purpose is to handle syntax that can be either present or absent. If a match is found, the output string will be equal to the matched portion of the input string. If a match is not found, the output string will be the empty string.
+
+Structure:
+
+```
+optional
+ <child mini-parser>
+```
+
+The 'optional' mini-parser should have one child node.
+
+Example Space Tree notation:
+```
+sequence
+ string literal
+  A
+ optional
+  character class
+   0123456789
+```
+
+In the above example, the input string will match if it is equal to the string 'A'. It will also match if it starts with an 'A' and is followed by one numeral.
+
+Input:
+A string.
+
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound is always true.
+
+matchString is equal to the output string of the child node when its matching function is applied to the input string.
+
+# 'split' mini-parser
+
+Description:
+
+The 'split' mini-parser will takes in one or more child nodes. It will execute only the first child node's matching function against the input string. If there is a match, the split mini-parser will return a match string equal to the match string from the child node. Although only the first child node will execute, the other child nodes could potentially have their matching functions invoked if they contain jump targets(see the section on the 'name' and 'jump' nodes for more details).
+
+Structure:
+
+```
+split
+ <child mini-parser 1>
+ <child mini-parser 2>
+ ...
+ <child mini-parser n>
+```
+
+The 'split' mini-parser should have one or more child nodes. While two or more child nodes is expected, one chlid node is permitted.
+
+Example Space Tree notation:
+```
+split
+ string literal
+  'A'
+ string literal
+  'This is ignored unless a name node is used.'
+```
+
+In the above example, the input string will match if it is equal to the string 'A'. The second string literal node will never get used.
+
+Input:
+A string.
+
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound: To calculate the matchFound value, first execute the matching function of the first child node. matchFound will be set equal to the matchFound property of the output object of the first child node.
+
+matchString: To caclulate the matchString value, execute the matching function of the first child node. Set the output string of the 'split' mini-parser to the output string of the child node.
+
+# 'name' mini-parser
+
+Description:
+
+The 'name' mini-parser will provide a label for a child node. This label can be used in conjunction with the 'jump' node in order to create looping structures. In addition, it will return essentially the same output object as its second child node.
+
+Structure:
+
+```
+name
+ <string 1>
+ <child mini-parser>
+```
+
+The 'name' mini-parser's first child node is a string. The second child node is a mini-parser. The first child node is interpreted to be the name of the 'name' node.
+
+Example Space Tree notation:
+```
+name
+ California
+ string literal
+  'A'
+```
+
+In the above example, the name of the 'name' node is 'California'. It will match against the input string 'A'.
+
+Input:
+A string.
+
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound: To calculate the matchFound value, first execute the matching function of the second child node. matchFound will be set equal to the matchFound property of the output object of the first child node.
+
+matchString: To caclulate the matchString value, execute the matching function of the second child node. Set the output string of the 'name' mini-parser to the output string of the child node.
+
+# 'jump' mini-parser
+
+Description:
+
+The 'jump' mini-parser will cause matching to proceed to the name node with the child specified by the first child node.
+
+Structure:
+
+```
+jump
+ <string 1>
+```
+
+The 'jump' mini-parser has one child node, which is a string which represents the name of the name node that whose matching function will be invoked.
+
+Example usage:
+```
+split
+ jump
+  California
+ name
+  California
+  string literal
+   'A'
+```
+
+In the above example, the jump node specifies a child node name of 'California'. During matching, execution will jump to the second child node of the split node because it has the name 'California'. The 'California' name node will then execute its second child node's matching function, which detects an 'A'. Thus, the above example essentially returns a match if the input is equal to the string literal 'A'.
+
+Input:
+A string.
+
+Output object:
+
+{
+  matchString,
+  matchFound
+}
+
+matchFound: To calculate the matchFound value, first execute the matching function of the second child node. matchFound will be set equal to the matchFound property of the output object of the first child node.
+
+matchString: To caclulate the matchString value, execute the matching function of the second child node. Set the output string of the 'name' mini-parser to the output string of the child node.

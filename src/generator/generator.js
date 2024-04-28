@@ -80,6 +80,7 @@ class Generator{
     let parser
     switch (format){
       case 'H1':
+        //Given a parser description in H1 format, loads the parser into memory
         parser = Generator.H1.import(parserDescription, this)
         break
       case 'M1':

@@ -92,6 +92,8 @@ class M1{
     return s2
   }
 
+  //s is a string passed in using M1 Format
+  //generator is a reference to the Generator object, which is a parser generator
   static importInternal(s,generator){
     //Stage 1 transforms M1 format to an in-memory format
     let firstComma = s.indexOf(',')
@@ -107,6 +109,7 @@ class M1{
         break
       case 'jump':
         //Jump nodes are incomplete at this stage because they do not have a reference yet to the name nodes and must be reprocessed
+        //by the import function in a post-processing operation
       case 'string literal':
       case 'character class':
         node = generator.createNode({type:nodeType, nodes: [s.substring(firstComma + 1, s.length - 1)]})

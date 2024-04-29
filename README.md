@@ -10,7 +10,7 @@ This README is meant to provide enough information for someone to start using th
 The executable portion of the code is located in the file releases/spg.js, which can be obtained by cloning the github repository located at https://github.com/raymond1/simple-parser-generator/. The installation instructions for a NodeJS installation and for a browser installation are shown below.
 
 ### NodeJS installation instructions using NPM
-1. Make a new package.json file. This can be done with the command npm init and pressing enter through all the prompts to use the default options.
+1. Make a new package.json file. This can be done with the command ```npm init``` and pressing enter through all the prompts to use the default options.
 2. Add or set the "type" attribute in the package.json file to the value "module".
 3. In a terminal, run the command
 
@@ -112,7 +112,7 @@ sequence
 
 The first string literal child is configured to detect 'A'. The second is configured to detect 'B', but that is not shown here because those pieces of text are not mini-parsers. Those pieces of text are only used during the parser generation stage to configure a mini-parser for its run-time operation.
 
-### Terminology
+## Terminology
 
 'matching function':
 
@@ -145,10 +145,9 @@ The list of available mini-parsers includes:
 11. name
 12. jump
 
-These mini-parsers will be described below, along with examples of how to specify them using Space Tree notation. Sometimes, a mini-parser will require additional descendent nodes in order to make sense. These requirements will be listed in the section called 'Structure' in the mini-parser descriptions shown below.
+These mini-parsers will be described below, along with examples of how to specify them using Space Tree notation. Sometimes, a mini-parser will require additional descendent nodes in order to make sense. These requirements will be listed in the section called 'Structure' in the mini-parser descriptions in the API section.
 
-The API-like description of the mini-parsers relies on some terminology that will be described here:
-
+## API
 ### 'character class' mini-parser
 Description:
 
@@ -520,7 +519,7 @@ matchFound is always true.
 
 matchString is equal to the output string of the child node when its matching function is applied to the input string.
 
-# 'split' mini-parser
+### 'split' mini-parser
 
 Description:
 
@@ -563,7 +562,7 @@ matchFound: To calculate the matchFound value, first execute the matching functi
 
 matchString: To caclulate the matchString value, execute the matching function of the first child node. Set the output string of the 'split' mini-parser to the output string of the child node.
 
-# 'name' mini-parser
+### 'name' mini-parser
 
 Description:
 
@@ -603,7 +602,7 @@ matchFound: To calculate the matchFound value, first execute the matching functi
 
 matchString: To caclulate the matchString value, execute the matching function of the second child node. Set the output string of the 'name' mini-parser to the output string of the child node.
 
-# 'jump' mini-parser
+### 'jump' mini-parser
 
 Description:
 

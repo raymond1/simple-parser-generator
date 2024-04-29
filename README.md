@@ -104,11 +104,13 @@ Here, this H1 specification is specifying that the root mini-parser is of type '
 
 Mini-parsers are sometimes called 'nodes' because of the tree-like structure they get arranged in. The above H1 file gets turned into the following tree of mini-parsers:
 
+```
 sequence
 |
 |--string literal
 |
 |--string literal
+```
 
 The first string literal child is configured to detect 'A'. The second is configured to detect 'B', but that is not shown here because those pieces of text are not mini-parsers. Those pieces of text are only used during the parser generation stage to configure a mini-parser for its run-time operation.
 

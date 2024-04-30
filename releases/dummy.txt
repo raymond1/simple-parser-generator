@@ -1,0 +1,1 @@
+This file is here to make the releases directory get detected by git. The idea is that the releases/spg.js file will be ignored and will need to be manually updated.

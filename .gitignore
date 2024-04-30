@@ -4,7 +4,7 @@ node_modules
 vendor
 src/server/root_certificates/*.pem
 thinking*.txt
-releases
+releases/spg.js
 documentation/api/*
 documentation/api
 documentation/demos/nodejs/spg.js

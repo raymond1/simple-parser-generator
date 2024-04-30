@@ -27,7 +27,7 @@ import {Generator} from 'simple-parser-generator'
 ### Browser installation instructions
 1. Set up a web server that can serve HTML and JavaScript pages with the correct Content-Type headers.
 2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving.
-3. Clone the https://github.com/raymond1/simple-parser-generator#v2 repository.
+3. Clone the https://github.com/raymond1/simple-parser-generator repository.
 4. Copy the file releases/spg.js into the folder that your web server is serving.
 5. In your index.html file, add the following just before the end of your body tag:
 ```

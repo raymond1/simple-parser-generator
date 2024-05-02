@@ -53,7 +53,7 @@ class H1{
       let firstNodeDepth = H1.H1GetDepth(s)
       let nodeName = H1.H1GetNodeName(s)
       
-      let nodeTypeNames = Generator.getNodeTypeNames()
+      let nodeTypeNames = ParserGenerator.getNodeTypeNames()
       if (nodeTypeNames.indexOf(nodeName) == -1){
         //error
         throw new Error('Unknown node type(H1GetChildNuggets): ' + nodeName)

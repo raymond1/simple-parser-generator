@@ -56,7 +56,7 @@ class H1{
       let nodeTypeNames = ParserGenerator.getNodeTypeNames()
       if (nodeTypeNames.indexOf(nodeName) == -1){
         //error
-        throw new Error('Unknown node type(H1GetChildNuggets): ' + nodeName)
+        throw new Error('Unknown node type(H1GetChildNuggets): |' + nodeName + '|')
       }
   
       if (['string literal','character class', 'jump'].indexOf(nodeName) > -1){

@@ -8,7 +8,7 @@ class H2{
 
     var left_of_first_left_bracket = string.substring(0,location_of_first_left_bracket).trim()
     if (left_of_first_left_bracket == X){
-      let indexOfRightMatchingSquareBracket = Generator.getMatchingRightSquareBracket(string,location_of_first_left_bracket)
+      let indexOfRightMatchingSquareBracket = ParserGenerator.getMatchingRightSquareBracket(string,location_of_first_left_bracket)
 
       if (indexOfRightMatchingSquareBracket > -1){
         return string.substring(0,indexOfRightMatchingSquareBracket+1)
@@ -23,7 +23,7 @@ class H2{
   //return the string containing up to the first pattern string
   //Returns '' if no valid next pattern string is found
   static headMatchPattern(string){
-    for (let nodeType of Generator.nodeTypes){
+    for (let nodeType of ParserGenerator.nodeTypes){
       let patternString = nodeType.headMatch(string)//headMatchFunction.call(this, string)
       if (patternString) return patternString
     }
@@ -40,12 +40,12 @@ class H2{
     let patterns = []
     let tempString = string.trim()
     while(tempString != ''){
-      let nextPatternString = Generator.headMatchPattern(tempString)
+      let nextPatternString = ParserGenerator.headMatchPattern(tempString)
       if (nextPatternString == ''){
         break
       }
       else{
-        let singlePattern = Generator.grammarize_PATTERN(nextPatternString)
+        let singlePattern = ParserGenerator.grammarize_PATTERN(nextPatternString)
         if (singlePattern){
           patterns.push(singlePattern)
         }else{
@@ -69,10 +69,10 @@ class H2{
   }
   
   static getTypeOfPattern(string){
-    for (let i = 0; i < Generator.nodeTypes.length; i++){
-      let headMatchResult = Generator.nodeTypes[i].headMatch(string)
+    for (let i = 0; i < ParserGenerator.nodeTypes.length; i++){
+      let headMatchResult = ParserGenerator.nodeTypes[i].headMatch(string)
       if (headMatchResult){
-        return Generator.nodeTypes[i].type
+        return ParserGenerator.nodeTypes[i].type
       }
     }
     return ''
@@ -123,7 +123,7 @@ class H2{
 
   static grammarize_PATTERN(string, parser){
     var trimmed_string = string.trim()
-    let typeOfPattern = Generator.getTypeOfPattern(trimmed_string)
+    let typeOfPattern = ParserGenerator.getTypeOfPattern(trimmed_string)
     return parser.grammarize(typeOfPattern, trimmed_string, parser)
   }
 

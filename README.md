@@ -3,7 +3,7 @@
 ## Introduction
 The Simple Parser Generator(SPG) is a system for generating parsers. There is currently only a JavaScript implementation, but the SPG is meant to be a highly portable system.
 
-This README is meant to provide enough information for someone to start using the SPG. It includes details about installation, concepts, the internal language H1, examples, and details on the overall operation. Additional documentation is available in the documentation folder in the .md Markdown files.
+This README is meant to provide enough information for someone to start using the SPG. It includes details about installation, concepts, the internal language H1, examples, and details on the overall operation. Additional documentation is available in the documentation folder in the file DEVELOPER_DOCUMENTATION.md.
 
 ## Installation
 
@@ -21,7 +21,7 @@ npm install git+https://github.com/raymond1/simple-parser-generator.git
 4. At this point, the simple parser generator should be installed. To use it, create a file called index.js and use an import statement. For example:
 
 ```
-import {Generator} from 'simple-parser-generator'
+import {ParserGenerator} from 'simple-parser-generator'
 ```
 
 ### Browser installation instructions
@@ -39,16 +39,16 @@ import {Generator} from 'simple-parser-generator'
       }
     </script>
     <script type="module">
-import {Generator} from 'simple-parser-generator'
+import {ParserGenerator} from 'simple-parser-generator'
     </script>
 ```
 
 ## Quick start sample program
-After going through the installation steps above, you will have access to a Generator object. The following quick start sample program is a minimalistic JavaScript stub program that explains from a software development point of view how to generate a parser using the SPG on the NodeJS platform.
+After going through the installation steps above, you will have access to a ParserGenerator object. The following quick start sample program is a minimalistic JavaScript stub program that explains from a software development point of view how to generate a parser using the SPG on the NodeJS platform.
 
 ```
-import {Generator} from 'simple-parser-generator' 
-let generator = new Generator()
+import {ParserGenerator} from 'simple-parser-generator' 
+let generator = new ParserGenerator()
 let specification = 
 `string literal
  world`
@@ -64,11 +64,11 @@ The exact structure of the output object will be described later on, but you can
 ## How the Simple Parser Generator operates
 The Simple Parser Generator has two stages of operation. In the first stage, called the 'parser generation stage', the SPG will take in a string input in the form of an H1 specification. In the second stage, called the 'run-time operation stage', or 'parsing stage', the generated parser itself will take in an input string and will begin parsing. 
 
-To initiate the parser generation stage, the Generator class's 'generateParser' method is called with an H1 specification as the input. The output of the Generator.generateParser method will be a parser. To initiate the parsing operation with the parser that is returned, the parser's 'parse' function is called, passing in an input string. The output of the parsing operation will a series of parsing output objects which will hold information on where different syntactical components are located in the input string.
+To initiate the parser generation stage, the ParserGenerator class's 'generateParser' method is called with an H1 specification as the input. The output of the ParserGenerator.generateParser method will be a parser. To initiate the parsing operation with the parser that is returned, the parser's 'parse' function is called, passing in an input string. The output of the parsing operation will a series of parsing output objects which will hold information on where different syntactical components are located in the input string.
 
-During the parser generation stage, the SPG will analyze the H1 specification passed in. An H1 specification describes a tree of instructions indicating how a parser is to be constructed. Each instruction in the H1 specification will be transformed by the SPG into in-memory objects that can be thought of as mini-parsers, or mini-programs, each capable of performing specific parsing-related tasks, such as recognizing fixed sequences of strings, or recognizing that a string starts with characters from a specific set. The mini-parsers will be arranged into a tree form, and the root element of that tree will be the parser returned by the Generator.generateParser function.
+During the parser generation stage, the SPG will analyze the H1 specification passed in. An H1 specification describes a tree of instructions indicating how a parser is to be constructed. Each instruction in the H1 specification will be transformed by the SPG into in-memory objects that can be thought of as mini-parsers, or mini-programs, each capable of performing specific parsing-related tasks, such as recognizing fixed sequences of strings, or recognizing that a string starts with characters from a specific set. The mini-parsers will be arranged into a tree form, and the root element of that tree will be the parser returned by the ParserGenerator.generateParser function.
 
-During the parsing stage, the parser that was returned from the Generator.generateParser function will take in an input string, and the input string will be passed to the root mini-parser of the parser. The parser's root will process the input string using the 'parse' function, store some output information and then proceed to pass operation down to is descendents. Depending on what the exact instructions are in the tree, operation may or may not terminate, but the end result of the parser's parse operation will typically be syntactical information.
+During the parsing stage, the parser that was returned from the ParserGenerator.generateParser function will take in an input string, and the input string will be passed to the root mini-parser of the parser. The parser's root will process the input string using the 'parse' function, store some output information and then proceed to pass operation down to is descendents. Depending on what the exact instructions are in the tree, operation may or may not terminate, but the end result of the parser's parse operation will typically be syntactical information.
 
 ## Understanding what a mini-parser is
 

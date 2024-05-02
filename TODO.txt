@@ -1,0 +1,2 @@
+M1.js's escape function looks possibly incorrect.
+

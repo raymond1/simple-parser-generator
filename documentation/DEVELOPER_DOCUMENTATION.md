@@ -2,9 +2,9 @@
 This file contains information about the internal organization of this piece of software.
 
 To develop, do the following:
-1)Install php, with the command line executable.
-2)Install composer.
-3)composer install
+1. Install php, with the command line executable.
+2. Install composer.
+3. composer install
 
 This will install the document-compiling-cms composer package from github (https://github.com/raymond1/document-compiling-cms).
 
@@ -27,7 +27,7 @@ npm run dev
 ```
 from the root folder.
 
-# Building the demo programes
+# Building the demo programs
 From the root follder, type in Make to trigger the Makefile action.
 
 # How to update the generate_website.php script
@@ -42,7 +42,7 @@ composer update
 ```
 
 # Launch checklist
-1) package.json in demo folder should be updated to correct branch from "github:raymond1/simple-parser-generator#v2"
+1) package.json in demo folder should be updated to correct branch from "github:raymond1/simple-parser-generator"
 2) demos should work
 3) documentation generation should be updated
 4) demo files should be present

@@ -1,8 +1,8 @@
 /**
- * The Generator class is a parser generator that generates in-memory parsers, and allows for the export of such parsers into the M1 or H1 format 
+ * The ParserGenerator class is a parser generator that generates in-memory parsers, and allows for the export of such parsers into the M1 or H1 format 
  * so that they can be imported in a different language environment.
  */
-class Generator{
+class ParserGenerator{
   /**
    * @constructor
    */
@@ -14,7 +14,7 @@ class Generator{
   }
 
   /**
-   * This function Uses console.log to verify that the software has been installed correctly. Running Generator.installCheck() should
+   * This function Uses console.log to verify that the software has been installed correctly. Running ParserGenerator.installCheck() should
    * display the message 'Successfully installed.'.
    * */
   static installCheck(){
@@ -22,11 +22,11 @@ class Generator{
   }
 
   /***
-   * This is a private function that initializes the Generator.nodeTypes property with a
+   * This is a private function that initializes the ParserGenerator.nodeTypes property with a
    * mapping between the 'friendly names' of nodes and the object classes.
    */
   static registerNodeTypes(){
-    Generator.nodeTypes = {
+    ParserGenerator.nodeTypes = {
       'character class': CharacterClassNode,
       'string literal':StringLiteralNode,
       'sequence':SequenceNode,
@@ -49,7 +49,7 @@ class Generator{
    * @returns {Array}
    */
   static getNodeTypeNames(){
-    return Object.keys(Generator.nodeTypes)
+    return Object.keys(ParserGenerator.nodeTypes)
   }
 
   /***
@@ -81,10 +81,10 @@ class Generator{
     switch (format){
       case 'H1':
         //Given a parser description in H1 format, loads the parser into memory
-        parser = Generator.H1.import(parserDescription, this)
+        parser = ParserGenerator.H1.import(parserDescription, this)
         break
       case 'M1':
-        parser = Generator.M1.import(parserDescription, this)
+        parser = ParserGenerator.M1.import(parserDescription, this)
         break
       default:
         break
@@ -124,7 +124,7 @@ class Generator{
    * @param {Object} metadata 
    */
   createNode(metadata){
-    let newNode = new Generator.nodeTypes[metadata.type](metadata)
+    let newNode = new ParserGenerator.nodeTypes[metadata.type](metadata)
     switch (metadata.type){
       case 'name':
         this.nameNodes[metadata.nodes[0]] = newNode
@@ -152,12 +152,12 @@ class Generator{
   }
 }
 
-Generator.registerNodeTypes()
-Generator.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
-Generator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
+ParserGenerator.registerNodeTypes()
+ParserGenerator.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
+ParserGenerator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
 
-Generator.H1 = H1
-Generator.M1 = M1
+ParserGenerator.H1 = H1
+ParserGenerator.M1 = M1
 
-export {Generator}
-export default Generator
+export {ParserGenerator}
+export default ParserGenerator

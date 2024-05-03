@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+<title>Basic usage</title>
+</head>
+<body>
+	<script type="importmap">
+{
+	"imports": {
+		"simple-parser-generator":"./spg.js"
+	}
+}
+  </script>
+    <script type="module">
+import {ParserGenerator} from 'simple-parser-generator'
+
+let generator = new ParserGenerator()
+let specification = `entire
+ character class
+  0123456789`
+
+let parser = generator.generateParser(specification)
+
+let inputString = '12345'
+let output = parser.parse(inputString)
+    </script>
+</body>
+</html>

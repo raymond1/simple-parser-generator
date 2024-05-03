@@ -125,7 +125,7 @@ class M1{
   //Takes in a string, s, in M1 format and converts it into an in-memory representation of a parser
   static import(s, generator){
     let rootNode = M1.importInternal(s,generator)
-    Generator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
+    ParserGenerator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
     return rootNode
   }
 
@@ -171,7 +171,7 @@ class M1{
   //This function converts from machine format M1 into human-compatible format H1
   static convertToH1(s, depth = 0){
     if (s.substring(0,1) != '['){
-      return Generator.H1EncodeDepth(depth) + s.slice()
+      return ParserGenerator.H1EncodeDepth(depth) + s.slice()
     }
 
     let outputString = ''
@@ -179,26 +179,26 @@ class M1{
 
     let commaIndex = s.indexOf(',')
     let nodeType = s.substring(caret, commaIndex)
-    outputString += Generator.H1EncodeDepth(depth) + nodeType + '\n'
+    outputString += ParserGenerator.H1EncodeDepth(depth) + nodeType + '\n'
 
     caret += nodeType.length + 1//increase caret by left bracket plus node name + a comma, plus one character
     //obtain comma position relative to the string s starting at position caret
-    let commaOffset = Generator.getNextZeroLevelComma(s.substring(caret)) 
+    let commaOffset = ParserGenerator.getNextZeroLevelComma(s.substring(caret)) 
     while(commaOffset > -1){
       let nextNodeString = s.substring(caret,commaOffset + caret)
-      outputString += Generator.M1.convertToH1(nextNodeString, depth + 1) + '\n'
+      outputString += ParserGenerator.M1.convertToH1(nextNodeString, depth + 1) + '\n'
       caret = caret + nextNodeString.length + 1 //Skip to one character past the last found comma
-      commaOffset = Generator.getNextZeroLevelComma(s.substring(caret))
+      commaOffset = ParserGenerator.getNextZeroLevelComma(s.substring(caret))
     }
 
-    outputString += Generator.M1.convertToH1(s.substring(caret,s.length - 1), depth + 1)
+    outputString += ParserGenerator.M1.convertToH1(s.substring(caret,s.length - 1), depth + 1)
     return outputString
   }
 
   static export(node, depth = 0){
     switch(node.nodes.length){
       case 'name':
-        return `[${node.type},${Generator.M1.escape(node.nodes[0])},${node.nodes[1].export()}]`
+        return `[${node.type},${ParserGenerator.M1.escape(node.nodes[0])},${node.nodes[1].export()}]`
       case 'or':
       case 'sequence':
       case 'and':
@@ -206,7 +206,7 @@ class M1{
         let patternsString = ''
         this.nodes.forEach((pattern, index)=>{
           if (index > 0) patternsString += ","
-          patternsString += Generator.M1.export(pattern)
+          patternsString += ParserGenerator.M1.export(pattern)
         })
         let s = `[${node.type},${patternsString}]`
         return s      
@@ -219,7 +219,7 @@ class M1{
       case 'character class':
       case 'string literal':
       case 'jump':
-        return `[${node.type},${Generator.escape(node.nodes[0])}]`
+        return `[${node.type},${ParserGenerator.escape(node.nodes[0])}]`
     }
 
     return node.export(depth)

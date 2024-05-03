@@ -54,7 +54,7 @@ class CharacterClassNode extends Node{
   static type = 'character class'
 
   export(){
-    return `[${this.constructor.type},${Generator.escape(this.string)}]`
+    return `[${this.constructor.type},${ParserGenerator.escape(this.string)}]`
   }
 
   /**
@@ -126,7 +126,7 @@ class StringLiteralNode extends Node{
   static type = 'string literal'
 
   export(){
-    return `[${this.constructor.type},${Generator.escape(this.nodes[0])}]`
+    return `[${this.constructor.type},${ParserGenerator.escape(this.nodes[0])}]`
   }
 
   /**

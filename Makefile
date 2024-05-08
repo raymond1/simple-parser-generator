@@ -8,3 +8,4 @@ documentation:
 	rm -rf documentation/api
 	mkdir documentation/api
 	mv out/* documentation/api
+	cp releases/spg.js documentation/demos/basic_usage

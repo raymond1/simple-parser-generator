@@ -1,3 +1,6 @@
+/**
+ * This class contains functions related to the M1 language.
+ */
 class M1{
   //Given a string s, returns the first comma that is not part of a node
   //For example:
@@ -12,7 +15,6 @@ class M1{
   //Upon encountering ], the 'level' is decreased by 1.
   //Zero level commas are commas detected when the 'level' is zero.
   static getNextZeroLevelComma(s){
-  console.log('inside getNextZeroLevelComma:'+ s)
     let bracketLevel = 0
     let index = -1
     for (let i = 0; i < s.length; i++){

@@ -28,7 +28,7 @@ npm run dev
 from the root folder.
 
 # Building the demo programs
-From the root follder, type in Make to trigger the Makefile action.
+From the root folder, type in Make to trigger the Makefile action.
 
 # How to update the generate_website.php script
 After making changes to the script, go into the document-compiling-cms folder, add and commit your changes and then use the command:

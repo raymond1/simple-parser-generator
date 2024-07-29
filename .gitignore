@@ -13,3 +13,4 @@ documentation/demos/nodejs/test2.js
 documentation/demos/basic_usage/spg.js
 TODO.txt
 package-lock.json
+composer.lock

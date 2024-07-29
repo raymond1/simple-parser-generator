@@ -13,8 +13,8 @@ class ParserGenerator{
     this.jumpNodes = []
   }
 
-  /**
-   * This function Uses console.log to verify that the software has been installed correctly. Running ParserGenerator.installCheck() should
+  /** @method
+   * This function uses console.log to verify that the software has been installed correctly. Running ParserGenerator.installCheck() should
    * display the message 'Successfully installed.'.
    * */
   static installCheck(){
@@ -52,7 +52,7 @@ class ParserGenerator{
     return Object.keys(ParserGenerator.nodeTypes)
   }
 
-  /***
+  /** 
    * Increments the number of matches the parser has performed. Then, returns one less than the number of matches. Used to uniquely identify
    * all the match nodes as they are generated.
    * 
@@ -64,7 +64,7 @@ class ParserGenerator{
     return oldMatchCount
   }
 
-  /**
+  /** @method
    * Generates an in-memory parser using a string description in M1 or H1 format.
    * 
    * The definition for a parser in H1 or M1 format. The format must match the value passed into the format parameter. See the documentation in M1.md or H1.md for more information on the M1 and H1 file formats.

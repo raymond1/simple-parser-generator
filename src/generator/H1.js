@@ -199,7 +199,6 @@ class H1{
     //Given a string in H1 format, loads the appropriate nodes into memory
     static import(s, generator){
       let M1Code = H1.convertToM1(s)
-console.log('h1 converted to m1 is:' + M1Code)
       return M1.import(M1Code, generator)
     }
   

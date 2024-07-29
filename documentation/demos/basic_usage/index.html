@@ -4,10 +4,11 @@
 <title>Basic usage</title>
 </head>
 <body>
+  (View the page source and the console for the code and output)
 	<script type="importmap">
 {
 	"imports": {
-		"simple-parser-generator":"./spg.js"
+		"simple-parser-generator":"../spg.js"
 	}
 }
   </script>
@@ -23,6 +24,7 @@ let parser = generator.generateParser(specification)
 
 let inputString = '12345'
 let output = parser.parse(inputString)
+console.log(output)
     </script>
 </body>
 </html>

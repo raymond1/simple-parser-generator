@@ -1,6 +1,19 @@
+<!doctype html>
+<html>
+  <head><title>Simple Parser Generator Jump example</title></head>  
+  <body>
+    (Use view page source and the console to see what is happening.)
+    <script type="importmap">
+      {
+        "imports": {
+          "simple-parser-generator":"../spg.js"
+        }
+      }
+    </script>
+    <script type="module">
 //The Generator object is used to generate parsers. The TreeViewer object is a tool
 //meant to help analyze the output tree generated when parsers are fed with an input string.
-import {ParserGenerator, TreeViewer} from '../spg.js'
+import {ParserGenerator, TreeViewer} from 'simple-parser-generator'
 
 //Instantiate the generator object
 let generator = new ParserGenerator ()
@@ -40,3 +53,8 @@ treeViewer.display('text', output)
 
 //Running this program should produce text output detailing how the parser interpreted your input program.
 
+
+    </script>
+  </body>
+</html>
+<head></head>

@@ -22,7 +22,25 @@ class Node{
   }
 }
 
-Node.defaultAttributes = {depth: 0, offset: 0, parent: null}
+Node.setDefaultMetadataValues = function(metadata){
+  if (!metadata){
+    metadata = {}
+  }
+
+  if (!('depth' in metadata)){
+    metadata.depth = 0
+  }
+
+  if (!('globalOffset' in metadata)){
+    metadata.globalOffset = 0
+  }
+
+  if (!('parent' in metadata)){
+    metadata.parent = null
+  }
+
+  return metadata
+}
 
 /**
  * This class represents a character class. It provides the 'parse' function, which is capable of 
@@ -68,7 +86,8 @@ class CharacterClassNode extends Node{
    * @param {String} inputString - The input string to parse.
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()
     //matches if the inputString starts with characters from the character class
@@ -92,6 +111,7 @@ class CharacterClassNode extends Node{
     }
 
     Object.assign(newMatchNode, {
+      globalOffset: metadata.globalOffset,
       parent: metadata.parent, 
       depth: metadata.depth,
       inputString: inputString.slice(), 
@@ -99,7 +119,7 @@ class CharacterClassNode extends Node{
       id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       matchString: inputString.substring(0, matchLength),
-      matchFound
+      matchFound,
     })
     return newMatchNode
   }
@@ -139,7 +159,9 @@ class StringLiteralNode extends Node{
    * @param {String} inputString - The input string
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     let newMatchNode = new MatchNode()
     //matches if inputString starts with the string passed in during object construction
     let matchLength = 0
@@ -148,6 +170,7 @@ class StringLiteralNode extends Node{
     }
 
     Object.assign(newMatchNode, {
+      globalOffset: metadata.globalOffset,
       parent: metadata.parent, 
       depth: metadata.depth,
       inputString: inputString.slice(), 
@@ -159,6 +182,7 @@ class StringLiteralNode extends Node{
       string: this.nodes[0],
       matchFound: matchLength > 0?true:false
     })
+
     return newMatchNode
   }
 }
@@ -191,13 +215,16 @@ class NotNode extends Node{
    * @returns {Number} - Returns 0 if child node's parse function returns a positive number. Otherwise, returns
    * the length of inputString.
    */
-  parse(inputString, metadata = Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     var newMatchNode = new MatchNode()
-    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
 
     let matchLength = (matchInfo.matchString !== '')?0:inputString.matchLength
     Object.assign(
       newMatchNode, {
+        globalOffset: metadata.globalOffset,
         parent: metadata.parent, 
         depth: metadata.depth,
         inputString: inputString.slice(), 
@@ -246,7 +273,9 @@ class EntireNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     let newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
@@ -261,6 +290,7 @@ class EntireNode extends Node{
     }
 
     Object.assign(newMatchNode, {
+      globalOffset: metadata.globalOffset,
       parent: metadata.parent, 
       depth: metadata.depth,
       inputString: inputString.slice(), 
@@ -316,16 +346,20 @@ class SequenceNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {Number} The sum of the matched strings of its child nodes if matching was successful
    */
-  parse(inputString, metadata = Node.defaultAttributes){
-    var newMatchNode = new MatchNode()
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
+    let newMatchNode = new MatchNode()
     let tempString = inputString
     let totalMatchLength = 0
 
     let subMatches = []
     let matchInfo
     let matchFound = true
+    let localOffset = 0
+
     for (let i = 0; i < this['nodes'].length; i++){
-      matchInfo = this.nodes[i].parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
+      matchInfo = this.nodes[i].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset + localOffset, parent: newMatchNode})
       subMatches.push(matchInfo)
       if (!matchInfo.matchFound){
         matchFound = false
@@ -333,12 +367,14 @@ class SequenceNode extends Node{
       }else{
         totalMatchLength = totalMatchLength + matchInfo.matchString.length
         tempString = tempString.substring(matchInfo.matchString.length)
+        localOffset = localOffset + matchInfo.matchString.length
       }
     }
     let matchLength = totalMatchLength
 
     Object.assign(
       newMatchNode, {
+        globalOffset: metadata.globalOffset,
         parent: metadata.parent, 
         depth: metadata.depth,
         inputString: inputString.slice(), 
@@ -394,14 +430,16 @@ class OrNode extends Node{
    * @param {String} inputString - the input string.
    * @returns {MatchNode}
    */
-  parse(inputString,metadata = Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     var newMatchNode = new MatchNode()
 
     let subMatches = []
     let matchInfo
     let matchFound = false
     for (let i = 0; i < this.nodes.length; i++){
-      matchInfo = this['nodes'][i].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+      matchInfo = this['nodes'][i].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
       subMatches.push(matchInfo)
       if (!matchInfo.matchFound){
         continue
@@ -414,6 +452,7 @@ class OrNode extends Node{
     let matchLength = matchInfo.matchString.length
     Object.assign(
       newMatchNode, {
+        globalOffset: metadata.globalOffset,
         parent: metadata.parent, 
         depth: metadata.depth,
         inputString: inputString.slice(), 
@@ -466,7 +505,9 @@ class AndNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
-  parse(inputString,metadata = Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     var newMatchNode = new MatchNode()
 
     let subMatches = []
@@ -476,7 +517,7 @@ class AndNode extends Node{
     let matchFound = true
 
     for (let i = 0; i < this.nodes.length; i++){
-      matchInfo = this.nodes[i].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+      matchInfo = this.nodes[i].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
       subMatches.push(matchInfo)
       if (!matchInfo.matchFound){
         smallestMatchLength = 0
@@ -503,6 +544,7 @@ class AndNode extends Node{
 
     Object.assign(
       newMatchNode, {
+        globalOffset: metadata.globalOffset,
         parent: metadata.parent, 
         depth: metadata.depth,
         inputString: inputString.slice(), 
@@ -549,13 +591,16 @@ class MultipleNode extends Node{
    * @param {String} inputString - The input string
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     var newMatchNode = new MatchNode()
     let tempString = inputString
     let totalMatchLength = 0
     let matchFound = false
+    let localOffset = 0
     let subMatches = []
-    let matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
     if (matchInfo.matchFound){
       matchFound = true
       subMatches.push(matchInfo)
@@ -563,13 +608,15 @@ class MultipleNode extends Node{
 
     while(matchInfo.matchFound){
       totalMatchLength = totalMatchLength + matchInfo.matchString.matchLength
+      localOffset = localOffset + matchInfo.matchString.matchLength
       tempString = tempString.substring(matchInfo.matchString.matchLength)
-      matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, parent: this})
+      matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset + localOffset, parent: this})
       subMatches.push(matchInfo)
     }
   
     Object.assign(
       newMatchNode, {
+        globalOffset: metadata.globalOffset,
         parent: metadata.parent, 
         depth: metadata.depth,
         inputString: inputString.slice(), 
@@ -617,14 +664,17 @@ class OptionalNode extends Node{
    * @param {String} inputString - The input string.
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     let newMatchNode = new MatchNode()
-    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
 
     let subMatches = []
     subMatches.push(matchInfo)
 
     Object.assign(newMatchNode, {
+      globalOffset: metadata.globalOffset,
       parent: metadata.parent, 
       depth: metadata.depth,
       inputString: inputString.slice(), 
@@ -664,12 +714,15 @@ class SplitNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata=Node.defaultAttributes){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     let newMatchNode = new MatchNode()
-    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
     let subMatches = []
     subMatches.push(matchInfo)
     
     Object.assign(newMatchNode, {
+      globalOffset: metadata.globalOffset,
       parent: metadata.parent, 
       depth: metadata.depth,
       inputString: inputString.slice(), 
@@ -709,13 +762,16 @@ class NameNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
-  parse(inputString, metadata=Node.defaultAttributes){
+  parse(inputString, metadata){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     let newMatchNode = new MatchNode()
-    let matchInfo = this.nodes[1].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let matchInfo = this.nodes[1].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
     let subMatches = []
     subMatches.push(matchInfo)
     
     Object.assign(newMatchNode, {
+      globalOffset: metadata.globalOffset,
       parent: metadata.parent, 
       depth: metadata.depth,
       inputString: inputString.slice(), 
@@ -754,12 +810,15 @@ class JumpNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata=Node.defaultAttributes){
+    metadata = Node.setDefaultMetadataValues(metadata)
+
     let newMatchNode = new MatchNode()
-    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
+    let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
     let subMatches = []
     subMatches.push(matchInfo)
     
     Object.assign(newMatchNode, {
+      globalOffset: metadata.globalOffset,
       parent: metadata.parent, 
       depth: metadata.depth,
       inputString: inputString.slice(), 

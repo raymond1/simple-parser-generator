@@ -1,17 +1,16 @@
 /**
- * Converts a tree into either a text-based representation or a DOM tree representation.
+ * Converts an output tree from a parser into a human-readable form, either a text-based representation or a DOM tree representation.
  * 
  */
 class TreeViewer{
   /**
    * 
-   * @param {Object} root The root tree node
+   * @param {Object} output The root of the output tree being displayed.
    * @param {DOMElement} parentElement The DOM parent node where the root HTML element will be attached for display.
    */
   constructor(parentElement = null){
     /** 
      * The parentElement, if passed in is used to attach DOM elements when using the display function.
-     * If no parent element is passed in,
      * @member {DOMElement} */
     this.parentElement = parentElement
     // this.domElement = document.createElement('pre')

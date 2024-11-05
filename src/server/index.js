@@ -16,6 +16,8 @@ app.use(express.static('../../documentation/',   {
       res.set({'Content-Type': 'application/javascript'}) 
     }else if (extension == '.md'){
       res.set({'Content-Type': 'text/plain'}) 
+    }else if (extension == '.css'){
+      res.set({'Content-Type': 'text/css'}) 
     }
   }
 }))

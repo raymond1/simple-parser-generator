@@ -1,9 +1,9 @@
 # Simple Parser Generator
 
 ## Introduction
-The Simple Parser Generator(SPG) is a system for generating parsers. There is currently only a JavaScript implementation, but the SPG is meant to be a highly portable system.
+The Simple Parser Generator(SPG) is a system for generating parsers. Usually, people use parsers to answer questions such as: 'Is the following string valid?', 'Is the string S a valid program?', 'Inside of a program, where are the functions? Where the classes? Where are the statements?', 'If the syntax for a valid string requires that it includes components A, B and C, then where do the components A,B and C begin and end if I pass in the string S?' The answers to these questions allows people to build programming languages and file formats for expressing algorithms to a computer or to express structured data.
 
-This README is meant to provide enough information for someone to start using the SPG. It includes details about installation, concepts, the internal language H1, examples, and details on the overall operation. Additional documentation is available in the documentation folder in the file DEVELOPER_DOCUMENTATION.md.
+This README is meant to be a tutorial to provide enough information for someone to start using the SPG. It includes details about installation, concepts, the internal language H1 for describing parsers, examples, and details on the overall operation. 
 
 ## Installation
 
@@ -24,7 +24,7 @@ npm install git+https://github.com/raymond1/simple-parser-generator.git
 import {ParserGenerator} from 'simple-parser-generator'
 ```
 
-### Browser installation instructions
+### Browser based installation instructions
 1. Set up a web server that can serve HTML and JavaScript pages with the correct Content-Type headers.
 2. Create a small website containing an index.html file and put it into the document root or public_html folder or other folder where your web server will be serving.
 3. Clone the https://github.com/raymond1/simple-parser-generator repository.
@@ -43,32 +43,79 @@ import {ParserGenerator} from 'simple-parser-generator'
     </script>
 ```
 
-## Quick start sample program
-After going through the installation steps above, you will have access to a ParserGenerator object. The following quick start sample program is a minimalistic JavaScript stub program that explains from a software development point of view how to generate a parser using the SPG on the NodeJS platform.
+## Basic usage
+The typical usage of the SPG looks as follows:
 
 ```
-import {ParserGenerator} from 'simple-parser-generator' 
-let generator = new ParserGenerator()
-let specification = 
+import {ParserGenerator, TreeViewer} from 'simple-parser-generator'
+let parserGenerator = new ParserGenerator()
+let parserSpecification = 
+`string literal
+ Hello, world.`
+
+let parser = parserGenerator.generateParser(parserSpecification)
+
+let inputString = 'Hello, world.'
+let output = parser.parse(inputString)
+console.log(output)
+```
+
+Explanation:
+
+1. The line
+
+```import {ParserGenerator, TreeViewer} from 'simple-parser-generator'```
+
+imports the ParserGenerator and TreeViewer classes. The ParserGenerator class is used to generate parsers. The TreeViewer class is sometimes helpful for viewing the output 
+2. The line 
+
+```let parserGenerator = new ParserGenerator()```
+
+instantiates an instance of the ParserGenerator()
+
+3. The statement
+
+```let parserSpecification = 
 `string literal
  world`
-
-let parser = generator.generateParser(specification)
-
-let inputString = 'world'
-let output = parser.parse(inputString)
 ```
 
-The exact structure of the output object will be described later on, but you can view it with a debugger.
+sets a string value for the variable 'parserSpecification'. This string variable is actually a program written using the H1 syntax for the SPG API. Understanding the details of H1 syntax and how to use it to control the SPG using the SPG API is a core part of using the SPG.
 
-## How the Simple Parser Generator operates
-The Simple Parser Generator has two stages of operation. In the first stage, called the 'parser generation stage', the SPG will take in a string input in the form of an H1 specification. In the second stage, called the 'run-time operation stage', or 'parsing stage', the generated parser itself will take in an input string and will begin parsing. 
+4. The statement
 
-To initiate the parser generation stage, the ParserGenerator class's 'generateParser' method is called with an H1 specification as the input. The output of the ParserGenerator.generateParser method will be a parser. To initiate the parsing operation with the parser that is returned, the parser's 'parse' function is called, passing in an input string. The output of the parsing operation will a series of parsing output objects which will hold information on where different syntactical components are located in the input string.
+```let parser = parserGenerator.generateParser(specification)```
 
-During the parser generation stage, the SPG will analyze the H1 specification passed in. An H1 specification describes a tree of instructions indicating how a parser is to be constructed. Each instruction in the H1 specification will be transformed by the SPG into in-memory objects that can be thought of as mini-parsers, or mini-programs, each capable of performing specific parsing-related tasks, such as recognizing fixed sequences of strings, or recognizing that a string starts with characters from a specific set. The mini-parsers will be arranged into a tree form, and the root element of that tree will be the parser returned by the ParserGenerator.generateParser function.
+use the parser generator to create a new parser pased off of the 'parserSpecification' variable that was passed in and saves it into the 'parser' variable.
 
-During the parsing stage, the parser that was returned from the ParserGenerator.generateParser function will take in an input string, and the input string will be passed to the root mini-parser of the parser. The parser's root will process the input string using the 'parse' function, store some output information and then proceed to pass operation down to is descendents. Depending on what the exact instructions are in the tree, operation may or may not terminate, but the end result of the parser's parse operation will typically be syntactical information.
+5. The statement
+
+```let inputString = 'world'```
+
+sets the input string that will be sent to the parser.
+
+6. The statement
+
+```let output = parser.parse(inputString)```
+
+uses the parser to parse the input string. Its output is a tree structure filled with information about the parsing process. Further processing can be done at this point to extract parsing details about the input string. The exact structure and nature of this output tree structure will be explained later on in this tutorial, but the SPG's work has essentially been completed at this point in the program's execution.
+
+
+The best way to view the structure of the output object,
+
+
+
+## Understanding How the Simple Parser Generator operates
+The Simple Parser Generator has two stages of operation. In stage 1, the SPG will take in a string input in the form of an H1 specification describing a parser. The generated parser will then be used in stage 2, which is the runtime operation stage.
+
+### Stage 1 - Parser Generation
+To initiate the parser generation stage, the ParserGenerator class's 'generateParser' method needs to be called with an H1 specification as the input. The return value of the ParserGenerator.generateParser method will be a parser that can be used in stage 2.
+
+### Stage 2 - Runtime Operation
+The parser generated in stage 1 has a 'parse' function which takes in an input string, which is the string for which parsing is required. The return value from the parse function will be a series of parsing output objects which will hold information on where different syntactical components are located in the input string.
+
+## How to specify a parser
+
 
 ## Mini-parsers
 

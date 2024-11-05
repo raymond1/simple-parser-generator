@@ -2,26 +2,26 @@
 This file contains information about the internal organization of this piece of software.
 
 To develop, do the following:
-1. Install php, with the command line executable.
+1. Install php so that it is accessible from the command line.
 2. Install composer.
-3. composer install
+3. Run `composer install`.
 
 This will install the document-compiling-cms composer package from github (https://github.com/raymond1/document-compiling-cms).
 
-This tool is able to cobble pieces of files together.
+4. The document compiling cms is able to cobble pieces of files together.
 
-To use this tool, do the following:
+To use this tool, run the following command:
 
-php vendor/raymond1/document-compiling-cms/generate_website.php src/script.txt
+`php vendor/raymond1/document-compiling-cms/generate_website.php src/script.txt`
 
 This will trigger the "compilation" process.
 
-4)Set script permissions
+5. Set script permissions
 Permissions:
 In root, chmod u+x dev_script.sh.
 In src/server, chmod u+x restart.sh.
 
-5)Run:
+6. Run:
 ```
 npm run dev
 ```
@@ -49,5 +49,3 @@ composer update
 
 # How to generate the JSDoc documentation
 npx jsdoc -c jsdoc.json -d documentation/api
-
-# Style guide

@@ -22,6 +22,8 @@ class Node{
   }
 }
 
+Node.defaultAttributes = {depth: 0, offset: 0, parent: null}
+
 /**
  * This class represents a character class. It provides the 'parse' function, which is capable of 
  * determining whether the start of an input string belongs to a class of characters defined
@@ -66,7 +68,7 @@ class CharacterClassNode extends Node{
    * @param {String} inputString - The input string to parse.
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = {depth: 0, parent: null}){
+  parse(inputString, metadata = Node.defaultAttributes){
 
     let newMatchNode = new MatchNode()
     //matches if the inputString starts with characters from the character class
@@ -137,7 +139,7 @@ class StringLiteralNode extends Node{
    * @param {String} inputString - The input string
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = {depth: 0, parent: null}){
+  parse(inputString, metadata = Node.defaultAttributes){
     let newMatchNode = new MatchNode()
     //matches if inputString starts with the string passed in during object construction
     let matchLength = 0
@@ -189,7 +191,7 @@ class NotNode extends Node{
    * @returns {Number} - Returns 0 if child node's parse function returns a positive number. Otherwise, returns
    * the length of inputString.
    */
-  parse(inputString, metadata = {depth: 0, parent: null}){
+  parse(inputString, metadata = Node.defaultAttributes){
     var newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
@@ -244,7 +246,7 @@ class EntireNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = {depth: 0, parent: null}){
+  parse(inputString, metadata = Node.defaultAttributes){
     let newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
@@ -314,7 +316,7 @@ class SequenceNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {Number} The sum of the matched strings of its child nodes if matching was successful
    */
-  parse(inputString, metadata = {depth: 0, parent: null}){
+  parse(inputString, metadata = Node.defaultAttributes){
     var newMatchNode = new MatchNode()
     let tempString = inputString
     let totalMatchLength = 0
@@ -392,7 +394,7 @@ class OrNode extends Node{
    * @param {String} inputString - the input string.
    * @returns {MatchNode}
    */
-  parse(inputString,metadata = {depth: 0, parent: null}){
+  parse(inputString,metadata = Node.defaultAttributes){
     var newMatchNode = new MatchNode()
 
     let subMatches = []
@@ -464,7 +466,7 @@ class AndNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
-  parse(inputString,metadata = {depth: 0, parent: null}){
+  parse(inputString,metadata = Node.defaultAttributes){
     var newMatchNode = new MatchNode()
 
     let subMatches = []
@@ -547,7 +549,7 @@ class MultipleNode extends Node{
    * @param {String} inputString - The input string
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = {depth: 0, parent: null}){
+  parse(inputString, metadata = Node.defaultAttributes){
     var newMatchNode = new MatchNode()
     let tempString = inputString
     let totalMatchLength = 0
@@ -615,7 +617,7 @@ class OptionalNode extends Node{
    * @param {String} inputString - The input string.
    * @returns {MatchNode}
    */
-  parse(inputString, metadata = {depth: 0, parent: null}){
+  parse(inputString, metadata = Node.defaultAttributes){
     let newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
@@ -661,7 +663,7 @@ class SplitNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
-  parse(inputString, metadata={depth:0,parent:null}){
+  parse(inputString, metadata=Node.defaultAttributes){
     let newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
     let subMatches = []
@@ -707,7 +709,7 @@ class NameNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
-  parse(inputString, metadata={depth:0,parent:null}){
+  parse(inputString, metadata=Node.defaultAttributes){
     let newMatchNode = new MatchNode()
     let matchInfo = this.nodes[1].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
     let subMatches = []
@@ -751,7 +753,7 @@ class JumpNode extends Node{
    * @param {String} inputString - The input string. 
    * @returns {MatchNode}
    */
-  parse(inputString, metadata={depth:0,parent:null}){
+  parse(inputString, metadata=Node.defaultAttributes){
     let newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
     let subMatches = []

@@ -1,3 +1,4 @@
+//This is the language without the brackets
 class H1{
   //Given a string s beginning with a node at line 0, this function will return the last character in the node
   static H1GetNodeString(s){

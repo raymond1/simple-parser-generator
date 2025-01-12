@@ -10,12 +10,7 @@
 	"private": false,
 	"dependencies": {
 	},
-	"scripts": {
-		"dev": "./dev_script.sh"
-	},
 	"devDependencies": {
-		"jsdoc": "^4.0.0",
-		"dotenv": "^16.0.3",
-		"express": "^4.19.2"
+		"jsdoc": "^4.0.0"
 	}
 }

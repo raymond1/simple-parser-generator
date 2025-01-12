@@ -49,3 +49,7 @@ composer update
 
 # How to generate the JSDoc documentation
 npx jsdoc -c jsdoc.json -d documentation/api
+
+# Directory structure
+
+The documentation folder contains demos in it. If you type in make, you will put a copy of the latest compiled spg.js into demos.

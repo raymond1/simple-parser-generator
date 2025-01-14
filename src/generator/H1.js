@@ -1,9 +1,11 @@
-//This is the language without the brackets
+//see demos/calculator/index.js for an example
 class H1{
-  //Given a string s beginning with a node at line 0, this function will return the last character in the node
-  static H1GetNodeString(s){
+  //Takes in a string s containing line breaks and finds the depth of the first line.
+  //Afterwards, the location where the depth becomes less than or equal to the depth of the first line is
+  //considered the end of the node that started on the first line of the input string.
+  static GetNodeString(s){
     //1)Get depth of first line, which should contain the node name
-    let firstNodeDepth = H1.H1GetDepth(s)
+    let firstNodeDepth = H1.GetDepth(s)
 
     //2)Go line by line until a lower or equal depth has been reached. That should be the end of the current node
     let lines = s.split('\n')
@@ -11,7 +13,7 @@ class H1{
     let nodeString = lines[0] + '\n'
     for (let i = 1; i < lines.length; i++){
       let line = lines[i]
-      let lineDepth = H1.H1GetDepth(line)
+      let lineDepth = H1.GetDepth(line)
       if (lineDepth <= firstNodeDepth){
         break
       }
@@ -27,235 +29,194 @@ class H1{
   }
 
 
-    //s: a string in H1 format, starting with a node string
-    static H1GetNumberOfChildren(s){
-      let lines = s.split('\n')
-      let firstNodeDepth = H1.H1GetDepth(s)
-      let numberOfChildren = 0
-      for (let i = 1; i < lines.length; i++){
-        let line = lines[i]
-        let lineDepth = H1.H1GetDepth(line)
-        if (lineDepth <= firstNodeDepth){
-          break
-        }
-        if (lineDepth == firstNodeDepth + 1){
-          numberOfChildren++
-        }
+  //s: a string in H1 format, starting with a node string
+  //This function returns the number of child elements of the first node of the string s
+  static GetNumberOfChildren(s){
+    let lines = s.split('\n')
+    let firstNodeDepth = H1.GetDepth(s)
+    let numberOfChildren = 0
+    for (let i = 1; i < lines.length; i++){
+      let line = lines[i]
+      let lineDepth = H1.GetDepth(line)
+      if (lineDepth <= firstNodeDepth){
+        break
       }
-      return numberOfChildren
+      if (lineDepth == firstNodeDepth + 1){
+        numberOfChildren++
+      }
     }
-  
-    //Takes in a tree in H1 format, possibly with leading spaces also, and returns the children of the node on the first line. The children
-    //are returned as strings
-    //Assumes input string is the complete node string for a single node
-    static H1GetChildNuggets(s){
-      let childNodes = []
-      let lines = s.split('\n')
-      let firstNodeDepth = H1.H1GetDepth(s)
-      let nodeName = H1.H1GetNodeName(s)
+    return numberOfChildren
+  }
+
+  //Given a string s, returns the number of distinct root nodes
+  static GetNumberOfRootNodes(s){
+    let rootNodes = 0
+    let lines = s.split('\n')
+    for (let line of lines){
+      if (line.length > 0 && line.substring(0,1) !== ' '){
+        rootNodes += 1
+      }
+    }
+    return rootNodes
+  }
+
+
+  //Takes in a tree fragment in H1 format, possibly a part of a tree with leading spaces, and returns the children of the node on the first line. The children
+  //are returned as strings
+  //Assumes input string is the complete node string for a single node
+  static GetChildNodeStrings(s){
+    let childNodes = []
+    let lines = s.split('\n')
+    let firstNodeDepth = H1.GetDepth(s)
+    let nodeName = H1.GetContent(s)
+    
+    let nodeTypeNames = ParserGenerator.getNodeTypeNames()
+    if (nodeTypeNames.indexOf(nodeName) == -1){
+      //error
+debugger
+      throw new Error('Unknown node type(GetChildNodeStrings): |' + nodeName + '|')
+    }
+
+
+    //For all other nodes, return an array of the child node strings
+    let numberOfChildren = 0
+    let previousNodeDepth = firstNodeDepth
+    for (let i = 1; i < lines.length; i++){
+      let currentDepth = H1.GetDepth(lines[i])
       
-      let nodeTypeNames = ParserGenerator.getNodeTypeNames()
-      if (nodeTypeNames.indexOf(nodeName) == -1){
-        //error
-        throw new Error('Unknown node type(H1GetChildNuggets): |' + nodeName + '|')
-      }
-  
-      if (['string literal','character class', 'jump'].indexOf(nodeName) > -1){
-        //Take the next line
-        childNodes.push(lines[1].substring(firstNodeDepth+1))
-      }
-      else if (nodeName == 'name'){
-        childNodes.push(lines[1].substring(firstNodeDepth+1))
-        childNodes.push(lines[2].substring(firstNodeDepth+1))
-      }
-      else{
-        //For all other nodes, return an array of the child node strings
-        let numberOfChildren = 0
-        for (let i = 1; i < lines.length; i++){
-          let line = lines[i] + '\n'
-          let lineDepth = H1.H1GetDepth(line)
-          if (lineDepth <= firstNodeDepth){
-            break
-          }
-  
-          if (lineDepth == firstNodeDepth + 1){
-            numberOfChildren++
-            childNodes.push('')
-          }
-    
-          if (lineDepth >= firstNodeDepth + 1){
-            childNodes[numberOfChildren-1] += line
-          }
-        }
-  
-        for (let i = 0; i < childNodes.length; i++){
-          childNodes[i] = childNodes[i].substring(0,childNodes[i].length - 1) //Chop off last carriage return for each child
-        }
-      }
-  
-      return childNodes
-    }
-  
-    //Given a string s in H1 format, returns the number of spaces before the first line in s. The number of
-    //spaces is called the depth.
-    static H1GetDepth(s){
-      let numberOfSpaces = 0
-      for (let i = 0; i < s.length; i++){
-        if (s.substring(i,i+1) == ' '){
-          numberOfSpaces += 1
+      //Check if lines are well-formed
+      if (currentDepth == previousNodeDepth + 1 || currentDepth <= previousNodeDepth && currentDepth > firstNodeDepth){
+        if (currentDepth == firstNodeDepth + 1){
+          numberOfChildren++
+          childNodes.push(lines[i].slice())
         }else{
-          break
+          childNodes[numberOfChildren-1] += '\n' + lines[i].slice()
         }
-      }
-      return numberOfSpaces
-    }
-  
-    //Returns the index of the first line with a particular depth in depthArray such that
-    //the line number is greater than or equal to startingLine
-    static H1GetFirstLineWithDepth(depthArray, firstNodeDepth, startingLine = 1){
-      for (let i = 0; i < depthArray.length; i++){
-        if (depthArray[i] == firstNodeDepth){
-          if (i >= startingLine){
-            return firstNodeDepth
-          }
-        }
-      }
-  
-      return -1
-    }
-  
-    //Takes in a node string s and returns the first line without the carriage return and leading spaces
-    static H1GetNodeName(s){
-      let depth = H1.H1GetDepth(s)
-      let nodeName = s.substring(depth,s.indexOf('\n'))
-      return nodeName
-    }
-  
-    //This function works for only one root node. It fails if there are two or more root nodes.
-    //A string in H1 form starts with a node name on a single line
-    //followed by a property or
-    //one or more nodes.
-    //Or one property followed by one or more nodes
-    //Given a string in H1 form:
-    //rule list
-    // rule
-    //  NUMBER
-    //  multiple
-    //   multiple
-    //    sequence
-    //     reference rule name 2----To do
-    //     multiple
-    //      character class
-    //       (space)(space)0123456789
-    // rule2
-    //  rule name 2
-    //  multiple
-    //   string literal
-    //    (space)fsfasfasdfsdfs
-    //this function will convert it into M1 format
-    static convertToM1(s){
-      //Valid H1 format means the first line is the name of a node type
-      let nodeString = H1.H1GetNodeString(s)
-      if (nodeString == ''){
-        throw new Error('String passed in for H1 to M1 conversion is not in H1 format.')
-      }
-      let childNuggets = H1.H1GetChildNuggets(nodeString)
-  
-      //Get the node name
-      let nodeName = H1.H1GetNodeName(s)
-      let childrenString = ''
-  
-      if (nodeName == 'character class' || nodeName == 'string literal'|| nodeName == 'jump'){
-        let depth = H1.H1GetDepth(s)
-        let lines = s.split('\n')
-        childrenString += lines[1].substring(depth + 1)
-      }else if (nodeName == 'name'){
-//   name
-//    asfdsf
-//    adfsadfdsf
-//     asdfasdfasdf
-        let lines = s.split('\n')
-        let secondLineBreak = s.indexOf('\n', lines[0].length + 1 + 1)
-        childrenString += childNuggets[0]+ ',' + H1.convertToM1(s.substring(secondLineBreak + 1))
+        //Well formed
+      } else if (currentDepth > previousNodeDepth + 1){
+        throw new Error(`Error: parser definition is invalid due to non-consecutive node depths detected ${i} line(s) from the first.`)
       }
       else{
-        for (let i = 0; i < childNuggets.length; i++){
-          if (i > 0){
-            childrenString += ','
-          }
-          childrenString += H1.convertToM1(childNuggets[i])
+        break
+      }
+
+      previousNodeDepth = currentDepth
+    }
+
+    return childNodes
+  }
+
+  //Given a string s in H1 format, returns the number of spaces before the first line in s. The number of
+  //spaces is called the depth.
+  static GetDepth(s){
+    let numberOfSpaces = 0
+    for (let i = 0; i < s.length; i++){
+      if (s.substring(i,i+1) == ' '){
+        numberOfSpaces += 1
+      }else{
+        break
+      }
+    }
+    return numberOfSpaces
+  }
+
+  //Returns the index of the first line with a particular depth in depthArray such that
+  //the line number is greater than or equal to startingLine
+  static GetFirstLineWithDepth(depthArray, firstNodeDepth, startingLine = 1){
+    for (let i = 0; i < depthArray.length; i++){
+      if (depthArray[i] == firstNodeDepth){
+        if (i >= startingLine){
+          return firstNodeDepth
         }
       }
-  
-      let outputString = `[${nodeName},${childrenString}]`
-  
-      return outputString
     }
+
+    return -1
+  }
+
+  //Takes in a node string s and returns the first line without the carriage return and leading spaces
+  static GetContent(s){
+    let depth = H1.GetDepth(s)
+    let nodeName = Strings.ReadOneLine(s).substring(depth)
+    return nodeName
+  }
+
+  //Returns n spaces
+  static EncodeDepth(n){
+    return ' '.repeat(n)
+  }
   
-    //Returns n spaces
-    static H1EncodeDepth(n){
-      return ' '.repeat(n)
-    }
+
+  //Assumes input string is well-formed
+  //Given a string in H1 format, returns an object that is treelike
+  //in form
+  //Should returns undefined for a string like the empty string with no nodes
+
+  //Assumes that there is only one root for now
+  static Import(s, generator){
+    let childNodes = H1.GetChildNodeStrings(s)
+    let nodeType = H1.GetContent(s)
+
+    let node
     
-    //Given a string in H1 format, loads the appropriate nodes into memory
-    static import(s, generator){
-      let M1Code = H1.convertToM1(s)
-      return M1.import(M1Code, generator)
+    switch(nodeType){
+      case 'name':
+        if (!childNodes[0]||!childNodes[1]){
+          throw new Error('name node should have two children.')
+        }
+        //name                 line i
+        // <identifier>        line i+1
+        // <name of target>    line i+2
+        node = generator.createNode(
+          {
+            type:nodeType, 
+            nodes: [
+              H1.GetContent(childNodes[0]),
+              H1.Import(childNodes[1],generator)
+            ]
+          }
+        )
+        break
+      case 'jump':
+        //Jump nodes are incomplete at this stage because they do not have a reference yet to the name nodes and must be reprocessed
+        //by the import function in a post-processing operation
+      case 'string literal':
+      case 'character class':
+        let childContent = H1.GetContent(childNodes[0])
+        node = generator.createNode({type:nodeType, nodes: [childContent]})
+        break
+      default:
+        //need to get all child nodes of the current node...
+        //stuff like and, or, sequence have one or more children that have children
+        let childNodesAsObjects = []
+        for (let childNode of childNodes){
+          childNodesAsObjects.push(H1.Import(childNode,generator))
+        }
+        node = generator.createNode({type:nodeType, nodes: childNodesAsObjects})
+        break
     }
-  
-  
-    //Returns without a trailing carriage return
-    //rule list
-    // rule
-    //  multiple
-    //Given the root node of a parsing tree, this transforms it into H1 format
-    static H1Export(node, depth = 0){
-      let outputString = H1.H1EncodeDepth(depth) + node.type + '\n'
-  
-      let childrenString = ''
-      switch(node.type){
-        case 'multiple':
-        case 'not':
-        case 'optional':
-        case 'entire':
-          {
-            childrenString += H1.H1Export(node.nodes[0], depth + 1)
-          }
-          break
-        case 'or':
-        case 'and':
-        case 'sequence':
-        case 'rule list':
-          {
-            let listPropertyName = 'patterns'
-            if (node.type == 'rule list') listPropertyName = 'rules'
-  
-            for (let i = 0; i < node[listPropertyName].length; i++){
-              childrenString += H1.H1Export(node[listPropertyName][i], depth + 1)
-              if (i < node.rules.length - 1){
-                childrenString += '\n'
-              }
-            }      
-          }
-          break
-        case 'rule':
-          {
-            childrenString += H1.H1EncodeDepth(depth + 1) + node.name + '\n'
-            childrenString += H1.H1Export(node.nodes[0], depth + 1)
-          }
-          break
-        case 'character class':
-        case 'string literal':
-        case 'rule name':
-          {
-            childrenString += H1.H1EncodeDepth(depth + 1) + node.nodes[0]
-          }
-          break
-        default:
-          break
+    return node
+  }
+
+
+  //Returns without a trailing carriage return
+  //rule list
+  // rule
+  //  multiple
+  //Given the root node of a parsing tree, this transforms it into H1 format
+  static Export(node, depth = 0){
+    let outputString = H1.EncodeDepth(depth) + node.type + '\n'
+
+    for (let childNode of node.nodes){
+      if (typeof childNode == "string"){
+        outputString += H1.EncodeDepth(depth + 1) + H1.GetContent(childNode) + '\n'
       }
-      outputString += childrenString
-      return outputString  
+      else{
+        outputString += H1.Export(childNode, depth + 1)
+      }
     }
-  
+
+    return outputString  
+  }
+
 }

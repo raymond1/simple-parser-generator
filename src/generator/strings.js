@@ -136,4 +136,14 @@ Strings.headMatchUntilDelimiter = function(string, delimiter){
   return ''
 }
 
+//Takes a string with one or more lines and returns
+//the first line. If the input string has no line breaks, the entire string is returned
+Strings.ReadOneLine = function(s){
+  let firstNewLineLocation = s.indexOf('\n')
+  if (firstNewLineLocation < 0){
+    return s
+  }else{
+    return s.substring(0,firstNewLineLocation)
+  }
 
+}

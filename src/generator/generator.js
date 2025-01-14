@@ -70,27 +70,12 @@ class ParserGenerator{
    * The definition for a parser in H1 or M1 format. The format must match the value passed into the format parameter. See the documentation in M1.md or H1.md for more information on the M1 and H1 file formats.
    * @param {String} parserDescription
    * 
-   * format can be either 'H1' or 'M1'
-   * @param {String} format
    *
    * Returns a parser, as described by the string parserDescription.
    * @returns {Object}
    */
-  generateParser(parserDescription, format='H1'){
-    let parser
-    switch (format){
-      case 'H1':
-        //Given a parser description in H1 format, loads the parser into memory
-        parser = ParserGenerator.H1.import(parserDescription, this)
-        break
-      case 'M1':
-        parser = ParserGenerator.M1.import(parserDescription, this)
-        break
-      default:
-        break
-    }
-
-    return parser
+  generateParser(parserDescription){
+    return ParserGenerator.H1.Import(parserDescription, this)
   }
 
   /***
@@ -157,7 +142,6 @@ ParserGenerator.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJK
 ParserGenerator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
 
 ParserGenerator.H1 = H1
-ParserGenerator.M1 = M1
 
 export {ParserGenerator}
 export default ParserGenerator

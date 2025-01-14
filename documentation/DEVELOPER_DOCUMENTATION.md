@@ -16,19 +16,7 @@ To use this tool, run the following command:
 
 This will trigger the "compilation" process.
 
-5. Set script permissions
-Permissions:
-In root, chmod u+x dev_script.sh.
-In src/server, chmod u+x restart.sh.
-
-6. Run:
-```
-npm run dev
-```
-from the root folder.
-
-# Building the demo programs
-From the root folder, type in Make to trigger the Makefile action.
+5. Alternatively, you can type in Make.
 
 # How to update the generate_website.php script
 After making changes to the script, go into the document-compiling-cms folder, add and commit your changes and then use the command:
@@ -53,3 +41,7 @@ npx jsdoc -c jsdoc.json -d documentation/api
 # Directory structure
 
 The documentation folder contains demos in it. If you type in make, you will put a copy of the latest compiled spg.js into demos.
+
+# Coding style
+
+External functions start with a capital.

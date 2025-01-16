@@ -16,9 +16,12 @@ class Node{
     this.nodes = metadata.nodes
   }
 
-  //Implemented and overriden by child nodes. Given a node, coverts it into a string form
-  export(depth = 0){
-    throw new Exception('Error while exporting grammar: ' + node['type'] + ' export not implemented.')
+  //Debug function
+  d(){
+    console.log(this.type)
+    if (this.type == 'name'){
+      console.log(this.nodes[0])
+    }
   }
 }
 
@@ -73,10 +76,6 @@ class CharacterClassNode extends Node{
    * */
   static type = 'character class'
 
-  export(){
-    return `[${this.constructor.type},${ParserGenerator.escape(this.string)}]`
-  }
-
   /**
    * This method takes in a string value in the inputString parameter
    * and returns n, where n is equal to the number of consecutive characters of inputString,
@@ -87,6 +86,8 @@ class CharacterClassNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()
@@ -147,10 +148,6 @@ class StringLiteralNode extends Node{
    */
   static type = 'string literal'
 
-  export(){
-    return `[${this.constructor.type},${ParserGenerator.escape(this.nodes[0])}]`
-  }
-
   /**
    * During parsing, the inputString is compared against the internal string. If the first
    * few letters of inputString are equal to the internal string, the parse method returns
@@ -160,6 +157,8 @@ class StringLiteralNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()
@@ -204,9 +203,6 @@ class NotNode extends Node{
    */
   static type = 'not'
 
-  export(){
-    return `[${this.constructor.type},${this.pattern.export()}]`
-  }
 
   /**
    * This function returns 0 if its child node returns a positive number when fed with the input string.
@@ -216,12 +212,14 @@ class NotNode extends Node{
    * the length of inputString.
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     var newMatchNode = new MatchNode()
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
 
-    let matchLength = (matchInfo.matchString !== '')?0:inputString.matchLength
+    let matchLength = matchInfo.matchFound?0:inputString.length
     Object.assign(
       newMatchNode, {
         globalOffset: metadata.globalOffset,
@@ -262,9 +260,6 @@ class EntireNode extends Node{
    */
   static type = 'entire'
 
-  export(){
-    return `[${this.constructor.type},${this.nodes[0].export()}]`
-  }
 
   /**
    * This function passes the input string to its child node's parse function. The return value from
@@ -274,6 +269,8 @@ class EntireNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()
@@ -323,18 +320,6 @@ class SequenceNode extends Node{
    */
   static type = 'sequence'
 
-  export(){
-    let patternsString = ''
-    this.nodes.forEach((pattern, index)=>{
-      if (index > 0){
-        patternString += ","
-      }
-      patternsString += `[${pattern.export()}]`
-    })
-    let s = `[${patternsString}]`
-    return s
-  }
-
   /**
    * The sequence node has an array of one or more child nodes. It matches the first child node from
    * the nodes property (i.e. nodes[0]), against the input string. If it is
@@ -347,6 +332,8 @@ class SequenceNode extends Node{
    * @returns {Number} The sum of the matched strings of its child nodes if matching was successful
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()
@@ -409,16 +396,6 @@ class OrNode extends Node{
    * @property {String} type - The string constant 'or'.
    */
   static type = 'or'
-  
-  export(){
-    let patternsString = ''
-    this.nodes.forEach((pattern, index)=>{
-      if (index > 0) patternsString += ","
-      patternsString += pattern.export()
-    })
-    let s = `[${this.constructor.type},${patternsString}]`
-    return s
-  }
 
   /**
    * Takes in a string and returns a MatchNode object with two properties: matchFound and matchString.
@@ -431,6 +408,8 @@ class OrNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     var newMatchNode = new MatchNode()
@@ -486,16 +465,6 @@ class AndNode extends Node{
    */
   static type = 'and'
 
-  export(){
-    let patternsString = ''
-    this.nodes.forEach((pattern, index)=>{
-      if (index > 0) patternsString += ","
-      patternsString += pattern.export()
-    })
-    let s = `[${this.constructor.type},${patternsString}]`
-    return s
-  }
-
   /**
    * Takes in a string and returns a MatchNode object with the following properties:
    * matchFound: true if every child node matches with inputString, false otherwise
@@ -506,6 +475,8 @@ class AndNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     var newMatchNode = new MatchNode()
@@ -526,13 +497,13 @@ class AndNode extends Node{
       }else{
         //If there is only one subsequence, use that as the matchLength
         if (firstIteration){
-          smallestMatchLength = matchInfo.matchString.matchLength
+          smallestMatchLength = matchInfo.matchString.length
           firstIteration = false
         }
         else{
           //If there is more than one subsequence, use the smallest matchLength
-          if (matchInfo.matchString.matchLength < smallestMatchLength){
-            smallestMatchLength = matchInfo.matchString.matchLength
+          if (matchInfo.matchString.length < smallestMatchLength){
+            smallestMatchLength = matchInfo.matchString.length
           }
         }
       }
@@ -579,10 +550,6 @@ class MultipleNode extends Node{
    */
   static type = 'multiple'
 
-  export(){
-    return `[multiple,${this.nodes[0].export()}]`
-  }
-
   /**
    * Takes in an input string and returns a MatchNode object with the following properties:
    * matchFound: true if the child node of the multiple node matches at least once
@@ -592,6 +559,8 @@ class MultipleNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     var newMatchNode = new MatchNode()
@@ -607,9 +576,9 @@ class MultipleNode extends Node{
     }
 
     while(matchInfo.matchFound){
-      totalMatchLength = totalMatchLength + matchInfo.matchString.matchLength
-      localOffset = localOffset + matchInfo.matchString.matchLength
-      tempString = tempString.substring(matchInfo.matchString.matchLength)
+      totalMatchLength = totalMatchLength + matchInfo.matchString.length
+      localOffset = localOffset + matchInfo.matchString.length
+      tempString = tempString.substring(matchInfo.matchString.length)
       matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset + localOffset, parent: this})
       subMatches.push(matchInfo)
     }
@@ -652,9 +621,6 @@ class OptionalNode extends Node{
    */
   static type = 'optional'
 
-  export(){
-    return `[${this.constructor.type},${this.nodes[0].export()}]`
-  }
 
   /**
    * Takes in a string and returns a MatchNode object with the following properties:
@@ -665,6 +631,8 @@ class OptionalNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()
@@ -714,6 +682,8 @@ class SplitNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata=Node.defaultAttributes){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()
@@ -763,6 +733,8 @@ class NameNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata){
+    super.d()
+
     metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()
@@ -810,6 +782,7 @@ class JumpNode extends Node{
    * @returns {MatchNode}
    */
   parse(inputString, metadata=Node.defaultAttributes){
+    super.d()
     metadata = Node.setDefaultMetadataValues(metadata)
 
     let newMatchNode = new MatchNode()

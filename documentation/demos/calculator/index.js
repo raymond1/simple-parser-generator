@@ -59,13 +59,14 @@ parserDefinition =
   integer
  name
   integer
-  or
-   jump
-    positive number
-   string literal
-    0
-   jump
-    negative number
+  entire
+   or
+    jump
+     positive number
+    string literal
+     0
+    jump
+     negative number
  name
   positive number
   jump
@@ -92,9 +93,100 @@ parserDefinition =
 let parser = generator.generateParser(parserDefinition)
 //let x = ParserGenerator.H1.Export(parser)
 
-let testProgram = '100FIXED_STRING_2FIXED_STRING_1'
+let testProgram = '100'
 
 let output = parser.parse(testProgram)
 
 let treeViewer = new TreeViewer()
 treeViewer.display('text', output)
+
+/*
+
+	function evaluateExpression(){
+		debugger
+		function evaluate(expressionTreeNode){
+			let expressionValue
+			switch(expressionTreeNode.name){
+				case 'EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					return expressionValue
+					break
+				case 'ADDITIVE_EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					for (let i = 1; i < expressionTreeNode.matches.length; i++){
+						let additive_operant_term = expressionTreeNode.matches[i]
+						let operator = additive_operant_term.matches[0].matchString
+	
+						if (operator == '+'){
+							expressionValue += evaluate(additive_operant_term.matches[1])
+						}else if (operator == '-'){
+							expressionValue -= evaluate(additive_operant_term.matches[1])
+						}
+					}
+					return expressionValue
+					break
+				case 'TERM':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+						return expressionValue
+						break
+				case 'MULTIPLICATIVE_EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					for (let i = 1; i < expressionTreeNode.matches.length; i++){
+						let multiplicative_operant_factor = expressionTreeNode.matches[i]
+						let operator = multiplicative_operant_factor.matches[0].matchString
+	
+						if (operator == '*'){
+							expressionValue *= evaluate(multiplicative_operant_factor.matches[1])
+						}else if (operator == '/'){
+							expressionValue /= evaluate(multiplicative_operant_factor.matches[1])
+						}
+					}
+					return expressionValue
+					break
+				case 'EXPONENTIAL_EXPRESSION':
+					expressionValue = Math.pow(evaluate(expressionTreeNode.matches[0]), evaluate(expressionTreeNode.matches[1]))
+					return expressionValue
+				  break
+				case 'PARENTHETICAL_EXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[1])
+					return expressionValue
+				  break
+				case 'SUBEXPRESSION':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+					return expressionValue
+				  break
+
+				case 'FACTOR':
+					expressionValue = evaluate(expressionTreeNode.matches[0])
+						return expressionValue
+						break
+				case 'INTEGER':
+					return parseInt(expressionTreeNode.matchString, 10)
+					break
+			}
+		}
+	
+		let grammar = document.querySelector('#input_grammar').value
+		let parser = new Parser()
+	
+		parser.setGrammar(grammar)
+	
+		let input = document.getElementById("expression").value
+	
+		let output = parser.parse(input)
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='WHITESPACE')})
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='POSITIVE_INTEGER'||treeNode['name']=='NEGATIVE_INTEGER')})	
+		output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule name')})
+		document.getElementById('result').innerHTML = evaluate(output.root)
+	
+		let tree = new DOMTreeNode(parser.runningGrammar, document.querySelector('#test'))
+	
+		let treeViewer2 = new TreeViewer(output, document.querySelector('#test2'))
+		treeViewer2.display()
+	
+		let treeViewer3 = new TreeViewer(parser.rawMatches, document.querySelector('#test3'))
+		treeViewer3.display()
+	}
+
+
+*/

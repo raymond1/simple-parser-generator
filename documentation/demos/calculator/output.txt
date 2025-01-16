@@ -1,0 +1,185 @@
+split
+jump
+name
+integer
+entire
+or
+jump
+name
+positive number
+jump
+name
+number
+and
+multiple
+character class
+character class
+not
+string literal
+*****BEGIN*split*0
+ *****BEGIN*jump*1
+  *****BEGIN*name*2
+   *****BEGIN*entire*3
+    *****BEGIN*or*4
+     *****BEGIN*jump*5
+      *****BEGIN*name*6
+       *****BEGIN*jump*7
+        *****BEGIN*name*8
+         *****BEGIN*and*9
+          *****BEGIN*multiple*10
+           *****BEGIN*character class*11
+           matchString:100
+           matchFound:true
+           globalOffset:0
+           parent:10
+           depth:11
+           inputString:100
+           type:character class
+           id:9
+           serial:0
+           *************END*************11
+           *****BEGIN*character class*11
+           matchString:(empty string)
+           matchFound:false
+           globalOffset:3
+           parent:10
+           depth:11
+           inputString:(empty string)
+           type:character class
+           id:9
+           serial:1
+           *************END*************11
+          matchString:100
+          matchFound:true
+          globalOffset:0
+          parent:13
+          depth:10
+          inputString:100
+          type:multiple
+          id:10
+          serial:2
+          *************END*************10
+          *****BEGIN*not*10
+           *****BEGIN*string literal*11
+           matchString:(empty string)
+           matchFound:false
+           globalOffset:0
+           parent:12
+           depth:11
+           inputString:100
+           type:string literal
+           id:11
+           serial:3
+           string:0
+           *************END*************11
+          matchString:(empty string)
+          matchFound:true
+          globalOffset:0
+          parent:13
+          depth:10
+          inputString:100
+          type:not
+          id:12
+          serial:4
+          *************END*************10
+         matchString:(empty string)
+         matchFound:true
+         globalOffset:0
+         parent:14
+         depth:9
+         inputString:100
+         type:and
+         id:13
+         serial:5
+         *************END*************9
+        matchString:(empty string)
+        matchFound:true
+        globalOffset:0
+        parent:7
+        depth:8
+        inputString:100
+        type:name
+        id:14
+        serial:6
+        *************END*************8
+       matchString:(empty string)
+       matchFound:true
+       globalOffset:0
+       parent:8
+       depth:7
+       inputString:100
+       type:jump
+       id:7
+       serial:7
+       *************END*************7
+      matchString:(empty string)
+      matchFound:true
+      globalOffset:0
+      parent:1
+      depth:6
+      inputString:100
+      type:name
+      id:8
+      serial:8
+      *************END*************6
+     matchString:(empty string)
+     matchFound:true
+     globalOffset:0
+     parent:4
+     depth:5
+     inputString:100
+     type:jump
+     id:1
+     serial:9
+     *************END*************5
+    matchString:(empty string)
+    matchFound:true
+    globalOffset:0
+    parent:5
+    depth:4
+    inputString:100
+    type:or
+    id:4
+    serial:10
+    *************END*************4
+   matchString:(empty string)
+   matchFound:false
+   globalOffset:0
+   parent:6
+   depth:3
+   inputString:100
+   type:entire
+   id:5
+   serial:11
+   *************END*************3
+  matchString:(empty string)
+  matchFound:false
+  globalOffset:0
+  parent:0
+  depth:2
+  inputString:100
+  type:name
+  id:6
+  serial:12
+  *************END*************2
+ matchString:(empty string)
+ matchFound:false
+ globalOffset:0
+ parent:19
+ depth:1
+ inputString:100
+ type:jump
+ id:0
+ serial:13
+ *************END*************1
+matchString:(empty string)
+matchFound:false
+globalOffset:0
+parent:(null)
+depth:0
+inputString:100
+type:split
+id:19
+serial:14
+*************END*************0
+

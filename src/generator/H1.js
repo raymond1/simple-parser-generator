@@ -72,8 +72,6 @@ class H1{
     
     let nodeTypeNames = ParserGenerator.getNodeTypeNames()
     if (nodeTypeNames.indexOf(nodeName) == -1){
-      //error
-debugger
       throw new Error('Unknown node type(GetChildNodeStrings): |' + nodeName + '|')
     }
 
@@ -146,14 +144,19 @@ debugger
     return ' '.repeat(n)
   }
   
-
+  static Import(s, generator){
+    let rootNode = H1.ImportInternal(s,generator)
+    ParserGenerator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
+    return rootNode
+  }
+  
   //Assumes input string is well-formed
   //Given a string in H1 format, returns an object that is treelike
   //in form
   //Should returns undefined for a string like the empty string with no nodes
 
   //Assumes that there is only one root for now
-  static Import(s, generator){
+  static ImportInternal(s, generator){
     let childNodes = H1.GetChildNodeStrings(s)
     let nodeType = H1.GetContent(s)
 
@@ -169,17 +172,17 @@ debugger
         // <name of target>    line i+2
         node = generator.createNode(
           {
-            type:nodeType, 
+            type:'name', 
             nodes: [
               H1.GetContent(childNodes[0]),
-              H1.Import(childNodes[1],generator)
+              H1.ImportInternal(childNodes[1],generator)
             ]
           }
         )
         break
       case 'jump':
         //Jump nodes are incomplete at this stage because they do not have a reference yet to the name nodes and must be reprocessed
-        //by the import function in a post-processing operation
+        //by the ImportInternal function in a post-processing operation
       case 'string literal':
       case 'character class':
         let childContent = H1.GetContent(childNodes[0])
@@ -190,11 +193,12 @@ debugger
         //stuff like and, or, sequence have one or more children that have children
         let childNodesAsObjects = []
         for (let childNode of childNodes){
-          childNodesAsObjects.push(H1.Import(childNode,generator))
+          childNodesAsObjects.push(H1.ImportInternal(childNode,generator))
         }
         node = generator.createNode({type:nodeType, nodes: childNodesAsObjects})
         break
     }
+
     return node
   }
 

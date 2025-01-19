@@ -2,93 +2,125 @@ import {ParserGenerator, TreeViewer} from '../spg.js'
 
 let generator = new ParserGenerator ()
 
-let parserDefinition = 
-`split
- jump
-  expression
- name
-  expression
+let parserDefinition
+// parserDefinition = 
+// `split
+//  jump
+//   expression
+//  name
+//   expression
+//   or
+//    jump
+//     parentheses expression
+//    jump
+//     numerical expression
+//  name
+//   parentheses expression
+//   or
+//    sequence
+//     string literal
+//      (
+//     jump
+//      expression
+//     string literal
+//      )
+//  name
+//   addition expression
+//   sequence
+//    jump
+//     integer
+//    string literal
+//     +
+//    jump
+//     integer
+//  name
+//   integer
+//   multiple
+//    character class
+//     0123456789
+
+//   1+2
+//  name
+//   numerical expression
+//    optional
+//     jump whitespace
+//    multiple
+//     character class
+//      0123456789
+//   jump
+//    whitespace
+//  name
+//   whitespace
+//    or
+//     `
+
+// parserDefinition =
+// `split
+//  jump
+//   integer
+//  name
+//   integer
+//   entire
+//    or
+//     jump
+//      positive number
+//     string literal
+//      0
+//     jump
+//      negative number
+//  name
+//   positive number
+//   jump
+//    number
+//  name
+//   number
+//   and
+//    multiple
+//     character class
+//      0123456789
+//    not
+//     string literal
+//      0
+//  name
+//   negative number
+//   sequence
+//    string literal
+//     -
+//    jump
+//     positive number
+// `
+
+
+parserDefinition =
+`
+
+integer
+ entire
   or
-   jump
-    parentheses expression
-   jump
-    numerical expression
- name
-  parentheses expression
-  or
-   sequence
-    string literal
-     (
-    jump
-     expression
-    string literal
-     )
- name
-  addition expression
-  sequence
-   jump
-    integer
+   positive number
    string literal
-    +
-   jump
-    integer
- name
-  integer
+    0
+   negative number
+
+//comment
+positive number
+ number
+
+number
+ and
   multiple
    character class
     0123456789
-
-  1+2
- name
-  numerical expression
-   optional
-    jump whitespace
-   multiple
-    character class
-     0123456789
-  jump
-   whitespace
- name
-  whitespace
-   or
-    `
-
-parserDefinition =
-`split
- jump
-  integer
- name
-  integer
-  entire
-   or
-    jump
-     positive number
-    string literal
-     0
-    jump
-     negative number
- name
-  positive number
-  jump
-   number
- name
-  number
-  and
-   multiple
-    character class
-     0123456789
-   not
-    string literal
-     0
- name
-  negative number
-  sequence
+  not
    string literal
-    -
-   jump
-    positive number
-`
+    0
 
+negative number
+ sequence
+  string literal
+   -
+  positive number
+`
 
 let parser = generator.generateParser(parserDefinition)
 //let x = ParserGenerator.H1.Export(parser)

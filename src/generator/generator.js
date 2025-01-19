@@ -138,9 +138,6 @@ class ParserGenerator{
 }
 
 ParserGenerator.registerNodeTypes()
-ParserGenerator.validRuleNameCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_'
-ParserGenerator.keywords = ['OR','AND', 'SEQUENCE', 'NOT', 'OPTIONAL', 'MULTIPLE', 'CHARACTER_CLASS', 'ENTIRE']
-
 ParserGenerator.H1 = H1
 
 export {ParserGenerator}

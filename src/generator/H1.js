@@ -3,7 +3,7 @@ class H1{
   //Takes in a string s containing line breaks and finds the depth of the first line.
   //Afterwards, the location where the depth becomes less than or equal to the depth of the first line is
   //considered the end of the node that started on the first line of the input string.
-  static GetNodeString(s){
+  static GetEntireNodeString(s){
     //1)Get depth of first line, which should contain the node name
     let firstNodeDepth = H1.GetDepth(s)
 
@@ -68,13 +68,6 @@ class H1{
     let childNodes = []
     let lines = s.split('\n')
     let firstNodeDepth = H1.GetDepth(s)
-    let nodeName = H1.GetContent(s)
-    
-    let nodeTypeNames = ParserGenerator.getNodeTypeNames()
-    if (nodeTypeNames.indexOf(nodeName) == -1){
-      throw new Error('Unknown node type(GetChildNodeStrings): |' + nodeName + '|')
-    }
-
 
     //For all other nodes, return an array of the child node strings
     let numberOfChildren = 0
@@ -107,6 +100,9 @@ class H1{
   //Given a string s in H1 format, returns the number of spaces before the first line in s. The number of
   //spaces is called the depth.
   static GetDepth(s){
+if (!s){
+  debugger
+}
     let numberOfSpaces = 0
     for (let i = 0; i < s.length; i++){
       if (s.substring(i,i+1) == ' '){
@@ -132,7 +128,65 @@ class H1{
     return -1
   }
 
-  //Takes in a node string s and returns the first line without the carriage return and leading spaces
+  //Gets rid of completely empty lines(not even spaces)
+  //Gets rid of comment lines starting with //
+  static Preprocess(s){
+    let outputStringArray = []
+    let lines = s.split('\n')
+    for (let line of lines){
+      if (line == ''){
+        continue
+      }
+
+      if (line.substring(0,2) == '//'){
+        continue
+      }
+
+      outputStringArray.push(line)
+    }
+
+    return outputStringArray.join('\n')
+  }
+
+  //Obtains the content of the nodes with depth 0
+  static GetRootLevelNodesContent(s){
+    let lines = s.split('\n')
+    let returnLines = []
+    for (let i = 0; i < lines.length; i++){
+      let line = lines[i]
+      if (H1.GetDepth(line) == 0){
+        returnLines.push(line)
+      }
+    }
+    return returnLines
+  }
+
+  //Returns all nodes of depth 0
+  //Assumes s is well-formed
+  static GetEntireRootNodeStrings(s){
+    let lines = s.split('\n')
+    let returnLineNumbers = []
+    let returnLines = []
+    for (let i = 0; i < lines.length; i++){
+      let line = lines[i]
+      if (H1.GetDepth(line) == 0){
+        returnLineNumbers.push(i)
+      }
+    }
+    returnLineNumbers.push(lines.length)
+
+    for (let i = 0; i < returnLineNumbers.length-1; i++){
+      let accumulatorString = []
+      for (let j = returnLineNumbers[i]; j < returnLineNumbers[i+1]; j++){
+        accumulatorString.push(lines[j])
+      }
+      let tempString = accumulatorString.join('\n')
+      returnLines.push(tempString)
+    }
+    return returnLines
+  }
+
+  //Takes in a node string s and returns the first line, which is returned without the carriage return and leading spaces
   static GetContent(s){
     let depth = H1.GetDepth(s)
     let nodeName = Strings.ReadOneLine(s).substring(depth)
@@ -143,11 +197,61 @@ class H1{
   static EncodeDepth(n){
     return ' '.repeat(n)
   }
-  
+/*`
+
+integer
+ entire
+  or
+   positive number
+   string literal
+    0
+   negative number
+
+//comment
+positive number
+ number
+
+number
+ and
+  multiple
+   character class
+    0123456789
+  not
+   string literal
+    0
+
+negative number
+ sequence
+  string literal
+   -
+  positive number
+`*/
   static Import(s, generator){
-    let rootNode = H1.ImportInternal(s,generator)
+    //Get rid of empty lines and comments
+    let s2 = H1.Preprocess(s)
+
+    //Find all lines of depth 0
+    let rootNodeStrings = H1.GetEntireRootNodeStrings(s2)
+
+    //Extract the node names at depth 0. Store the key inside the generator object
+    for (let i = 0; i < rootNodeStrings.length; i++){
+      generator.nameNodes[H1.GetContent(rootNodeStrings[i])] = null
+    }
+
+    let rootNodes = []
+    //All root level strings become name nodes
+    for (let rootNodeString of rootNodeStrings){
+      let customNodeName = H1.GetContent(rootNodeString)
+      let childNode = H1.ImportInternal(H1.GetChildNodeStrings(rootNodeString)[0],generator)
+
+      let nameNode = generator.createNode({type:'name', nodes:[customNodeName, childNode]})
+
+      rootNodes.push(nameNode)
+    }
+
+    let ultimateRoot = generator.createNode({type:'split', nodes: rootNodes})
     ParserGenerator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
-    return rootNode
+    return ultimateRoot
   }
   
   //Assumes input string is well-formed
@@ -161,7 +265,7 @@ class H1{
     let nodeType = H1.GetContent(s)
 
     let node
-    
+    let childContent
     switch(nodeType){
       case 'name':
         if (!childNodes[0]||!childNodes[1]){
@@ -185,10 +289,17 @@ class H1{
         //by the ImportInternal function in a post-processing operation
       case 'string literal':
       case 'character class':
-        let childContent = H1.GetContent(childNodes[0])
+        childContent = H1.GetContent(childNodes[0])
         node = generator.createNode({type:nodeType, nodes: [childContent]})
         break
-      default:
+      case 'sequence':
+      case 'or':
+      case 'and':
+      case 'multiple':
+      case 'not':
+      case 'optional':
+      case 'entire':
+      case 'split':
         //need to get all child nodes of the current node...
         //stuff like and, or, sequence have one or more children that have children
         let childNodesAsObjects = []
@@ -196,6 +307,11 @@ class H1{
           childNodesAsObjects.push(H1.ImportInternal(childNode,generator))
         }
         node = generator.createNode({type:nodeType, nodes: childNodesAsObjects})
+        break
+      default:
+        //Treat as a jump 
+        //Here, nodeType should be a custom nodeType
+        node = generator.createNode({type:'jump', nodes: [nodeType]})
         break
     }
 

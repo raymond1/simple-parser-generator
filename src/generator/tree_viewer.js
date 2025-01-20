@@ -37,7 +37,12 @@ class TreeViewer{
       return '(undefined)\n'
     }
 
-    let outputString = ' '.repeat(matchNode.depth) + '*****BEGIN*' + matchNode.type+'*'+matchNode.depth+'\n'
+    //Name nodes get special treatment
+    let nameString = ''
+    if (matchNode.type == 'name'){
+      nameString = ':' + matchNode.name
+    }
+    let outputString = ' '.repeat(matchNode.depth) + '*****BEGIN*' + matchNode.type+ nameString + '*'+matchNode.depth+'\n'
 
     for (let key in matchNode){
       let keyValue = matchNode[key]

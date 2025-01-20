@@ -2,8 +2,8 @@
 transcribe
  src/generator/nodes.js
  src/generator/H1.js
+ src/generator/tree.js
  src/generator/generator.js 
- src/generator/tree.js 
  src/generator/strings.js 
  src/generator/tree_viewer.js 
 

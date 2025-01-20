@@ -100,9 +100,6 @@ class H1{
   //Given a string s in H1 format, returns the number of spaces before the first line in s. The number of
   //spaces is called the depth.
   static GetDepth(s){
-if (!s){
-  debugger
-}
     let numberOfSpaces = 0
     for (let i = 0; i < s.length; i++){
       if (s.substring(i,i+1) == ' '){
@@ -235,7 +232,8 @@ negative number
 
     //Extract the node names at depth 0. Store the key inside the generator object
     for (let i = 0; i < rootNodeStrings.length; i++){
-      generator.nameNodes[H1.GetContent(rootNodeStrings[i])] = null
+      let rootNodeName = H1.GetContent(rootNodeStrings[i])
+      generator.nameNodes[rootNodeName] = null
     }
 
     let rootNodes = []
@@ -266,6 +264,10 @@ negative number
 
     let node
     let childContent
+    if (!nodeType){
+      throw new Error('Invalid node. A node appears to be empty.')
+    }
+
     switch(nodeType){
       case 'name':
         if (!childNodes[0]||!childNodes[1]){
@@ -309,9 +311,14 @@ negative number
         node = generator.createNode({type:nodeType, nodes: childNodesAsObjects})
         break
       default:
-        //Treat as a jump 
+        //Treat as an implicit jump 
         //Here, nodeType should be a custom nodeType
-        node = generator.createNode({type:'jump', nodes: [nodeType]})
+
+        if (nodeType in generator.nameNodes){
+          node = generator.createNode({type:'jump', nodes: [nodeType]})
+          break
+        }
+        throw new Error(`Jump target of |${nodeType}| does does not correspond to any known name node. Known name nodes include: ${Object.keys(generator.nameNodes).join(',')}`)
         break
     }
 

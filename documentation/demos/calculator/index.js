@@ -1,4 +1,4 @@
-import {ParserGenerator, TreeViewer} from '../spg.js'
+import {ParserGenerator, TreeViewer, Tree} from '../spg.js'
 
 let generator = new ParserGenerator ()
 
@@ -93,14 +93,62 @@ let parserDefinition
 
 parserDefinition =
 `
-
-integer
+term expression
  entire
   or
-   positive number
-   string literal
-    0
-   negative number
+   sequence
+    term
+    operator
+    term expression
+   term
+
+term
+ or
+  integer
+  parenthetical expression
+
+parenthetical expression
+ sequence
+  string literal
+   (
+  term expression
+  string literal
+   )
+
+operator
+ or
+  addition
+  subtraction
+  multiplication
+  division
+  exponent
+
+addition
+ string literal
+  +
+
+subtraction
+ string literal
+  -
+
+multiplication
+ string literal
+  *
+
+exponent
+ string literal
+  ^
+
+division
+ string literal
+  /
+
+integer
+ or
+  positive number
+  string literal
+   0
+  negative number
 
 //comment
 positive number
@@ -123,14 +171,16 @@ negative number
 `
 
 let parser = generator.generateParser(parserDefinition)
-//let x = ParserGenerator.H1.Export(parser)
 
-let testProgram = '100'
+let testProgram = '(100+25+60*80)+5'
 
 let output = parser.parse(testProgram)
+let outputTree = new Tree(output)
 
+let outputTree2 = outputTree.pruneNodes((node)=>{return node.type !== 'name'})
 let treeViewer = new TreeViewer()
-treeViewer.display('text', output)
+
+treeViewer.display('text', outputTree2.root)
 
 /*
 

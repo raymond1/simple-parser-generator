@@ -139,6 +139,7 @@ class ParserGenerator{
 
 ParserGenerator.registerNodeTypes()
 ParserGenerator.H1 = H1
+ParserGenerator.Tree = Tree
 
 export {ParserGenerator}
 export default ParserGenerator

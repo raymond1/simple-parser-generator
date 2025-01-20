@@ -18,9 +18,11 @@ class Node{
 
   //Debug function
   d(){
-    console.log(this.type)
-    if (this.type == 'name'){
-      console.log(this.nodes[0])
+    if (typeof DEBUG !== 'undefined'){
+      console.log(this.type)
+      if (this.type == 'name'){
+        console.log(this.nodes[0])
+      }
     }
   }
 }
@@ -752,7 +754,8 @@ class NameNode extends Node{
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
       matchString: matchInfo.matchString.slice(),
-      matchFound: matchInfo.matchFound
+      matchFound: matchInfo.matchFound,
+      name:this.nodes[0]
     })
     return newMatchNode
   }

@@ -39,7 +39,7 @@ class Tree{
 			nodesToReturn.push(treeNode)
 		}
 
-		for (let match of treeNode.matches){
+		for (let match of treeNode.subMatches){
 			let childNodes = this.returnAllNodes(match, test, nodesToReturn)
 			nodesToReturn = Utilities.array_merge(nodesToReturn, childNodes)
 		}
@@ -77,33 +77,33 @@ class Tree{
 
 			//For each match in the current node, if there is a parent, then the parent must add the matches to its matches list
 			//All the children must set their parent to the parent of matchTreeNode
-			for (let match of matchTreeNode.matches){
+			for (let match of matchTreeNode.subMatches){
 				if (matchTreeNode.parent){
-					matchTreeNode.parent.matches.push(match)
+					matchTreeNode.parent.subMatches.push(match)
 					match.parent = matchTreeNode.parent
 				}
 			}
 
 			//If matchTreeNode node has a parent that is not null, then the current node must be removed from its matches list
       if (matchTreeNode.parent){
-				for (let i = 0; i < matchTreeNode.parent.matches.length; i++){
+				for (let i = 0; i < matchTreeNode.parent.subMatches.length; i++){
 					//remove the item
-					if (matchTreeNode.parent.matches[i] === matchTreeNode){
-						matchTreeNode.parent.matches.splice(i,1)
+					if (matchTreeNode.parent.subMatches[i] === matchTreeNode){
+						matchTreeNode.parent.subMatches.splice(i,1)
 						break
 					}
 				}
 			}else{
 				//If matchTreeNode.parent is null, then
         //matchTreeNode = df
-        this.root = matchTreeNode.matches[0]
+        this.root = matchTreeNode.subMatches[0]
 			}
 
 		}else{
 			//item was not found
 			//check if children need to be removed
 			//All the children must set their parent to the parent of matchTreeNode
-			for (let match of matchTreeNode.matches){
+			for (let match of matchTreeNode.subMatches){
 				this.removeItemAndHeal(itemToRemove,match)
 			}
 		}
@@ -123,20 +123,20 @@ class Tree{
 	//removes branches of the tree that match test
 	static _cutNodes(treeNode, test){
 		let nodesToCut = []
-		for (let i = 0; i < treeNode.matches.length; i++){
-			let childNode = treeNode.matches[i]
+		for (let i = 0; i < treeNode.subMatches.length; i++){
+			let childNode = treeNode.subMatches[i]
 			if (test(childNode)){
 				nodesToCut.push(childNode)
 			}
 		}
 
 		for (let i = 0; i < nodesToCut.length; i++){
-			let index = treeNode.matches.indexOf(nodesToCut[i])
-			treeNode.matches.splice(index, 1)
+			let index = treeNode.subMatches.indexOf(nodesToCut[i])
+			treeNode.subMatches.splice(index, 1)
 		}
 
-		for (let i = 0; i < treeNode.matches.length; i++){
-			Tree._cutNodes(treeNode.matches[i], test)
+		for (let i = 0; i < treeNode.subMatches.length; i++){
+			Tree._cutNodes(treeNode.subMatches[i], test)
 		}
 	}
 
@@ -174,24 +174,24 @@ class Tree{
 		}
 	}
 
-  //returns a tree consisting only of the rules matched in the user-specified grammar
+  //returns a tree consisting only of the name nodes matched in the user-specified grammar
 	//matches are guaranteed to be contiguous
 	//Only matches that are from an uninterrupted line of successful matches are returned
-  getRuleMatchesOnly(){
+  getNameNodeMatchesOnly(){
 		let clonedTree = this.clone()
 		clonedTree.cutNodes((treeNode)=>{ return treeNode['matchFound'] == false})
-		let successfulRuleNodes = null
+		let successfulNameNodes = null
 		if (clonedTree.root){
-			successfulRuleNodes = clonedTree.returnAllNodes(clonedTree.root, 
+			successfulNameNodes = clonedTree.returnAllNodes(clonedTree.root, 
 				(_matchTreeNode)=>{
-					return _matchTreeNode.type == 'rule'
+					return _matchTreeNode.type == 'name'
 				})	
 		}
 
-    let notSuccessfulRuleNodes = clonedTree.treeInvert(successfulRuleNodes)
-		if (notSuccessfulRuleNodes){
-			for (let ruleToRemove of notSuccessfulRuleNodes){
-				clonedTree.removeItemAndHeal(ruleToRemove)
+    let notSuccessfulNameNodes = clonedTree.treeInvert(successfulNameNodes)
+		if (notSuccessfulNameNodes){
+			for (let nameNodeToRemove of notSuccessfulNameNodes){
+				clonedTree.removeItemAndHeal(nameNodeToRemove)
 			}	
 		}
 
@@ -206,7 +206,7 @@ class Tree{
       return
     }
     treeNode.depth = depth
-    for (let match of treeNode.matches){
+    for (let match of treeNode.subMatches){
       this.resetDepth(match, depth + 1)
     }
   }
@@ -235,11 +235,11 @@ class Tree{
   //updates the parent element to refer to the clone tree rather than the parent tree
 	innerClone(matchTreeNode){
 		let newTreeNode = this.shallowCopy(matchTreeNode)
-    newTreeNode.matches = []
-    if (matchTreeNode.matches){
-      for (let match of matchTreeNode.matches){
+    newTreeNode.subMatches = []
+    if (matchTreeNode.subMatches){
+      for (let match of matchTreeNode.subMatches){
         let matchClone = this.innerClone(match)
-        newTreeNode.matches.push(matchClone)
+        newTreeNode.subMatches.push(matchClone)
         matchClone.parent = newTreeNode
       }
     }
@@ -270,7 +270,7 @@ class Tree{
 				operation(matchNode)
 			}
 
-			for (let match of matchNode.matches){
+			for (let match of matchNode.subMatches){
 				this.recursiveApply(match,operation,selectionTest)
 			}
 		}
@@ -278,3 +278,4 @@ class Tree{
   */
 }
 
+export {Tree}

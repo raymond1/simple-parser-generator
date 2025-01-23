@@ -3,104 +3,21 @@ import {ParserGenerator, TreeViewer, Tree} from '../spg.js'
 let generator = new ParserGenerator ()
 
 let parserDefinition
-// parserDefinition = 
-// `split
-//  jump
-//   expression
-//  name
-//   expression
-//   or
-//    jump
-//     parentheses expression
-//    jump
-//     numerical expression
-//  name
-//   parentheses expression
-//   or
-//    sequence
-//     string literal
-//      (
-//     jump
-//      expression
-//     string literal
-//      )
-//  name
-//   addition expression
-//   sequence
-//    jump
-//     integer
-//    string literal
-//     +
-//    jump
-//     integer
-//  name
-//   integer
-//   multiple
-//    character class
-//     0123456789
-
-//   1+2
-//  name
-//   numerical expression
-//    optional
-//     jump whitespace
-//    multiple
-//     character class
-//      0123456789
-//   jump
-//    whitespace
-//  name
-//   whitespace
-//    or
-//     `
-
-// parserDefinition =
-// `split
-//  jump
-//   integer
-//  name
-//   integer
-//   entire
-//    or
-//     jump
-//      positive number
-//     string literal
-//      0
-//     jump
-//      negative number
-//  name
-//   positive number
-//   jump
-//    number
-//  name
-//   number
-//   and
-//    multiple
-//     character class
-//      0123456789
-//    not
-//     string literal
-//      0
-//  name
-//   negative number
-//   sequence
-//    string literal
-//     -
-//    jump
-//     positive number
-// `
 
 
 parserDefinition =
 `
-term expression
+calculatable expression
  entire
-  or
-   sequence
-    term
-    operator
-    term expression
+  term expression
+
+term expression
+ or
+  sequence
    term
+   operator
+   term expression
+  term
 
 term
  or
@@ -172,16 +89,49 @@ negative number
 
 let parser = generator.generateParser(parserDefinition)
 
-let testProgram = '(100+25+60*80)+5'
+let testProgram = '(1+2*3)+4'
 
 let output = parser.parse(testProgram)
 let outputTree = new Tree(output)
+let outputTree2 = outputTree.returnFilteredTree(
+	(treeNode)=>{
+		if (treeNode.type == 'name'){
+			//Filter out these nodes
+			if (['positive number','negative number','number','calculatable expression'].includes(treeNode.name)){
+console.log(treeNode.name + ' was filtered out')
+				return false
+			}
 
-let outputTree2 = outputTree.pruneNodes((node)=>{return node.type !== 'name'})
+			if (treeNode.matchFound){
+				return true
+			}
+		}
+		return false
+	}
+)
+
 let treeViewer = new TreeViewer()
-
 treeViewer.display('text', outputTree2.root)
 
+function evaluate(treeNode){
+debugger
+	switch (treeNode.name){
+		case 'term expression':
+			return 0
+		case 'parenthetical expression':
+			return 0
+		case 'term':
+			return 0
+		case 'integer':
+			return Number(treeNode.matchString)
+		default:
+			return 0
+			//throw new Error('Error: Match node type not implemented.')
+	}
+}
+
+console.log(evaluate(outputTree2.root))
+console.log(outputTree2.size())
 /*
 
 	function evaluateExpression(){

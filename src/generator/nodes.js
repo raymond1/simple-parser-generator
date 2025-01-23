@@ -581,7 +581,7 @@ class MultipleNode extends Node{
       totalMatchLength = totalMatchLength + matchInfo.matchString.length
       localOffset = localOffset + matchInfo.matchString.length
       tempString = tempString.substring(matchInfo.matchString.length)
-      matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset + localOffset, parent: this})
+      matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset + localOffset, parent: newMatchNode})
       subMatches.push(matchInfo)
     }
   
@@ -594,7 +594,7 @@ class MultipleNode extends Node{
         type: this['type'].slice(),
         id: this.id, 
         serial: this.generator.getAndIncrementMatchCount(),
-        subMatches,
+        subMatches:subMatches,
         matchString: inputString.substring(0, totalMatchLength),
         matchFound
       }

@@ -11,6 +11,8 @@ class ParserGenerator{
     this.matchCount = 0 //enumerates the matches
     this.nameNodes = {}
     this.jumpNodes = []
+
+    this.nodes = {} //A mapping from the id to the node
   }
 
   /** @method
@@ -119,6 +121,7 @@ class ParserGenerator{
     }
     newNode.id = this.getId()
     newNode.generator = this
+    this.nodes[newNode.id] = newNode //Add the node to the dictionary
     return newNode
   }
 

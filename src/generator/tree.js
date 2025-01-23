@@ -23,40 +23,41 @@ class Tree{
   //Test is a function you can pass in to return only certain nodes
   //If test is passed in and is not null, then if the test function, when it takes matchTree as a parameter evaluates to true, then
   //matchTree will be returned as part of the result set
-  returnAllNodes(treeNode, test = null, matchesSoFar = []){
+  static returnFilteredNodeList(treeNode, test = null, matchesSoFar = []){
 		if (!treeNode){
 			return null
 		}
 		//The default test always returns true, in effect returning all nodes
-		if (test == null){
+		if (!test){
 			test = function(){
 				return true
 			}
 		}
 
 		let nodesToReturn = []
+
 		if (test(treeNode) && matchesSoFar.indexOf(treeNode) == -1){
 			nodesToReturn.push(treeNode)
 		}
 
 		for (let match of treeNode.subMatches){
-			let childNodes = this.returnAllNodes(match, test, nodesToReturn)
+			let childNodes = Tree.returnFilteredNodeList(match, test, nodesToReturn)
 			nodesToReturn = Utilities.array_merge(nodesToReturn, childNodes)
 		}
 		return nodesToReturn
 	}
 
 	//Removes a node from a tree and rejoins it
-    //          root
+  //          root
 	//           |
 	//           A
 	//          / \
-    //          B C
+  //          B C
 	//         /| |\
 	//        / | | \
 	//       D  E F  G
 	//       |
-    //       H
+  //       H
 	//       |
 	//       I
 	//
@@ -74,31 +75,32 @@ class Tree{
 		}
 
 		if (matchTreeNode === itemToRemove){
+      if (matchTreeNode.parent){ //read as 'if matchTreeNode is not the root of the entire tree'
 
-			//For each match in the current node, if there is a parent, then the parent must add the matches to its matches list
-			//All the children must set their parent to the parent of matchTreeNode
-			for (let match of matchTreeNode.subMatches){
-				if (matchTreeNode.parent){
+				//Set child matches as the children of the parent
+        for (let match of matchTreeNode.subMatches){
 					matchTreeNode.parent.subMatches.push(match)
 					match.parent = matchTreeNode.parent
-				}
-			}
+			  }
 
-			//If matchTreeNode node has a parent that is not null, then the current node must be removed from its matches list
-      if (matchTreeNode.parent){
-				for (let i = 0; i < matchTreeNode.parent.subMatches.length; i++){
+        for (let i = 0; i < matchTreeNode.parent.subMatches.length; i++){
 					//remove the item
 					if (matchTreeNode.parent.subMatches[i] === matchTreeNode){
 						matchTreeNode.parent.subMatches.splice(i,1)
 						break
 					}
 				}
-			}else{
-				//If matchTreeNode.parent is null, then
-        //matchTreeNode = df
-        this.root = matchTreeNode.subMatches[0]
-			}
-
+      }else{
+				//Here, matchTreeNode is the root of the entire tree as it has no parent
+        if (matchTreeNode.subMatches.length > 1){
+          throw new Error('Removing root node does not result in a tree.')
+        }else{
+          this.root = matchTreeNode.subMatches[0]
+					matchTreeNode.parent = null
+					matchTreeNode.subMatches = []
+					this.root.parent = null
+        }
+      }
 		}else{
 			//item was not found
 			//check if children need to be removed
@@ -114,7 +116,7 @@ class Tree{
 	//This function returns a new tree with the same nodes as the old tree, except that nodes that match the test function are deleted
 	//Remaining nodes are healed back together
 	pruneNodes(test){
-		let nodesToPrune = this.returnAllNodes(this.root, test)
+		let nodesToPrune = Tree.returnFilteredNodeList(this.root, test)
 		for (let node of nodesToPrune){
 			this.removeItemAndHeal(node, this.root)
 		}
@@ -182,7 +184,7 @@ class Tree{
 		clonedTree.cutNodes((treeNode)=>{ return treeNode['matchFound'] == false})
 		let successfulNameNodes = null
 		if (clonedTree.root){
-			successfulNameNodes = clonedTree.returnAllNodes(clonedTree.root, 
+			successfulNameNodes = Tree.returnFilteredNodeList(clonedTree.root, 
 				(_matchTreeNode)=>{
 					return _matchTreeNode.type == 'name'
 				})	
@@ -214,10 +216,10 @@ class Tree{
 	//Given a set of nodes in a list, this function returns all elements in domain which are not in the list of nodes passed in
 	treeInvert(selectedNodeList, matchTreeNode = this.root){
 		if (!selectedNodeList){
-			return this.returnAllNodes(matchTreeNode)
+			return Tree.returnFilteredNodeList(matchTreeNode)
 		}
 
-		let test = this.returnAllNodes(matchTreeNode, (_matchTreeNode)=>{
+		let test = Tree.returnFilteredNodeList(matchTreeNode, (_matchTreeNode)=>{
 			let booleanValue = selectedNodeList.includes(_matchTreeNode)
 			return !booleanValue
 		})
@@ -262,7 +264,7 @@ class Tree{
 
 		return newNode
   }
-/*
+
 	//performs a shallow operation on all nodes that match selectionTest and are not null
 	recursiveApply(matchNode = this.root, operation, selectionTest){
 		if (matchNode){
@@ -275,7 +277,32 @@ class Tree{
 			}
 		}
   }
-  */
+
+	//Returns number of nodes in the tree
+	size(matchNode = this.root, total = 0){
+		if (matchNode){
+			for (let match of matchNode.subMatches){
+				total += this.size(match)
+			}
+			return total + 1
+		}
+	}
+
+
+	//Takes in a tree and a filter
+	//Clones the tree and returns a new one containing only the filtered nodes.
+	//Assumes that root node will not be filtered out
+	returnFilteredTree(filter){
+		let newTree = this.clone()
+		let listOfFilteredInNodes = Tree.returnFilteredNodeList(newTree.root, filter)
+		let listOfFilteredOutNodes = newTree.treeInvert(listOfFilteredInNodes)
+
+		newTree.pruneNodes((node)=>{
+			return listOfFilteredOutNodes.includes(node)
+	})
+
+		return newTree
+	}
 }
 
 export {Tree}

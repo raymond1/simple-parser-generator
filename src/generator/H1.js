@@ -265,7 +265,7 @@ negative number
     let node
     let childContent
     if (!nodeType){
-      throw new Error('Invalid node. A node appears to be empty.')
+      throw new Error('Invalid node. A node appears to be empty. Perhaps you have a line containing only spaces?')
     }
 
     switch(nodeType){

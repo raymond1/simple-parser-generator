@@ -44,4 +44,4 @@ The documentation folder contains demos in it. If you type in make, you will put
 
 # Coding style
 
-External functions start with a capital.
+External functions start with a capital. Internal functions, such as helper functions, start with a lowercase letter. (See tree.js for examples)

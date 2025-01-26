@@ -93,12 +93,18 @@ class Tree{
       }else{
 				//Here, matchTreeNode is the root of the entire tree as it has no parent
         if (matchTreeNode.subMatches.length > 1){
-          throw new Error('Removing root node does not result in a tree.')
-        }else{
+          throw new Error('Operation does not result in a tree')
+          // //Create a new root node if the match tree node has two or more children
+          // this.root = new MatchNode()
+          // this.root.parent = null
+          // this.root.subMatches = matchTreeNode.subMatches
+        }else if (matchTreeNode.subMatches.length == 1){
           this.root = matchTreeNode.subMatches[0]
 					matchTreeNode.parent = null
 					matchTreeNode.subMatches = []
 					this.root.parent = null
+        }else{ //0 subMatches. Do nothing
+
         }
       }
 		}else{
@@ -111,14 +117,32 @@ class Tree{
 		}
 	}
 
+  //Incomplete
+  //Takes in a tree and a filter function and returns a new tree that is
+  //the same as the old tree, except that nodes identified by the filter function have been removed.
+  //If the root node with two or more children is removed, the result is more than one tree, so this 
+  //function will return an array of trees.
+  //The element passed in is a Tree object, not a treeNode.
+  static ReturnPrunedTrees(tree, filter){
+    let treeArray = []
+    let newTree = tree.clone()
+    return treeArray
+  }
+
+
 	//test is a function that sets which nodes to ignore. When test evaluates to true, a node will be ignored from the tree.
 	//This function is meant to get rid of certain nodes
 	//This function returns a new tree with the same nodes as the old tree, except that nodes that match the test function are deleted
 	//Remaining nodes are healed back together
 	pruneNodes(test){
-		let nodesToPrune = Tree.returnFilteredNodeList(this.root, test)
-		for (let node of nodesToPrune){
-			this.removeItemAndHeal(node, this.root)
+		let nodesToPrune = Tree.returnFilteredNodeList(this.root, test).sort((a,b)=>{
+      b.depth - a.depth
+    })
+
+    for (let i = 0; i < nodesToPrune.length; i++){
+      let nodeToPrune = nodesToPrune[i]
+console.log(nodeToPrune.type)
+			this.removeItemAndHeal(nodeToPrune, this.root)
 		}
 	}
 
@@ -249,7 +273,7 @@ class Tree{
 		return newTreeNode
 	}
 
-	//copies all attributes one node, except for matches
+	//copies all attributes on node, but does not copy matches
 	shallowCopy(treeNode){
 		if (treeNode == null){
 			return null
@@ -294,13 +318,16 @@ class Tree{
 	//Assumes that root node will not be filtered out
 	returnFilteredTree(filter){
 		let newTree = this.clone()
+console.log('newTree size inside returnFilteredTree', newTree.size())
 		let listOfFilteredInNodes = Tree.returnFilteredNodeList(newTree.root, filter)
+console.log('listOfFilteredInNodes length inside returnFilteredTree', listOfFilteredInNodes.length)
 		let listOfFilteredOutNodes = newTree.treeInvert(listOfFilteredInNodes)
+console.log('listOfFilteredOutNodes length inside returnFilteredTree', listOfFilteredOutNodes.length)
 
 		newTree.pruneNodes((node)=>{
 			return listOfFilteredOutNodes.includes(node)
-	})
-
+	  })
+console.log('newTree after pruning:', newTree.size())
 		return newTree
 	}
 }

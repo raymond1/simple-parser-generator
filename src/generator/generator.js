@@ -140,6 +140,7 @@ class ParserGenerator{
 
 ParserGenerator.registerNodeTypes()
 ParserGenerator.H1 = H1
+ParserGenerator.M1 = M1
 ParserGenerator.Tree = Tree
 
 export {ParserGenerator}

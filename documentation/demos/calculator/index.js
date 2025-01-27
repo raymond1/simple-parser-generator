@@ -177,16 +177,16 @@ let testProgram = '1+2*3-2^2^2*2' //1,7, -25
 
 let output = parser.parse(testProgram)
 let outputTree = new Tree(output)
-console.log('outputTree size:', outputTree.size())
-console.log(ParserGenerator.H1.Export(outputTree))
+console.log('outputTree size after parsing:', outputTree.size())
+console.log(ParserGenerator.M1.Export(outputTree.root))
 
 
 let treeViewer = new TreeViewer()
-console.log('outputTree after parsing but before filtering')
+console.log('outputTree before filtering')
 treeViewer.display('text', outputTree.root)
 
 
-console.log('outputTree size:', outputTree.size())
+console.log('outputTree size after filtering:', outputTree.size())
 //true is to filter in
 //false is to filter out
 let outputTree2 = outputTree.returnFilteredTree(

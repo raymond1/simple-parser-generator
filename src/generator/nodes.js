@@ -115,12 +115,12 @@ class CharacterClassNode extends Node{
 
     Object.assign(newMatchNode, {
       globalOffset: metadata.globalOffset,
-      parent: metadata.parent, 
+      parent: metadata.parent, //parent refers to the parent match node
       depth: metadata.depth,
       inputString: inputString.slice(), 
       type: this['type'].slice(),
-      id: this.id, 
-      serial: this.generator.getAndIncrementMatchCount(),
+      grammar_node_id: this.id, //grammar node id refers to the grammar node that generated the match node. Used in M1.js.
+      serial: this.generator.getAndIncrementMatchCount(), //serial is a unique serial number assigned to each match node
       matchString: inputString.substring(0, matchLength),
       matchFound,
     })
@@ -176,9 +176,8 @@ class StringLiteralNode extends Node{
       depth: metadata.depth,
       inputString: inputString.slice(), 
       type: this['type'].slice(),
-      id: this.id, 
+      grammar_node_id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
-      subMatches: [],
       matchString: inputString.substring(0, matchLength),
       string: this.nodes[0],
       matchFound: matchLength > 0?true:false
@@ -229,7 +228,7 @@ class NotNode extends Node{
         depth: metadata.depth,
         inputString: inputString.slice(), 
         type: this['type'].slice(),
-        id: this.id, 
+        grammar_node_id: this.id, 
         serial: this.generator.getAndIncrementMatchCount(),
         subMatches: [matchInfo],
         matchString: inputString.substring(0, matchLength),
@@ -294,7 +293,7 @@ class EntireNode extends Node{
       depth: metadata.depth,
       inputString: inputString.slice(), 
       type: this['type'].slice(),
-      id: this.id, 
+      grammar_node_id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
       matchString: inputString.substring(0, matchLength),
@@ -368,7 +367,7 @@ class SequenceNode extends Node{
         depth: metadata.depth,
         inputString: inputString.slice(), 
         type: this['type'].slice(),
-        id: this.id, 
+        grammar_node_id: this.id, 
         serial: this.generator.getAndIncrementMatchCount(),
         subMatches,
         matchString: inputString.substring(0, matchLength),
@@ -438,7 +437,7 @@ class OrNode extends Node{
         depth: metadata.depth,
         inputString: inputString.slice(), 
         type: this['type'].slice(),
-        id: this.id, 
+        grammar_node_id: this.id, 
         serial: this.generator.getAndIncrementMatchCount(),
         subMatches,
         matchString: inputString.substring(0, matchLength),
@@ -522,7 +521,7 @@ class AndNode extends Node{
         depth: metadata.depth,
         inputString: inputString.slice(), 
         type: this['type'].slice(),
-        id: this.id, 
+        grammar_node_id: this.id, 
         serial: this.generator.getAndIncrementMatchCount(),
         subMatches,
         matchString: inputString.substring(0, matchLength),
@@ -592,7 +591,7 @@ class MultipleNode extends Node{
         depth: metadata.depth,
         inputString: inputString.slice(), 
         type: this['type'].slice(),
-        id: this.id, 
+        grammar_node_id: this.id, 
         serial: this.generator.getAndIncrementMatchCount(),
         subMatches:subMatches,
         matchString: inputString.substring(0, totalMatchLength),
@@ -649,7 +648,7 @@ class OptionalNode extends Node{
       depth: metadata.depth,
       inputString: inputString.slice(), 
       type: this['type'].slice(),
-      id: this.id, 
+      grammar_node_id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
       matchString: inputString.substring(0, matchInfo.matchString.length),
@@ -699,7 +698,7 @@ class SplitNode extends Node{
       depth: metadata.depth,
       inputString: inputString.slice(), 
       type: this['type'].slice(),
-      id: this.id, 
+      grammar_node_id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
       matchString: matchInfo.matchString.slice(),
@@ -750,7 +749,7 @@ class NameNode extends Node{
       depth: metadata.depth,
       inputString: inputString.slice(), 
       type: this['type'].slice(),
-      id: this.id, 
+      grammar_node_id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
       matchString: matchInfo.matchString.slice(),
@@ -799,7 +798,7 @@ class JumpNode extends Node{
       depth: metadata.depth,
       inputString: inputString.slice(), 
       type: this['type'].slice(),
-      id: this.id, 
+      grammar_node_id: this.id, 
       serial: this.generator.getAndIncrementMatchCount(),
       subMatches,
       matchString: matchInfo.matchString.slice(),
@@ -828,6 +827,11 @@ class MatchNode{
       console.log(attribute + ':' + this[attribute])
     }
     console.log('end node')
+  }
+
+  //Exports to space-tree notation
+  static Export(matchNode){
+
   }
 }
 

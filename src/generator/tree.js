@@ -93,6 +93,7 @@ class Tree{
       }else{
 				//Here, matchTreeNode is the root of the entire tree as it has no parent
         if (matchTreeNode.subMatches.length > 1){
+
           throw new Error('Operation does not result in a tree')
           // //Create a new root node if the match tree node has two or more children
           // this.root = new MatchNode()
@@ -103,8 +104,8 @@ class Tree{
 					matchTreeNode.parent = null
 					matchTreeNode.subMatches = []
 					this.root.parent = null
-        }else{ //0 subMatches. Do nothing
-
+        }else{ //0 subMatches. Remove root only
+          this.root = null
         }
       }
 		}else{
@@ -136,12 +137,11 @@ class Tree{
 	//Remaining nodes are healed back together
 	pruneNodes(test){
 		let nodesToPrune = Tree.returnFilteredNodeList(this.root, test).sort((a,b)=>{
-      b.depth - a.depth
-    })
+      a.depth - b.depth
+    }).reverse()
 
     for (let i = 0; i < nodesToPrune.length; i++){
       let nodeToPrune = nodesToPrune[i]
-console.log(nodeToPrune.type)
 			this.removeItemAndHeal(nodeToPrune, this.root)
 		}
 	}

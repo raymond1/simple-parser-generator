@@ -48,6 +48,8 @@ class TreeViewer{
       let keyValue = matchNode[key]
 
       switch(key){
+        case 'generator':
+          continue //do not display generator attribute
         case 'parent':
           {
             //display parent's id value

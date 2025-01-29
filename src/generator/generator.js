@@ -1,5 +1,5 @@
 /**
- * The ParserGenerator class is a parser generator that generates in-memory parsers, and allows for the export of such parsers into the M1 or H1 format 
+ * The ParserGenerator class is a parser generator that generates in-memory parsers, and allows for the export of such parsers into the O1 or H1 format 
  * so that they can be imported in a different language environment.
  */
 class ParserGenerator{
@@ -11,7 +11,14 @@ class ParserGenerator{
     this.matchCount = 0 //enumerates the matches
     this.nameNodes = {}
     this.jumpNodes = []
+  }
 
+  reset(){
+    this.idCounter = 0
+    this.matchCount = 0
+    this.nameNodes = {}
+    this.jumpNodes = []
+    //It is possible that the nodes themselves may point to each other, resulting in a memory leak.
   }
 
   /** @method
@@ -66,9 +73,9 @@ class ParserGenerator{
   }
 
   /** @method
-   * Generates an in-memory parser using a string description in M1 or H1 format.
+   * Generates an in-memory parser using a string description in O1 or H1 format.
    * 
-   * The definition for a parser in H1 or M1 format. The format must match the value passed into the format parameter. See the documentation in M1.md or H1.md for more information on the M1 and H1 file formats.
+   * The definition for a parser in H1 or O1 format. The format must match the value passed into the format parameter. See the documentation in O1.md or H1.md for more information on the O1 and H1 file formats.
    * @param {String} parserDescription
    * 
    *
@@ -139,8 +146,9 @@ class ParserGenerator{
 }
 
 ParserGenerator.registerNodeTypes()
-ParserGenerator.H1 = H1
 ParserGenerator.M1 = M1
+ParserGenerator.H1 = H1
+ParserGenerator.O1 = O1
 ParserGenerator.Tree = Tree
 
 export {ParserGenerator}

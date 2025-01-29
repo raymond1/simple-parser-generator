@@ -1,4 +1,6 @@
 import {ParserGenerator, TreeViewer, Tree} from '../spg.js'
+import { writeFileSync } from 'node:fs';
+
 
 let generator = new ParserGenerator ()
 
@@ -81,70 +83,6 @@ plus or minus
   string literal
    -
 
-
-// multiplication expression
-//  sequence
-//   term expression
-//   string literal
-//    *
-//   term expression
-
-// multiplicative expression
-//  or
-//   multiplication expression
-//   divisionExpression
-
-
-// term expression
-//  or
-//   sequence
-//    term
-//    operator
-//    term expression
-//   term
-
-// term
-//  or
-//   integer
-//   parenthetical expression
-
-// parenthetical expression
-//  sequence
-//   string literal
-//    (
-//   term expression
-//   string literal
-//    )
-
-// operator
-//  or
-//   addition
-//   subtraction
-//   multiplication
-//   division
-//   exponent
-
-// addition
-//  string literal
-//   +
-
-// subtraction
-//  string literal
-//   -
-
-// multiplication
-//  string literal
-//   *
-
-// exponent
-//  string literal
-//   ^
-
-// division
-//  string literal
-//   /
-
-
 integer
  or
   positive number
@@ -172,14 +110,29 @@ negative number
 `
 
 let parser = generator.generateParser(parserDefinition)
+let exportOfParser = ParserGenerator.M1.Export(parser)
+console.log('M1.export of outputTree.root', exportOfParser)
+
+let generator2 = new ParserGenerator()
+let parser2 = ParserGenerator.M1.Import(exportOfParser, generator2)
+let exportOfParser2 = ParserGenerator.M1.Export(parser2)
+console.log('M1 export of parser 2:', exportOfParser2)
 
 let testProgram = '1+2*3-2^2^2*2' //1,7, -25
 
-let output = parser.parse(testProgram)
+let output = parser2.parse(testProgram)
 let outputTree = new Tree(output)
 console.log('outputTree size after parsing:', outputTree.size())
-console.log(ParserGenerator.M1.Export(outputTree.root))
+let operations = ParserGenerator.O1.Export(outputTree.root)
+console.log(ParserGenerator.O1.Export(outputTree.root))
 
+
+try {
+  writeFileSync('output.txt', operations);
+  // file written successfully
+} catch (err) {
+  console.error(err);
+}
 
 let treeViewer = new TreeViewer()
 console.log('outputTree before filtering')

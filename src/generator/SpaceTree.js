@@ -173,4 +173,42 @@ class SpaceTree{
   static EncodeDepth(n){
     return ' '.repeat(n)
   }
+
+  //Given a string in spacetree notation, this function returns a dictionary
+  //{<lineNumber1>: <node string 1>, <lineNumber2>:<node string 2>}
+  static GetAllNodesOfDepth(s, n){
+    let returnDictionary = {}
+
+    let lines = s.split('\n')
+    for (let i = 0; i < lines.length; i++){
+      let depth = SpaceTree.GetDepth(lines[i])
+      if (depth == n){
+        returnDictionary[i] = lines[i].substring(n)
+      }
+    }
+    return returnDictionary
+  }
+
+  // //
+  // static GetChildNodeStringsFromDepthAndKey(s, depth, key){
+  //   let lines = s.split('\n')
+  //   let childNodeStrings = []
+
+  //   let i = 0
+  //   for(let line of lines){
+  //     if (SpaceTree.GetDepth(line) == depth && SpaceTree.GetContent(line) == key){
+  //       children = SpaceTree.GetChildNodeStrings()
+  //       break
+  //     }
+  //     i++
+  //   }
+  // }
+
+  //Need a convert to object function
+  static ConvertStringToObject(s){
+    {
+      nodeString: ''
+      children:[]
+    }
+  }
 }

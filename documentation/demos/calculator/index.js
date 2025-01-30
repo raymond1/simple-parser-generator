@@ -109,26 +109,27 @@ negative number
   positive number
 `
 
-let parser = generator.generateParser(parserDefinition)
-let exportOfParser = ParserGenerator.M1.Export(parser)
-console.log('M1.export of outputTree.root', exportOfParser)
-
-let generator2 = new ParserGenerator()
-let parser2 = ParserGenerator.M1.Import(exportOfParser, generator2)
-let exportOfParser2 = ParserGenerator.M1.Export(parser2)
-console.log('M1 export of parser 2:', exportOfParser2)
+let info = ParserGenerator.H1.Import(parserDefinition, generator)
+let parser = info.ultimateRoot
+let debugInfo = info.mapNodeIdsToOriginalLineNumbers
 
 let testProgram = '1+2*3-2^2^2*2' //1,7, -25
 
-let output = parser2.parse(testProgram)
+debugger
+let output = parser.parse(testProgram)
 let outputTree = new Tree(output)
-console.log('outputTree size after parsing:', outputTree.size())
+
 let operations = ParserGenerator.O1.Export(outputTree.root)
 console.log(ParserGenerator.O1.Export(outputTree.root))
 
+let grammarNodeToLineMapping = ''
+for (let i = 0; i < Object.keys(debugInfo).length; i++){
+  grammarNodeToLineMapping += i + '-' + debugInfo[i] + '\n'
+}
 
 try {
   writeFileSync('output.txt', operations);
+  writeFileSync('output2.txt', grammarNodeToLineMapping);
   // file written successfully
 } catch (err) {
   console.error(err);
@@ -251,94 +252,3 @@ function evaluate(treeNode){
 }
 
 console.log('answer is:', evaluate(outputTree2.root))
-// console.log(outputTree2.size())
-/*
-
-  function evaluateExpression(){
-    debugger
-    function evaluate(expressionTreeNode){
-      let expressionValue
-      switch(expressionTreeNode.name){
-        case 'EXPRESSION':
-          expressionValue = evaluate(expressionTreeNode.matches[0])
-          return expressionValue
-          break
-        case 'ADDITIVE_EXPRESSION':
-          expressionValue = evaluate(expressionTreeNode.matches[0])
-          for (let i = 1; i < expressionTreeNode.matches.length; i++){
-            let additive_operant_term = expressionTreeNode.matches[i]
-            let operator = additive_operant_term.matches[0].matchString
-  
-            if (operator == '+'){
-              expressionValue += evaluate(additive_operant_term.matches[1])
-            }else if (operator == '-'){
-              expressionValue -= evaluate(additive_operant_term.matches[1])
-            }
-          }
-          return expressionValue
-          break
-        case 'TERM':
-          expressionValue = evaluate(expressionTreeNode.matches[0])
-            return expressionValue
-            break
-        case 'MULTIPLICATIVE_EXPRESSION':
-          expressionValue = evaluate(expressionTreeNode.matches[0])
-          for (let i = 1; i < expressionTreeNode.matches.length; i++){
-            let multiplicative_operant_factor = expressionTreeNode.matches[i]
-            let operator = multiplicative_operant_factor.matches[0].matchString
-  
-            if (operator == '*'){
-              expressionValue *= evaluate(multiplicative_operant_factor.matches[1])
-            }else if (operator == '/'){
-              expressionValue /= evaluate(multiplicative_operant_factor.matches[1])
-            }
-          }
-          return expressionValue
-          break
-        case 'EXPONENTIAL_EXPRESSION':
-          expressionValue = Math.pow(evaluate(expressionTreeNode.matches[0]), evaluate(expressionTreeNode.matches[1]))
-          return expressionValue
-          break
-        case 'PARENTHETICAL_EXPRESSION':
-          expressionValue = evaluate(expressionTreeNode.matches[1])
-          return expressionValue
-          break
-        case 'SUBEXPRESSION':
-          expressionValue = evaluate(expressionTreeNode.matches[0])
-          return expressionValue
-          break
-
-        case 'FACTOR':
-          expressionValue = evaluate(expressionTreeNode.matches[0])
-            return expressionValue
-            break
-        case 'INTEGER':
-          return parseInt(expressionTreeNode.matchString, 10)
-          break
-      }
-    }
-  
-    let grammar = document.querySelector('#input_grammar').value
-    let parser = new Parser()
-  
-    parser.setGrammar(grammar)
-  
-    let input = document.getElementById("expression").value
-  
-    let output = parser.parse(input)
-    output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='WHITESPACE')})
-    output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule'&&treeNode['name']=='POSITIVE_INTEGER'||treeNode['name']=='NEGATIVE_INTEGER')})  
-    output.pruneNodes((treeNode)=>{return (treeNode['type'] == 'rule name')})
-    document.getElementById('result').innerHTML = evaluate(output.root)
-  
-    let tree = new DOMTreeNode(parser.runningGrammar, document.querySelector('#test'))
-  
-    let treeViewer2 = new TreeViewer(output, document.querySelector('#test2'))
-    treeViewer2.display()
-  
-    let treeViewer3 = new TreeViewer(parser.rawMatches, document.querySelector('#test3'))
-    treeViewer3.display()
-  }
-
-
-*/

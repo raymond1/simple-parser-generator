@@ -4,7 +4,7 @@
 class H1{
   //Gets rid of completely empty lines(not even spaces)
   //Gets rid of comment lines starting with //
-  static Preprocess(s){
+  static Process(s){
     let outputStringArray = []
     let lines = s.split('\n')
     for (let line of lines){
@@ -52,13 +52,41 @@ class H1{
     positive number
   `*/
   static Import(s, generator){
-    let lines = s.split('\n')
+    //Extract line numbers for the debugger
+    let originalLines = s.split('\n')
     
+    //Internally, line numbers start from 0.
+    let mapOriginalLineNumbersToLines = {}
+    for (let i = 0; i < originalLines.length; i++){
+      mapOriginalLineNumbersToLines[i] = originalLines[i]
+    }
+
     //Get rid of empty lines and comments
-    let s2 = H1.Preprocess(s)
+    let s2 = H1.Process(s)
+
+    //Map processed lines to original line numbers
+    let processedLines = s2.split('\n')
+    let mapProcessedLineNumbersToOriginalLineNumbers = {}
+
+    let j = 0 //counter for originalLines
+    for (let i = 0; i < processedLines.length; i++){
+      while (processedLines[i] != originalLines[j]){
+        j++
+      }
+      mapProcessedLineNumbersToOriginalLineNumbers[i] = j
+    }
+
+    //Will also need to map nodes to processed lines
+    let mapNodeIdsToProcessedLines = {}
 
     //Find all lines of depth 0
     let rootNodeStrings = SpaceTree.GetEntireRootNodeStrings(s2)
+    let rootNodeLineNumberOffsets = []
+    let accumulator = 0
+    for (let i = 0; i < rootNodeStrings.length; i++){
+      rootNodeLineNumberOffsets.push(accumulator)
+      accumulator = accumulator + rootNodeStrings[i].split('\n').length
+    }
 
     //Extract the node names at depth 0. Store the key inside the generator object
     for (let i = 0; i < rootNodeStrings.length; i++){
@@ -68,18 +96,28 @@ class H1{
 
     let rootNodes = []
     //All root level strings become name nodes
-    for (let rootNodeString of rootNodeStrings){
+    for (let i = 0; i < rootNodeStrings.length; i++){
+      let rootNodeString = rootNodeStrings[i]
       let customNodeName = SpaceTree.GetContent(rootNodeString)
-      let childNode = H1.importInternal(SpaceTree.GetChildNodeStrings(rootNodeString)[0],generator)
+      let childNode = H1.importInternal(SpaceTree.GetChildNodeStrings(rootNodeString)[0], generator, rootNodeLineNumberOffsets[i]+1, mapNodeIdsToProcessedLines)
 
       let nameNode = generator.createNode({type:'name', nodes:[customNodeName, childNode]})
+      mapNodeIdsToProcessedLines[nameNode.id] = rootNodeLineNumberOffsets[i]
 
       rootNodes.push(nameNode)
     }
 
     let ultimateRoot = generator.createNode({type:'split', nodes: rootNodes})
+    mapNodeIdsToProcessedLines[ultimateRoot.id] = -1
+
+    let mapNodeIdsToOriginalLineNumbers = {}
+
+    for (let id of Object.keys(mapNodeIdsToProcessedLines)){
+      mapNodeIdsToOriginalLineNumbers[id] = mapProcessedLineNumbersToOriginalLineNumbers[mapNodeIdsToProcessedLines[id]]
+    }
+
     ParserGenerator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
-    return ultimateRoot
+    return {ultimateRoot, mapNodeIdsToOriginalLineNumbers}
   }
 
   //Assumes input string is well-formed
@@ -88,7 +126,7 @@ class H1{
   //Should return undefined for a string like the empty string with no nodes
 
   //Assumes that there is only one root for now
-  static importInternal(s, generator){
+  static importInternal(s, generator, lineNumberOffset, mapNodeIdsToProcessedLines){
     let childNodes = SpaceTree.GetChildNodeStrings(s)
     let nodeType = SpaceTree.GetContent(s)
 
@@ -111,7 +149,7 @@ class H1{
             type:'name', 
             nodes: [
               SpaceTree.GetContent(childNodes[0]),
-              H1.importInternal(childNodes[1],generator)
+              H1.importInternal(childNodes[1],generator, lineNumberOffset + 2, mapNodeIdsToProcessedLines)
             ]
           }
         )
@@ -135,8 +173,10 @@ class H1{
         //need to get all child nodes of the current node...
         //stuff like and, or, sequence have one or more children that have children
         let childNodesAsObjects = []
+        let i = 1
         for (let childNode of childNodes){
-          childNodesAsObjects.push(H1.importInternal(childNode,generator))
+          childNodesAsObjects.push(H1.importInternal(childNode,generator, lineNumberOffset + i, mapNodeIdsToProcessedLines))
+          i = i + 1
         }
         node = generator.createNode({type:nodeType, nodes: childNodesAsObjects})
         break
@@ -152,6 +192,7 @@ class H1{
         break
     }
 
+    mapNodeIdsToProcessedLines[node.id] = lineNumberOffset
     return node
   }
 }

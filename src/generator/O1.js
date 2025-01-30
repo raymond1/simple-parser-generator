@@ -61,11 +61,11 @@ class O1{
     for (let sortedNode of sortedNodes){
       outputString += SpaceTree.EncodeDepth(1) + sortedNode.serial + '\n'
       for (let key of Object.keys(sortedNode)){
-        outputString += SpaceTree.EncodeDepth(2) + key + '\n' 
         let tempString = ''
 
         switch (key){
           case 'generator':
+            //Do not display the generator property
             continue
           case 'subMatches':
             for (let subMatch of sortedNode['subMatches']){
@@ -85,7 +85,7 @@ class O1{
             tempString = SpaceTree.EncodeDepth(3) + sortedNode[key] + '\n'
             break
         }
-        outputString += tempString
+        outputString += SpaceTree.EncodeDepth(2) + key + '\n' + tempString 
       }
     }
 

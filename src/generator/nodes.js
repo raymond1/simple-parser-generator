@@ -564,9 +564,10 @@ class MultipleNode extends Node{
     let localOffset = 0
     let subMatches = []
     let matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
+
+    subMatches.push(matchInfo)
     if (matchInfo.matchFound){
       matchFound = true
-      subMatches.push(matchInfo)
     }
 
     while(matchInfo.matchFound){

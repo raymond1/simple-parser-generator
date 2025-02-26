@@ -24,43 +24,36 @@ class H1{
   
   /*`
 
-  integer
-   entire
-    or
-     positive number
-     string literal
-      0
-     negative number
+integer
+ entire
+  or
+   positive number
+   string literalß
+    0
+   negative number
 
-  //comment
+//comment
+positive number
+ number
+
+number
+ and
+  multiple
+   character class
+    0123456789
+  not
+   string literal
+    0
+
+negative number
+ sequence
+  string literal
+   -
   positive number
-   number
-
-  number
-   and
-    multiple
-     character class
-      0123456789
-    not
-     string literal
-      0
-
-  negative number
-   sequence
-    string literal
-     -
-    positive number
-  `*/
+`*/
   static Import(s, generator){
-    //Extract line numbers for the debugger
     let originalLines = s.split('\n')
     
-    //Internally, line numbers start from 0.
-    let mapOriginalLineNumbersToLines = {}
-    for (let i = 0; i < originalLines.length; i++){
-      mapOriginalLineNumbersToLines[i] = originalLines[i]
-    }
-
     //Get rid of empty lines and comments
     let s2 = H1.Process(s)
 
@@ -75,34 +68,42 @@ class H1{
       }
       mapProcessedLineNumbersToOriginalLineNumbers[i] = j
     }
-
-    //Will also need to map nodes to processed lines
+debugger
+    //Will also need to map nodes to processed lines. In other words, each node has an id and the association between the
+    //node id and the processed
     let mapNodeIdsToProcessedLines = {}
 
-    //Find all lines of depth 0
-    let rootNodeStrings = SpaceTree.GetEntireRootNodeStrings(s2)
-    let rootNodeLineNumberOffsets = []
+    //Get all nodes of depth 0
+    let rootNodeLineNumbers = []
+
+    //Find all line numbers of all lines with depth 0, the 'root' nodes from an H1 specification
+    let filter = `depth
+ =
+  0
+return
+ node`
+    let rootNodes = SpaceTree.Filter(s2, filter)
+
     let accumulator = 0
-    for (let i = 0; i < rootNodeStrings.length; i++){
-      rootNodeLineNumberOffsets.push(accumulator)
-      accumulator = accumulator + rootNodeStrings[i].split('\n').length
+    for (let i = 0; i < rootNodes.length; i++){
+      rootNodeLineNumbers.push(accumulator)
+      accumulator = accumulator + rootNodes[i].split('\n').length
     }
 
     //Extract the node names at depth 0. Store the key inside the generator object
-    for (let i = 0; i < rootNodeStrings.length; i++){
-      let rootNodeName = SpaceTree.GetContent(rootNodeStrings[i])
+    for (let i = 0; i < rootNodes.length; i++){
+      let rootNodeName = SpaceTree.GetText(rootNodes[i])
       generator.nameNodes[rootNodeName] = null
     }
 
-    let rootNodes = []
     //All root level strings become name nodes
-    for (let i = 0; i < rootNodeStrings.length; i++){
-      let rootNodeString = rootNodeStrings[i]
-      let customNodeName = SpaceTree.GetContent(rootNodeString)
-      let childNode = H1.importInternal(SpaceTree.GetChildNodeStrings(rootNodeString)[0], generator, rootNodeLineNumberOffsets[i]+1, mapNodeIdsToProcessedLines)
+    for (let i = 0; i < rootNodes.length; i++){
+      let rootNodeString = rootNodes[i]
+      let customNodeName = SpaceTree.GetText(rootNodeString)
+      let childNode = H1.importInternal(SpaceTree.GetChildren(rootNodeString)[0], generator, rootNodeLineNumbers[i]+1, mapNodeIdsToProcessedLines)
 
       let nameNode = generator.createNode({type:'name', nodes:[customNodeName, childNode]})
-      mapNodeIdsToProcessedLines[nameNode.id] = rootNodeLineNumberOffsets[i]
+      mapNodeIdsToProcessedLines[nameNode.id] = rootNodeLineNumbers[i]
 
       rootNodes.push(nameNode)
     }
@@ -127,8 +128,8 @@ class H1{
 
   //Assumes that there is only one root for now
   static importInternal(s, generator, lineNumberOffset, mapNodeIdsToProcessedLines){
-    let childNodes = SpaceTree.GetChildNodeStrings(s)
-    let nodeType = SpaceTree.GetContent(s)
+    let childNodes = SpaceTree.GetChildren(s)
+    let nodeType = SpaceTree.GetText(s)
 
     let node
     let childContent
@@ -148,7 +149,7 @@ class H1{
           {
             type:'name', 
             nodes: [
-              SpaceTree.GetContent(childNodes[0]),
+              SpaceTree.GetText(childNodes[0]),
               H1.importInternal(childNodes[1],generator, lineNumberOffset + 2, mapNodeIdsToProcessedLines)
             ]
           }
@@ -159,7 +160,7 @@ class H1{
         //by the importInternal function in a post-processing operation
       case 'string literal':
       case 'character class':
-        childContent = SpaceTree.GetContent(childNodes[0])
+        childContent = SpaceTree.GetText(childNodes[0])
         node = generator.createNode({type:nodeType, nodes: [childContent]})
         break
       case 'sequence':

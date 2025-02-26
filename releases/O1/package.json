@@ -1,0 +1,11 @@
+{
+  "name": "o1",
+  "version": "1.0.0",
+  "description": "Serialization format for output match nodes emitted by a parser.",
+  "main": "O1.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

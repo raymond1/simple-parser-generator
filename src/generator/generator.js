@@ -1,3 +1,7 @@
+import M1 from "m1"
+import H1 from "h1"
+import O1 from "o1"
+
 /**
  * The ParserGenerator class is a parser generator that generates in-memory parsers, and allows for the export of such parsers into the O1 or H1 format 
  * so that they can be imported in a different language environment.

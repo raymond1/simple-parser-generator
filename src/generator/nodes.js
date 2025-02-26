@@ -227,7 +227,7 @@ class NotNode extends Node{
         inputString: inputString.slice(), 
         type: this['type'].slice(),
         grammar_node_id: this.id, 
-        subMatches: [matchInfo],
+        submatches: [matchInfo],
         matchString: inputString.substring(0, matchLength),
         matchFound: !matchInfo.matchFound
       }
@@ -274,10 +274,10 @@ class EntireNode extends Node{
     let newMatchNode = new MatchNode(this.generator)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
-    let subMatches = []
+    let submatches = []
     let matchLength = 0
     let matchFound = false
-    subMatches.push(matchInfo)
+    submatches.push(matchInfo)
 
     if (matchInfo.matchString.length == inputString.length){
       matchLength = matchInfo.matchString.length
@@ -291,7 +291,7 @@ class EntireNode extends Node{
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       grammar_node_id: this.id, 
-      subMatches,
+      submatches,
       matchString: inputString.substring(0, matchLength),
       matchFound
     })
@@ -337,14 +337,14 @@ class SequenceNode extends Node{
     let tempString = inputString
     let totalMatchLength = 0
 
-    let subMatches = []
+    let submatches = []
     let matchInfo
     let matchFound = true
     let localOffset = 0
 
     for (let i = 0; i < this['nodes'].length; i++){
       matchInfo = this.nodes[i].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset + localOffset, parent: newMatchNode})
-      subMatches.push(matchInfo)
+      submatches.push(matchInfo)
       if (!matchInfo.matchFound){
         matchFound = false
         break;
@@ -364,7 +364,7 @@ class SequenceNode extends Node{
         inputString: inputString.slice(), 
         type: this['type'].slice(),
         grammar_node_id: this.id, 
-        subMatches,
+        submatches,
         matchString: inputString.substring(0, matchLength),
         matchFound
       }
@@ -410,12 +410,12 @@ class OrNode extends Node{
 
     var newMatchNode = new MatchNode(this.generator)
 
-    let subMatches = []
+    let submatches = []
     let matchInfo
     let matchFound = false
     for (let i = 0; i < this.nodes.length; i++){
       matchInfo = this['nodes'][i].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
-      subMatches.push(matchInfo)
+      submatches.push(matchInfo)
       if (!matchInfo.matchFound){
         continue
       }
@@ -433,7 +433,7 @@ class OrNode extends Node{
         inputString: inputString.slice(), 
         type: this['type'].slice(),
         grammar_node_id: this.id, 
-        subMatches,
+        submatches,
         matchString: inputString.substring(0, matchLength),
         matchFound
       }
@@ -476,7 +476,7 @@ class AndNode extends Node{
 
     var newMatchNode = new MatchNode(this.generator)
 
-    let subMatches = []
+    let submatches = []
     let matchInfo
     let smallestMatchLength = 0 //0 indicates no match
     let firstIteration = true
@@ -484,7 +484,7 @@ class AndNode extends Node{
 
     for (let i = 0; i < this.nodes.length; i++){
       matchInfo = this.nodes[i].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
-      subMatches.push(matchInfo)
+      submatches.push(matchInfo)
       if (!matchInfo.matchFound){
         smallestMatchLength = 0
         matchFound = false
@@ -516,7 +516,7 @@ class AndNode extends Node{
         inputString: inputString.slice(), 
         type: this['type'].slice(),
         grammar_node_id: this.id, 
-        subMatches,
+        submatches,
         matchString: inputString.substring(0, matchLength),
         matchFound
       }
@@ -562,10 +562,10 @@ class MultipleNode extends Node{
     let totalMatchLength = 0
     let matchFound = false
     let localOffset = 0
-    let subMatches = []
+    let submatches = []
     let matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
 
-    subMatches.push(matchInfo)
+    submatches.push(matchInfo)
     if (matchInfo.matchFound){
       matchFound = true
     }
@@ -575,7 +575,7 @@ class MultipleNode extends Node{
       localOffset = localOffset + matchInfo.matchString.length
       tempString = tempString.substring(matchInfo.matchString.length)
       matchInfo = this.nodes[0].parse(tempString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset + localOffset, parent: newMatchNode})
-      subMatches.push(matchInfo)
+      submatches.push(matchInfo)
     }
   
     Object.assign(
@@ -586,7 +586,7 @@ class MultipleNode extends Node{
         inputString: inputString.slice(), 
         type: this['type'].slice(),
         grammar_node_id: this.id, 
-        subMatches:subMatches,
+        submatches:submatches,
         matchString: inputString.substring(0, totalMatchLength),
         matchFound
       }
@@ -632,8 +632,8 @@ class OptionalNode extends Node{
     let newMatchNode = new MatchNode(this.generator)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
 
-    let subMatches = []
-    subMatches.push(matchInfo)
+    let submatches = []
+    submatches.push(matchInfo)
 
     Object.assign(newMatchNode, {
       globalOffset: metadata.globalOffset,
@@ -642,7 +642,7 @@ class OptionalNode extends Node{
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       grammar_node_id: this.id, 
-      subMatches,
+      submatches,
       matchString: inputString.substring(0, matchInfo.matchString.length),
       matchFound: true
     })
@@ -681,8 +681,8 @@ class SplitNode extends Node{
 
     let newMatchNode = new MatchNode(this.generator)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
-    let subMatches = []
-    subMatches.push(matchInfo)
+    let submatches = []
+    submatches.push(matchInfo)
     
     Object.assign(newMatchNode, {
       globalOffset: metadata.globalOffset,
@@ -691,7 +691,7 @@ class SplitNode extends Node{
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       grammar_node_id: this.id, 
-      subMatches,
+      submatches,
       matchString: matchInfo.matchString.slice(),
       matchFound: matchInfo.matchFound
     })
@@ -731,8 +731,8 @@ class NameNode extends Node{
 
     let newMatchNode = new MatchNode(this.generator)
     let matchInfo = this.nodes[1].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
-    let subMatches = []
-    subMatches.push(matchInfo)
+    let submatches = []
+    submatches.push(matchInfo)
     
     Object.assign(newMatchNode, {
       globalOffset: metadata.globalOffset,
@@ -741,7 +741,7 @@ class NameNode extends Node{
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       grammar_node_id: this.id, 
-      subMatches,
+      submatches,
       matchString: matchInfo.matchString.slice(),
       matchFound: matchInfo.matchFound,
       name:this.nodes[0]
@@ -779,8 +779,8 @@ class JumpNode extends Node{
 
     let newMatchNode = new MatchNode(this.generator)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
-    let subMatches = []
-    subMatches.push(matchInfo)
+    let submatches = []
+    submatches.push(matchInfo)
     
     Object.assign(newMatchNode, {
       globalOffset: metadata.globalOffset,
@@ -789,7 +789,7 @@ class JumpNode extends Node{
       inputString: inputString.slice(), 
       type: this['type'].slice(),
       grammar_node_id: this.id, 
-      subMatches,
+      submatches,
       matchString: matchInfo.matchString.slice(),
       matchFound: matchInfo.matchFound
     })
@@ -806,7 +806,7 @@ class MatchNode{
   constructor(generator){
     this.generator = generator
     //Defaults will be overridden during matching
-    this.subMatches = []
+    this.submatches = []
     this.matchString = ''
     this.matchFound = false
     this.serial = this.generator.getAndIncrementMatchCount()

@@ -63,8 +63,8 @@ class TreeViewer{
   
           }
           break
-        case 'subMatches':
-          for (let i = 0; i < matchNode['subMatches'].length;i++){
+        case 'submatches':
+          for (let i = 0; i < matchNode['submatches'].length;i++){
             outputString += this.getOutputString(keyValue[i])
           }
           // outputString += ' '.repeat(matchNode.depth) + key + ':' + keyValue + '\n'

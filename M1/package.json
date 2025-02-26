@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "name": "m1",
+  "version": "1.0.0",
+  "description": "Machine serialization format for representing parsers.",
+  "main": "M1.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

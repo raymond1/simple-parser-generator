@@ -18,3 +18,4 @@ composer.lock
 .vscode
 output.txt
 output2.txt
+Makefile

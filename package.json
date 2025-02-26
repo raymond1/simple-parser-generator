@@ -9,6 +9,7 @@
 	"license": "SEE LICENCE IN LICENCE",
 	"private": false,
 	"dependencies": {
+		"space-tree": "file:../spacetree/space-tree"
 	},
 	"devDependencies": {
 		"jsdoc": "^4.0.0"

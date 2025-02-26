@@ -1,10 +1,12 @@
+import SpaceTree from "space-tree"
+
 class O1{
   //Takes in a tree of produced match nodes
   //And returns a list of match nodes sorted by serial number
   static GetNodesAsList(matchNode, nodes=[]){
     nodes.push(matchNode) //Add current node
 
-    let considerationSet = matchNode.subMatches
+    let considerationSet = matchNode.submatches
     while (considerationSet.length > 0){
       for (let subMatch of considerationSet){
         nodes.push(subMatch) //add all children
@@ -13,8 +15,8 @@ class O1{
       let newConsiderationSet = []
 
       for (let subMatch of considerationSet){
-        if (subMatch.subMatches.length > 0){
-          for (let childOfChildren of subMatch.subMatches){
+        if (subMatch.submatches.length > 0){
+          for (let childOfChildren of subMatch.submatches){
             newConsiderationSet.push(childOfChildren)
           }
         }
@@ -43,7 +45,7 @@ class O1{
   //  
   // serial
   //  1
-  // subMatches
+  // submatches
   //  2
   //  3
   //  4
@@ -67,8 +69,8 @@ class O1{
           case 'generator':
             //Do not display the generator property
             continue
-          case 'subMatches':
-            for (let subMatch of sortedNode['subMatches']){
+          case 'submatches':
+            for (let subMatch of sortedNode['submatches']){
               tempString += SpaceTree.EncodeDepth(3) + subMatch.serial + '\n'
             }
             break

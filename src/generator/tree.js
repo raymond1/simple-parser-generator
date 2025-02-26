@@ -40,7 +40,7 @@ class Tree{
 			nodesToReturn.push(treeNode)
 		}
 
-		for (let match of treeNode.subMatches){
+		for (let match of treeNode.submatches){
 			let childNodes = Tree.returnFilteredNodeList(match, test, nodesToReturn)
 			nodesToReturn = Utilities.array_merge(nodesToReturn, childNodes)
 		}
@@ -78,33 +78,33 @@ class Tree{
       if (matchTreeNode.parent){ //read as 'if matchTreeNode is not the root of the entire tree'
 
 				//Set child matches as the children of the parent
-        for (let match of matchTreeNode.subMatches){
-					matchTreeNode.parent.subMatches.push(match)
+        for (let match of matchTreeNode.submatches){
+					matchTreeNode.parent.submatches.push(match)
 					match.parent = matchTreeNode.parent
 			  }
 
-        for (let i = 0; i < matchTreeNode.parent.subMatches.length; i++){
+        for (let i = 0; i < matchTreeNode.parent.submatches.length; i++){
 					//remove the item
-					if (matchTreeNode.parent.subMatches[i] === matchTreeNode){
-						matchTreeNode.parent.subMatches.splice(i,1)
+					if (matchTreeNode.parent.submatches[i] === matchTreeNode){
+						matchTreeNode.parent.submatches.splice(i,1)
 						break
 					}
 				}
       }else{
 				//Here, matchTreeNode is the root of the entire tree as it has no parent
-        if (matchTreeNode.subMatches.length > 1){
+        if (matchTreeNode.submatches.length > 1){
 
           throw new Error('Operation does not result in a tree')
           // //Create a new root node if the match tree node has two or more children
           // this.root = new MatchNode()
           // this.root.parent = null
-          // this.root.subMatches = matchTreeNode.subMatches
-        }else if (matchTreeNode.subMatches.length == 1){
-          this.root = matchTreeNode.subMatches[0]
+          // this.root.submatches = matchTreeNode.submatches
+        }else if (matchTreeNode.submatches.length == 1){
+          this.root = matchTreeNode.submatches[0]
 					matchTreeNode.parent = null
-					matchTreeNode.subMatches = []
+					matchTreeNode.submatches = []
 					this.root.parent = null
-        }else{ //0 subMatches. Remove root only
+        }else{ //0 submatches. Remove root only
           this.root = null
         }
       }
@@ -112,7 +112,7 @@ class Tree{
 			//item was not found
 			//check if children need to be removed
 			//All the children must set their parent to the parent of matchTreeNode
-			for (let match of matchTreeNode.subMatches){
+			for (let match of matchTreeNode.submatches){
 				this.removeItemAndHeal(itemToRemove,match)
 			}
 		}
@@ -149,20 +149,20 @@ class Tree{
 	//removes branches of the tree that match test
 	static _cutNodes(treeNode, test){
 		let nodesToCut = []
-		for (let i = 0; i < treeNode.subMatches.length; i++){
-			let childNode = treeNode.subMatches[i]
+		for (let i = 0; i < treeNode.submatches.length; i++){
+			let childNode = treeNode.submatches[i]
 			if (test(childNode)){
 				nodesToCut.push(childNode)
 			}
 		}
 
 		for (let i = 0; i < nodesToCut.length; i++){
-			let index = treeNode.subMatches.indexOf(nodesToCut[i])
-			treeNode.subMatches.splice(index, 1)
+			let index = treeNode.submatches.indexOf(nodesToCut[i])
+			treeNode.submatches.splice(index, 1)
 		}
 
-		for (let i = 0; i < treeNode.subMatches.length; i++){
-			Tree._cutNodes(treeNode.subMatches[i], test)
+		for (let i = 0; i < treeNode.submatches.length; i++){
+			Tree._cutNodes(treeNode.submatches[i], test)
 		}
 	}
 
@@ -226,13 +226,15 @@ class Tree{
     return returnValue
   }
   
+  //After pruning, trees may have node whose depth values are out of sync with the parent-child relationships.
+  //This function corrects the depth values
   resetDepth(treeNode,depth){
     if(!treeNode){
       //In case treeNode is null or undefined
       return
     }
     treeNode.depth = depth
-    for (let match of treeNode.subMatches){
+    for (let match of treeNode.submatches){
       this.resetDepth(match, depth + 1)
     }
   }
@@ -261,11 +263,11 @@ class Tree{
   //updates the parent element to refer to the clone tree rather than the parent tree
 	innerClone(matchTreeNode){
 		let newTreeNode = this.shallowCopy(matchTreeNode)
-    newTreeNode.subMatches = []
-    if (matchTreeNode.subMatches){
-      for (let match of matchTreeNode.subMatches){
+    newTreeNode.submatches = []
+    if (matchTreeNode.submatches){
+      for (let match of matchTreeNode.submatches){
         let matchClone = this.innerClone(match)
-        newTreeNode.subMatches.push(matchClone)
+        newTreeNode.submatches.push(matchClone)
         matchClone.parent = newTreeNode
       }
     }
@@ -296,7 +298,7 @@ class Tree{
 				operation(matchNode)
 			}
 
-			for (let match of matchNode.subMatches){
+			for (let match of matchNode.submatches){
 				this.recursiveApply(match,operation,selectionTest)
 			}
 		}
@@ -305,11 +307,13 @@ class Tree{
 	//Returns number of nodes in the tree
 	size(matchNode = this.root, total = 0){
 		if (matchNode){
-			for (let match of matchNode.subMatches){
+			for (let match of matchNode.submatches){
 				total += this.size(match)
 			}
 			return total + 1
-		}
+		}else{
+      return 0
+    }
 	}
 
 
@@ -318,18 +322,16 @@ class Tree{
 	//Assumes that root node will not be filtered out
 	returnFilteredTree(filter){
 		let newTree = this.clone()
-console.log('newTree size inside returnFilteredTree', newTree.size())
 		let listOfFilteredInNodes = Tree.returnFilteredNodeList(newTree.root, filter)
-console.log('listOfFilteredInNodes length inside returnFilteredTree', listOfFilteredInNodes.length)
 		let listOfFilteredOutNodes = newTree.treeInvert(listOfFilteredInNodes)
-console.log('listOfFilteredOutNodes length inside returnFilteredTree', listOfFilteredOutNodes.length)
 
 		newTree.pruneNodes((node)=>{
-			return listOfFilteredOutNodes.includes(node)
+      let includes = listOfFilteredOutNodes.includes(node)
+			return includes
 	  })
-console.log('newTree after pruning:', newTree.size())
 		return newTree
 	}
 }
 
 export {Tree}
+

@@ -3,7 +3,7 @@
   "name": "h1",
   "version": "1.0.0",
   "description": "File format for expressing parsers",
-  "main": "H1.js",
+  "main": "h1.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -1,6 +1,10 @@
-import M1 from "m1"
-import H1 from "h1"
-import O1 from "o1"
+import M1 from "./file-formats/m1/m1.js"
+import H1 from "./file-formats/h1/h1.js"
+import O1 from "./file-formats/o1/o1.js"
+import Tree from "./classes/tree.js"
+import Nodes from "./classes/nodes.js"
+import Strings from "./classes/strings.js"
+import Utilities from "./classes/utilities.js"
 
 /**
  * The ParserGenerator class is a parser generator that generates in-memory parsers, and allows for the export of such parsers into the O1 or H1 format 
@@ -31,37 +35,6 @@ class ParserGenerator{
    * */
   static installCheck(){
     console.log('Successfully installed.')
-  }
-
-  /***
-   * This is a private function that initializes the ParserGenerator.nodeTypes property with a
-   * mapping between the 'friendly names' of nodes and the object classes.
-   */
-  static registerNodeTypes(){
-    ParserGenerator.nodeTypes = {
-      'character class': CharacterClassNode,
-      'string literal':StringLiteralNode,
-      'sequence':SequenceNode,
-      'or':OrNode,
-      'and':AndNode,
-      'multiple':MultipleNode,
-      'not':NotNode,
-      'optional':OptionalNode,
-      'entire':EntireNode,
-      'split':SplitNode,
-      'name':NameNode,
-      'jump':JumpNode
-    }
-  }
-
-  /**
-   * Returns an array of strings listing the available node types recognized by this parser generator.
-   * 
-   * In other words: ['character class', 'string literal', 'sequence',...]
-   * @returns {Array}
-   */
-  static getNodeTypeNames(){
-    return Object.keys(ParserGenerator.nodeTypes)
   }
 
   /** 
@@ -121,7 +94,7 @@ class ParserGenerator{
    * @param {Object} metadata 
    */
   createNode(metadata){
-    let newNode = new ParserGenerator.nodeTypes[metadata.type](metadata)
+    let newNode = new ParserGenerator.NodeTypes[metadata.type](metadata)
     switch (metadata.type){
       case 'name':
         this.nameNodes[metadata.nodes[0]] = newNode
@@ -149,7 +122,22 @@ class ParserGenerator{
   }
 }
 
-ParserGenerator.registerNodeTypes()
+//Map from friendly name to Object classes
+ParserGenerator.NodeTypes = {
+  'character class': CharacterClassNode,
+  'string literal':StringLiteralNode,
+  'sequence':SequenceNode,
+  'or':OrNode,
+  'and':AndNode,
+  'multiple':MultipleNode,
+  'not':NotNode,
+  'optional':OptionalNode,
+  'entire':EntireNode,
+  'split':SplitNode,
+  'name':NameNode,
+  'jump':JumpNode
+}
+
 ParserGenerator.M1 = M1
 ParserGenerator.H1 = H1
 ParserGenerator.O1 = O1

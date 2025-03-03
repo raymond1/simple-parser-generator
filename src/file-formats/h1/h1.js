@@ -1,3 +1,5 @@
+import SpaceTree from "space-tree"
+
 //H1 is the class that deals with conversions to and from the H1 file format
 //which is the human-readable file format that can be imported into memory.
 
@@ -68,7 +70,6 @@ negative number
       }
       mapProcessedLineNumbersToOriginalLineNumbers[i] = j
     }
-debugger
     //Will also need to map nodes to processed lines. In other words, each node has an id and the association between the
     //node id and the processed
     let mapNodeIdsToProcessedLines = {}
@@ -87,6 +88,9 @@ return
     let accumulator = 0
     for (let i = 0; i < rootNodes.length; i++){
       rootNodeLineNumbers.push(accumulator)
+if (typeof rootNodes[i] != "string"){
+  console.log('rootNodes[i] is:' + rootNodes[i])
+}
       accumulator = accumulator + rootNodes[i].split('\n').length
     }
 
@@ -197,3 +201,5 @@ return
     return node
   }
 }
+
+export default H1

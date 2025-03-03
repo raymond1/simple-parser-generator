@@ -3,13 +3,13 @@
 	"name": "simple-parser-generator",
 	"version": "1.0.0",
 	"description": "A script for creating parsers specified using the Simple programming language.",
-	"main": "releases/spg.js",
+	"main": "src/generator.js",
 	"repository": "https://github.com/raymond1/simple-parser-generator",
 	"author": "Raymond Leon <raymondleon@raymondleon.ca>",
 	"license": "SEE LICENCE IN LICENCE",
 	"private": false,
 	"dependencies": {
-		"space-tree": "file:../spacetree/space-tree"
+		"space-tree": "file:../../spacetree/space-tree"
 	},
 	"devDependencies": {
 		"jsdoc": "^4.0.0"

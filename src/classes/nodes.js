@@ -100,7 +100,7 @@ class CharacterClassNode extends Node{
     //i goes from 1, 2, 3, ... to the length of the inputString
     for (let i = 1; i <= inputString.length; i++){
       let headString = inputString.substring(0,i)
-      if (Strings.contains_only(headString,this.nodes[0])){
+      if (Strings.ContainsOnly(headString,this.nodes[0])){
         matchingString = headString
       }else{
         break

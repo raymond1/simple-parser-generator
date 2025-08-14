@@ -1,3 +1,0 @@
-cp H1/* releases/H1
-cp M1/* releases/M1
-cp O1/* releases/O1

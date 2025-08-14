@@ -94,3 +94,5 @@ class O1{
     return outputString
   }
 }
+
+export default O1

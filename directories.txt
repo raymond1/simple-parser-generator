@@ -1,3 +1,3 @@
-releases/O1
-releases/M1
-releases/H1
+releases/o1
+releases/m1
+releases/h1

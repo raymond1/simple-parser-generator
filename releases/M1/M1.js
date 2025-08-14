@@ -107,3 +107,5 @@ class M1{
     return outputString  
   }
 }
+
+export default M1

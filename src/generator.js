@@ -2,9 +2,8 @@ import M1 from "./file-formats/m1/m1.js"
 import H1 from "./file-formats/h1/h1.js"
 import O1 from "./file-formats/o1/o1.js"
 import Tree from "./classes/tree.js"
+import TreeViewer from "./classes/tree_viewer.js"
 import Nodes from "./classes/nodes.js"
-import Strings from "./classes/strings.js"
-import Utilities from "./classes/utilities.js"
 
 /**
  * The ParserGenerator class is a parser generator that generates in-memory parsers, and allows for the export of such parsers into the O1 or H1 format 
@@ -94,7 +93,7 @@ class ParserGenerator{
    * @param {Object} metadata 
    */
   createNode(metadata){
-    let newNode = new ParserGenerator.NodeTypes[metadata.type](metadata)
+    let newNode = new ParserGenerator.Nodes.NodeTypes[metadata.type](metadata)
     switch (metadata.type){
       case 'name':
         this.nameNodes[metadata.nodes[0]] = newNode
@@ -106,42 +105,15 @@ class ParserGenerator{
     newNode.generator = this
     return newNode
   }
-
-  /***
-   * This function takes in an array of jump nodes and a map going from jump nodes to name nodes, and uses this information
-   * to connect the jump node to the name node that it is jumping to. A connection is formed when the first
-   * node child of a jump node is set to the value of a name node object.
-   * 
-   * During parsing, a jump node succeeds if its name node target succeeds.
-   */
-  static connectJumpNodesToNameNodes(jumpNodes, nameNodesMap){
-    for (let jumpNode of jumpNodes){
-      let tempNode = nameNodesMap[jumpNode.nodes[0]]
-      jumpNode.nodes[0] = tempNode
-    }
-  }
 }
 
-//Map from friendly name to Object classes
-ParserGenerator.NodeTypes = {
-  'character class': CharacterClassNode,
-  'string literal':StringLiteralNode,
-  'sequence':SequenceNode,
-  'or':OrNode,
-  'and':AndNode,
-  'multiple':MultipleNode,
-  'not':NotNode,
-  'optional':OptionalNode,
-  'entire':EntireNode,
-  'split':SplitNode,
-  'name':NameNode,
-  'jump':JumpNode
-}
 
 ParserGenerator.M1 = M1
 ParserGenerator.H1 = H1
 ParserGenerator.O1 = O1
 ParserGenerator.Tree = Tree
+ParserGenerator.TreeViewer = TreeViewer
+ParserGenerator.Nodes = Nodes
 
 export {ParserGenerator}
 export default ParserGenerator

@@ -179,4 +179,4 @@ class DOMTreeNode{
   }
 }
 
-export {TreeViewer}
+export default TreeViewer

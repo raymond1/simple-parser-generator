@@ -54,6 +54,7 @@ negative number
   positive number
 `*/
   static Import(s, generator){
+    let rootNodes = [] //Array of Node objects
     let originalLines = s.split('\n')
     
     //Get rid of empty lines and comments
@@ -83,26 +84,23 @@ negative number
   0
 return
  node`
-    let rootNodes = SpaceTree.Filter(s2, filter)
+    let rootNodeStrings = SpaceTree.Filter(s2, filter) //Array of node strings
 
     let accumulator = 0
-    for (let i = 0; i < rootNodes.length; i++){
+    for (let i = 0; i < rootNodeStrings.length; i++){
       rootNodeLineNumbers.push(accumulator)
-if (typeof rootNodes[i] != "string"){
-  console.log('rootNodes[i] is:' + rootNodes[i])
-}
-      accumulator = accumulator + rootNodes[i].split('\n').length
+      accumulator = accumulator + rootNodeStrings[i].split('\n').length
     }
 
     //Extract the node names at depth 0. Store the key inside the generator object
-    for (let i = 0; i < rootNodes.length; i++){
-      let rootNodeName = SpaceTree.GetText(rootNodes[i])
+    for (let i = 0; i < rootNodeStrings.length; i++){
+      let rootNodeName = SpaceTree.GetText(rootNodeStrings[i])
       generator.nameNodes[rootNodeName] = null
     }
 
     //All root level strings become name nodes
-    for (let i = 0; i < rootNodes.length; i++){
-      let rootNodeString = rootNodes[i]
+    for (let i = 0; i < rootNodeStrings.length; i++){
+      let rootNodeString = rootNodeStrings[i]
       let customNodeName = SpaceTree.GetText(rootNodeString)
       let childNode = H1.importInternal(SpaceTree.GetChildren(rootNodeString)[0], generator, rootNodeLineNumbers[i]+1, mapNodeIdsToProcessedLines)
 
@@ -121,7 +119,7 @@ if (typeof rootNodes[i] != "string"){
       mapNodeIdsToOriginalLineNumbers[id] = mapProcessedLineNumbersToOriginalLineNumbers[mapNodeIdsToProcessedLines[id]]
     }
 
-    ParserGenerator.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
+    this.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
     return {ultimateRoot, mapNodeIdsToOriginalLineNumbers}
   }
 
@@ -199,6 +197,20 @@ if (typeof rootNodes[i] != "string"){
 
     mapNodeIdsToProcessedLines[node.id] = lineNumberOffset
     return node
+  }
+
+  /***
+   * This function takes in an array of jump nodes and a map going from jump nodes to name nodes, and uses this information
+   * to connect the jump node to the name node that it is jumping to. A connection is formed when the first
+   * node child of a jump node is set to the value of a name node object.
+   * 
+   * During parsing, a jump node succeeds if its name node target succeeds.
+   */
+  static connectJumpNodesToNameNodes(jumpNodes, nameNodesMap){
+    for (let jumpNode of jumpNodes){
+      let tempNode = nameNodesMap[jumpNode.nodes[0]]
+      jumpNode.nodes[0] = tempNode
+    }
   }
 }
 

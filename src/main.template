@@ -1,9 +1,9 @@
 <%
 transcribe
- src/generator/nodes.js
- src/generator/tree.js
- src/generator/generator.js 
- src/generator/strings.js 
- src/generator/tree_viewer.js 
+ src/classes/nodes.js
+ src/classes/tree.js
+ src/generator.js 
+ src/classes/strings.js 
+ src/classes/tree_viewer.js 
 
 %>

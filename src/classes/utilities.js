@@ -13,3 +13,5 @@ class Utilities{
 		return returnArray
 	}
 }
+
+export default Utilities

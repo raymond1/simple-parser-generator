@@ -1,3 +1,4 @@
+import Strings from "./strings.js"
 /**
  * This class represents an atomic operation. When configured into a graph, Node objects form parsing programs that can
  * accomplish complex tasks. Parsing is also sometimes called 'matching'.
@@ -826,3 +827,24 @@ class MatchNode{
   }
 }
 
+class Nodes{
+
+}
+
+//Map from friendly name to Object classes
+Nodes.NodeTypes = {
+  'character class': CharacterClassNode,
+  'string literal':StringLiteralNode,
+  'sequence':SequenceNode,
+  'or':OrNode,
+  'and':AndNode,
+  'multiple':MultipleNode,
+  'not':NotNode,
+  'optional':OptionalNode,
+  'entire':EntireNode,
+  'split':SplitNode,
+  'name':NameNode,
+  'jump':JumpNode
+}
+
+export default Nodes

@@ -1,3 +1,5 @@
+import Utilities from "./utilities.js"
+
 class Tree{
   constructor(treeNode){
     this.root = treeNode

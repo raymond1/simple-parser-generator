@@ -2,7 +2,7 @@
 
 all:
 	php vendor/raymond1/document-compiling-cms/generate_website.php src/make_generator.script
-	cp -R documentation/demos ~/Desktop/programming/simple-https-server/public
+	#Do not add extra commands to this Makefile. Instead, modify make_generator.script to execute a command file
 
 documentation:
 	npx jsdoc -c jsdoc.json

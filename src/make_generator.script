@@ -1,5 +1,4 @@
-template src/main.template releases/spg.js
-generate directories
 copyscript src/subpackages.copy
+copyscript src/classes.copy
 copyscript src/demos.copy
-execute copysubpackages.txt
+execute src/copydemofilestowebroot.sh

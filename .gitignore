@@ -4,7 +4,7 @@ node_modules
 vendor
 src/server/root_certificates/*.pem
 thinking*.txt
-releases/spg.js
+releases
 documentation/api/*
 documentation/api
 documentation/demos/spg.js
@@ -19,3 +19,4 @@ composer.lock
 output.txt
 output2.txt
 Makefile
+src/copydemofilestowebroot.sh

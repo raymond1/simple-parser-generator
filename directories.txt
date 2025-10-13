@@ -1,3 +1,4 @@
-releases/o1
-releases/m1
-releases/h1
+documentation
+documentation/demos
+documentation/demos/classes
+documentation/demos/file-formats

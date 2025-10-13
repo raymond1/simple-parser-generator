@@ -1,9 +1,0 @@
-<%
-transcribe
- src/classes/nodes.js
- src/classes/tree.js
- src/generator.js 
- src/classes/strings.js 
- src/classes/tree_viewer.js 
-
-%>

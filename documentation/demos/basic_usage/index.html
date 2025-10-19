@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+<title>Basic usage</title>
+</head>
+<body>
+  (View the page source and the console for the code and output)
+	<script type="importmap">
+{
+	"imports": {
+		"simple-parser-generator":"../spg.js",
+    "space-tree":"../SpaceTree.js"
+	}
+}
+  </script>
+    <script type="module">
+import {ParserGenerator} from 'simple-parser-generator'
+
+let generator = new ParserGenerator()
+let specification = `entire
+ character class
+  0123456789`
+
+//let parser = generator.generateParser(specification)
+
+/*
+let inputString = '12345'
+let output = parser.ultimateRoot.parse(inputString)
+
+console.log(output)*/
+// console.log(ParserGenerator.H1.GetLineBreaks(''))
+// console.log(ParserGenerator.H1.GetLineBreaks('adsfasdf'))
+// console.log(ParserGenerator.H1.GetLineBreaks('adsfasdf\n\n'))
+// console.log(ParserGenerator.H1.Process(''))
+// console.log(ParserGenerator.H1.Process('adsfasdf'))
+// console.log(ParserGenerator.H1.Process("adsfasdf\nline2"))
+let s = "\n\nadsfasdf\nline2\n\n34234//dfsf\n//Hasdfsdaf"
+let a = ParserGenerator.H1.Process(s)
+console.log(a.newString)
+// for (let i = 0; i < a.excisions.length; i++){
+//   console.log(s.substring(a.excisions[i].position, a.excisions[i].position + a.excisions[i].length))
+// }
+    </script>
+</body>
+</html>

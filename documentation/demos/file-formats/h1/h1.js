@@ -4,9 +4,137 @@ import SpaceTree from "space-tree"
 //which is the human-readable file format that can be imported into memory.
 
 class H1{
-  //Gets rid of completely empty lines(not even spaces)
-  //Gets rid of comment lines starting with //
+  //Mathematical model:
+  //Lines are numbered from 0
+  //Following a newline character, a new line begins and the newline counter is incremented.
+  //Empty lines count as a line.
+  //Lines are separated by newline characters.
+  //Regions can be either a comment, a newline character, an empty line
+
+  //Slots are the spaces between characters and are numbered starting from the left from 0.
+  static GetTextAndNewlineRegions(s){
+    let regions = []
+
+    let regionStart = 0
+
+    let lineBreaks = H1.GetLineBreaks(s) //Get all line break indices
+
+    for (let i = 0; i < lineBreaks.length; i++){
+      let textRegion = {start:regionStart, end:lineBreaks[i], type: 'text'}
+      regions.push(textRegion)
+
+      let newlineRegion = {start:lineBreaks[i], end:lineBreaks[i] + 1, type: 'newline'}
+      regions.push(newlineRegion)
+      regionStart = lineBreaks[i] + 1
+    }
+    let endRegion = {start: regionStart, end: s.length, type: 'text'}
+    regions.push(endRegion)
+
+    return regions
+  }
+
+  //Marks regions as comments if they begin with '//'
+  //Marks regions as empties if they have a length of 0
+  static MarkCommentsAndEmpties(s, regions){
+    for (let i = 0; i < regions.length; i++){
+      if (regions[i].type == 'text'){
+        if (s.substring(regions[i].start, regions[i].end).substring(0,2) == '//'){
+          regions[i].type = 'comment'
+        }
+
+        if (regions[i].start == regions[i].end){
+          regions[i].type = 'empty'
+        }
+      }
+    }
+  }
+
+  static GetLineBreaks(s){
+    let lineBreaks = []
+    let caret
+    for (caret = 0; caret < s.length; caret++){
+      if (s[caret] == '\n'){
+        lineBreaks.push(caret)
+      }
+    }
+    return lineBreaks
+  }
+
+  //Given a set of regions, changes comment regions into empty regions
+  static MarkCommentsAsEmpties(regions){
+    for (let region of regions){
+      if (region.type == 'comment'){
+        region.type = 'empty'
+      }
+    }
+  }
+
+  //Given an array of regions, returns a new set. If two or more newline regions are continuous within the array,
+  //only one of them will be kept, and the rest will be marked for deletion.
+  static SquashConsecutiveNewlines(regions){
+    let newNewlineSequence = true
+    for (let i = 0; i < regions.length; i++){
+      if (regions[i].type == 'newline'){
+        if (newNewlineSequence){
+          newNewlineSequence = false
+        }else{
+          regions[i].type = 'delete'
+        }
+      }else{ //Not a newline region. Text region expected
+        newNewlineSequence = true //reset the flag
+      }
+    }
+
+    let newRegions = regions.filter((region)=>{return region.type != 'delete'})
+    return structuredClone(newRegions)
+  }
+
+  //If the first or last regions are of the newline type, delete the newlines
+  static DeleteDanglingNewlines(regions){
+    if (regions[0].type == 'newline'){
+      regions = regions.slice(1)
+    }
+
+    if(regions[regions.length - 1].type == 'newline'){
+      regions = regions.slice(0,-1)
+    }
+
+    return structuredClone(regions)
+  }
+
+  //Returns a string made up of various regions(start and end pairs)
+  static Reconstruct(s, regions){
+    let returnString = ''
+    for (let i = 0; i < regions.length; i++){
+      returnString += s.substring(regions[i].start, regions[i].end)
+    }
+    return returnString
+  }
+
+  //Given an original string s, returns a new string, newString, with empty lines and comments removed.
+  //Also returns debugging information, indicating where in the original string s the output string got its information from
   static Process(s){
+
+    let regions = H1.GetTextAndNewlineRegions(s)
+
+    H1.MarkCommentsAndEmpties(s,regions)
+    H1.MarkCommentsAsEmpties(regions) 
+    regions = structuredClone(regions).filter((region)=>{return region.type !='empty'})
+    regions = H1.SquashConsecutiveNewlines(regions)
+    regions = H1.DeleteDanglingNewlines(regions)
+
+    let newString = H1.Reconstruct(s, regions)
+    return {newString, originalRegions: regions}
+  }
+
+
+
+// '0123456789\nasdfasdf\nadfasdf\n'
+//'\nsdfadsfasf\n\n'
+
+//Line locations: 0-9,10-...
+//Line locations: Beginning,0- 
+/*
     let outputStringArray = []
     let lines = s.split('\n')
     for (let line of lines){
@@ -23,7 +151,8 @@ class H1{
 
     return outputStringArray.join('\n')
   }
-  
+*/
+
   /*`
 
 integer
@@ -58,7 +187,7 @@ negative number
     let originalLines = s.split('\n')
     
     //Get rid of empty lines and comments
-    let s2 = H1.Process(s)
+    let {s2, debugInfo} = H1.Process(s)
 
     //Map processed lines to original line numbers
     let processedLines = s2.split('\n')

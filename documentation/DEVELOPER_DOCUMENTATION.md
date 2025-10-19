@@ -18,6 +18,9 @@ This will trigger the "compilation" process.
 
 5. Alternatively, you can type in Make.
 
+# copydemofilestowebroot.sh
+You will need to update the copydemofilestowebroot.sh file to copy files to your webroot.
+
 # How to update the generate_website.php script
 After making changes to the script, go into the document-compiling-cms folder, add and commit your changes and then use the command:
 ```

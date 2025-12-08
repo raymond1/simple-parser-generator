@@ -1,6 +1,8 @@
 node_modules
 *.swp
 .DS_STORE
+._.DS_STORE
+._package.json
 vendor
 src/server/root_certificates/*.pem
 thinking*.txt
@@ -20,3 +22,4 @@ output.txt
 output2.txt
 Makefile
 src/copydemofilestowebroot.sh
+.env

@@ -1,4 +1,3 @@
 copyscript src/subpackages.copy
 copyscript src/classes.copy
 copyscript src/demos.copy
-execute src/copydemofilestowebroot.sh

@@ -1,4 +1,0 @@
-documentation
-documentation/demos
-documentation/demos/classes
-documentation/demos/file-formats

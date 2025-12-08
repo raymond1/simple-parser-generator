@@ -1,6 +1,6 @@
 import SpaceTree from "space-tree"
 
-//H1 is the class that deals with conversions to and from the H1 file format
+//H1 is the class that handles conversions to and from the H1 file format
 //which is the human-readable file format that can be imported into memory.
 
 class H1{
@@ -153,13 +153,32 @@ class H1{
   }
 */
 
+  //original is the original input program
+  //reduced is the original input program stripped of comments and extra spaces
+  //debugInfo is the information passed in indicated which character offset locations of the original string [{start:1,end:2, type:'text'}, ...]
+  //were used to create the reduced string
+
+  //The output is a mapping of {1:1,2:2,4:2,...}
+  static mapReducedLineNumbersToOriginalLineNumbers(debugInfo){
+    let returnMap = {}
+
+    let k = 0
+    for (let i = 0; i < debugInfo.length; i++){
+      for (let j = debugInfo[i].start; j < debugInfo[i].end; j++, k++){
+        returnMap[k] = j
+      }
+    }
+
+    return returnMap
+  }
   /*`
+Sample program
 
 integer
  entire
   or
    positive number
-   string literalß
+   string literal
     0
    negative number
 
@@ -183,27 +202,17 @@ negative number
   positive number
 `*/
   static Import(s, generator){
-    let rootNodes = [] //Array of Node objects
-    let originalLines = s.split('\n')
+    let rootNodes = [] //Array of Node objects with depth 0
     
-    //Get rid of empty lines and comments
-    let {s2, debugInfo} = H1.StripEmptyInformation(s)
+    let returnInformation = H1.StripEmptyInformation(s) //Get rid of empty lines and comments
 
-    //Map processed lines to original line numbers
-    let processedLines = s2.split('\n')
-    let mapProcessedLineNumbersToOriginalLineNumbers = {}
+    let s2 = returnInformation.newString //s2 is s with comments and empty newlines stripped
 
-    let j = 0 //counter for originalLines
-    for (let i = 0; i < processedLines.length; i++){
-      while (processedLines[i] != originalLines[j]){
-        j++
-      }
-      mapProcessedLineNumbersToOriginalLineNumbers[i] = j
-    }
-    
-    //Will also need to map nodes to processed lines. In other words, each node has an id and the association between the
-    //node id and the processed
-    let mapNodeIdsToProcessedLines = {}
+    //Map comment and empty-line stripped code lines back to original code line numbers
+    let mapFromReducedLineNumbersToOriginalLineNumbers = H1.mapReducedLineNumbersToOriginalLineNumbers(returnInformation.originalRegions)
+
+
+    let mapNodeIdsToReducedLines = {}
 
     //Get all nodes of depth 0
     let rootNodeLineNumbers = []
@@ -215,7 +224,7 @@ negative number
 return
  node`
     let rootNodeStrings = SpaceTree.Filter(s2, filter) //Array of node strings
-
+    
     let accumulator = 0
     for (let i = 0; i < rootNodeStrings.length; i++){
       rootNodeLineNumbers.push(accumulator)
@@ -232,21 +241,21 @@ return
     for (let i = 0; i < rootNodeStrings.length; i++){
       let rootNodeString = rootNodeStrings[i]
       let customNodeName = SpaceTree.GetText(rootNodeString)
-      let childNode = H1.importInternal(SpaceTree.GetChildren(rootNodeString)[0], generator, rootNodeLineNumbers[i]+1, mapNodeIdsToProcessedLines)
+      let childNode = H1.importInternal(SpaceTree.GetChildren(rootNodeString)[0], generator, rootNodeLineNumbers[i]+1, mapNodeIdsToReducedLines)
 
       let nameNode = generator.createNode({type:'name', nodes:[customNodeName, childNode]})
-      mapNodeIdsToProcessedLines[nameNode.id] = rootNodeLineNumbers[i]
+      mapNodeIdsToReducedLines[nameNode.id] = rootNodeLineNumbers[i]
 
       rootNodes.push(nameNode)
     }
 
     let ultimateRoot = generator.createNode({type:'split', nodes: rootNodes})
-    mapNodeIdsToProcessedLines[ultimateRoot.id] = -1
+    mapNodeIdsToReducedLines[ultimateRoot.id] = -1
 
     let mapNodeIdsToOriginalLineNumbers = {}
 
-    for (let id of Object.keys(mapNodeIdsToProcessedLines)){
-      mapNodeIdsToOriginalLineNumbers[id] = mapProcessedLineNumbersToOriginalLineNumbers[mapNodeIdsToProcessedLines[id]]
+    for (let id of Object.keys(mapNodeIdsToReducedLines)){
+      mapNodeIdsToOriginalLineNumbers[id] = mapFromReducedLineNumbersToOriginalLineNumbers[mapNodeIdsToReducedLines[id]]
     }
 
     this.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
@@ -259,7 +268,7 @@ return
   //Should return undefined for a string like the empty string with no nodes
 
   //Assumes that there is only one root for now
-  static importInternal(s, generator, lineNumberOffset, mapNodeIdsToProcessedLines){
+  static importInternal(s, generator, lineNumberOffset, mapNodeIdsToReducedLines){
     let childNodes = SpaceTree.GetChildren(s)
     let nodeType = SpaceTree.GetText(s)
 
@@ -282,7 +291,7 @@ return
             type:'name', 
             nodes: [
               SpaceTree.GetText(childNodes[0]),
-              H1.importInternal(childNodes[1],generator, lineNumberOffset + 2, mapNodeIdsToProcessedLines)
+              H1.importInternal(childNodes[1],generator, lineNumberOffset + 2, mapNodeIdsToReducedLines)
             ]
           }
         )
@@ -308,7 +317,7 @@ return
         let childNodesAsObjects = []
         let i = 1
         for (let childNode of childNodes){
-          childNodesAsObjects.push(H1.importInternal(childNode,generator, lineNumberOffset + i, mapNodeIdsToProcessedLines))
+          childNodesAsObjects.push(H1.importInternal(childNode,generator, lineNumberOffset + i, mapNodeIdsToReducedLines))
           i = i + 1
         }
         node = generator.createNode({type:nodeType, nodes: childNodesAsObjects})
@@ -325,7 +334,7 @@ return
         break
     }
 
-    mapNodeIdsToProcessedLines[node.id] = lineNumberOffset
+    mapNodeIdsToReducedLines[node.id] = lineNumberOffset
     return node
   }
 

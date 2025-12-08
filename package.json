@@ -9,7 +9,6 @@
 	"license": "SEE LICENCE IN LICENCE",
 	"private": false,
 	"devDependencies": {
-		"jsdoc": "^4.0.0"
 	},
 	"dependencies": {
 		"space-tree": "github:raymond1/space-tree"

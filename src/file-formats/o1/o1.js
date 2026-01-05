@@ -1,5 +1,6 @@
 import SpaceTree from "space-tree"
 
+//The main purpose of this code is to serialize the output matchNode tree
 class O1{
   //Takes in a tree of produced match nodes
   //And returns a list of match nodes sorted by serial number

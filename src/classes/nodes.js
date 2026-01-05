@@ -93,7 +93,7 @@ class CharacterClassNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    let newMatchNode = new MatchNode(this.generator)
+    let newMatchNode = new MatchNode(this.parser)
     //matches if the inputString starts with characters from the character class
     let matchingString = ''
     let matchFound = false
@@ -163,7 +163,7 @@ class StringLiteralNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    let newMatchNode = new MatchNode(this.generator)
+    let newMatchNode = new MatchNode(this.parser)
     //matches if inputString starts with the string passed in during object construction
     let matchLength = 0
     if (inputString.substring(0, this.nodes[0].length) == this.nodes[0]){
@@ -216,7 +216,7 @@ class NotNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    var newMatchNode = new MatchNode(this.generator)
+    var newMatchNode = new MatchNode(this.parser)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
 
     let matchLength = matchInfo.matchFound?0:inputString.length
@@ -272,7 +272,7 @@ class EntireNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    let newMatchNode = new MatchNode(this.generator)
+    let newMatchNode = new MatchNode(this.parser)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, parent: newMatchNode})
 
     let submatches = []
@@ -334,7 +334,7 @@ class SequenceNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    let newMatchNode = new MatchNode(this.generator)
+    let newMatchNode = new MatchNode(this.parser)
     let tempString = inputString
     let totalMatchLength = 0
 
@@ -409,7 +409,7 @@ class OrNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    var newMatchNode = new MatchNode(this.generator)
+    var newMatchNode = new MatchNode(this.parser)
 
     let submatches = []
     let matchInfo
@@ -475,7 +475,7 @@ class AndNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    var newMatchNode = new MatchNode(this.generator)
+    var newMatchNode = new MatchNode(this.parser)
 
     let submatches = []
     let matchInfo
@@ -558,7 +558,7 @@ class MultipleNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    var newMatchNode = new MatchNode(this.generator)
+    var newMatchNode = new MatchNode(this.parser)
     let tempString = inputString
     let totalMatchLength = 0
     let matchFound = false
@@ -630,7 +630,7 @@ class OptionalNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    let newMatchNode = new MatchNode(this.generator)
+    let newMatchNode = new MatchNode(this.parser)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
 
     let submatches = []
@@ -680,7 +680,7 @@ class SplitNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    let newMatchNode = new MatchNode(this.generator)
+    let newMatchNode = new MatchNode(this.parser)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
     let submatches = []
     submatches.push(matchInfo)
@@ -730,7 +730,7 @@ class NameNode extends Node{
 
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    let newMatchNode = new MatchNode(this.generator)
+    let newMatchNode = new MatchNode(this.parser)
     let matchInfo = this.nodes[1].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
     let submatches = []
     submatches.push(matchInfo)
@@ -778,7 +778,7 @@ class JumpNode extends Node{
     super.d()
     metadata = Node.setDefaultMetadataValues(metadata)
 
-    let newMatchNode = new MatchNode(this.generator)
+    let newMatchNode = new MatchNode(this.parser)
     let matchInfo = this.nodes[0].parse(inputString,{depth: metadata.depth + 1, globalOffset: metadata.globalOffset, parent: newMatchNode})
     let submatches = []
     submatches.push(matchInfo)
@@ -804,13 +804,13 @@ class JumpNode extends Node{
  * and a matchFound property.
  * */
 class MatchNode{
-  constructor(generator){
-    this.generator = generator
+  constructor(parser){
+    this.parser = parser
     //Defaults will be overridden during matching
     this.submatches = []
     this.matchString = ''
     this.matchFound = false
-    this.serial = this.generator.getAndIncrementMatchCount()
+    this.serial = this.parser.getAndIncrementMatchCount()
   }
 
   shallowDisplay(){

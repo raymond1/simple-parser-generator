@@ -9,11 +9,8 @@ thinking*.txt
 releases
 documentation/api/*
 documentation/api
-documentation/demos/spg.js
-documentation/demos/nodejs/spg.js
 documentation/demos/nodejs/api_test.js
 documentation/demos/nodejs/test2.js
-documentation/demos/basic_usage/spg.js
 TODO.txt
 package-lock.json
 composer.lock

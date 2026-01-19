@@ -112,16 +112,19 @@ class H1{
   }
 
   //Given an original string s, returns a new string, newString, with empty lines and comments removed.
-  //Also returns debugging information, indicating where in the original string s the output string got its information from
+  //Also returns debugging information, a set of regions in the form {start: 2, end: 24, type:text, start:24, end: 25, type: 'newline'}
+  // indicating the character indices in the original string s that when concatenated will generate the output string newString
   static StripEmptyInformation(s){
-
     let regions = H1.GetTextAndNewlineRegions(s)
 
     H1.MarkCommentsAndEmpties(s,regions)
     H1.MarkCommentsAsEmpties(regions) 
     regions = structuredClone(regions).filter((region)=>{return region.type !='empty'})
+
     regions = H1.SquashConsecutiveNewlines(regions)
     regions = H1.DeleteDanglingNewlines(regions)
+
+    regions.sort((region1,region2)=>{return region1.start - region2.start})
 
     let newString = H1.Reconstruct(s, regions)
     return {newString, originalRegions: regions}
@@ -153,24 +156,38 @@ class H1{
   }
 */
 
-  //original is the original input program
-  //reduced is the original input program stripped of comments and extra spaces
-  //debugInfo is the information passed in indicated which character offset locations of the original string [{start:1,end:2, type:'text'}, ...]
-  //were used to create the reduced string
+  //Given a string region {start:1, end:2, type:'text'} and a string, this function
+  //returns the number of newlines before the indicated region begins
+  static GetOriginalLineNumber(originalString, region){
+    let linesBefore = originalString.substring(0,region.start).split('\n')
+    return linesBefore.length - 1
+  }
 
-  //The output is a mapping of {1:1,2:2,4:2,...}
-  static mapReducedLineNumbersToOriginalLineNumbers(debugInfo){
+  //regions is in the form [{start:1,end:2, type:'text'}, {start:3, end: 3, type: 'newline'}...]
+  //It is a collection of character regions from the original input string. The regions are sorted
+  //in ascending order of the start property.
+
+  //The output is a mapping of {0:0,1:2,2:3,...} (reduced line number to original line number)
+  //The input is the original program containing comments and blank lines
+  static mapReducedLineNumbersToOriginalLineNumbers(originalString, regions){
+
+    let reducedLineNumber = 0
+    let originalLineNumber
+
     let returnMap = {}
-
-    let k = 0
-    for (let i = 0; i < debugInfo.length; i++){
-      for (let j = debugInfo[i].start; j < debugInfo[i].end; j++, k++){
-        returnMap[k] = j
+    for (let region of regions){
+      if (region.type == 'text'){
+        originalLineNumber = H1.GetOriginalLineNumber(originalString,region)
+        returnMap[reducedLineNumber] = originalLineNumber
+      }
+      else{
+        reducedLineNumber += 1
       }
     }
 
     return returnMap
   }
+
   /*`
 Sample program
 
@@ -201,17 +218,18 @@ negative number
    -
   positive number
 `*/
+  //Root nodes have no indentation(depth = 0)
   static Import(s, generator){
     let rootNodes = [] //Array of Node objects with depth 0
-    
-    let returnInformation = H1.StripEmptyInformation(s) //Get rid of empty lines and comments
 
+    //Stage 1: strip comments, compact newlines, remove empty lines
+    let returnInformation = H1.StripEmptyInformation(s) //Get rid of empty lines and comments
     let s2 = returnInformation.newString //s2 is s with comments and empty newlines stripped
 
-    //Map comment and empty-line stripped code lines back to original code line numbers
-    let mapFromReducedLineNumbersToOriginalLineNumbers = H1.mapReducedLineNumbersToOriginalLineNumbers(returnInformation.originalRegions)
+    //Stage 2: Map comment and empty-line stripped code lines back to original code line numbers
+    let mapFromReducedLineNumbersToOriginalLineNumbers = H1.mapReducedLineNumbersToOriginalLineNumbers(s, returnInformation.originalRegions)
 
-
+    //Stage 3: Convert root level nodes into name nodes
     let mapNodeIdsToReducedLines = {}
 
     //Get all nodes of depth 0
@@ -249,6 +267,7 @@ return
       rootNodes.push(nameNode)
     }
 
+    //Stage 4: add a split to be the holder of all the name nodes
     let ultimateRoot = generator.createNode({type:'split', nodes: rootNodes})
     mapNodeIdsToReducedLines[ultimateRoot.id] = -1
 
@@ -258,8 +277,11 @@ return
       mapNodeIdsToOriginalLineNumbers[id] = mapFromReducedLineNumbersToOriginalLineNumbers[mapNodeIdsToReducedLines[id]]
     }
 
+    //Stage 5: connect jump nodes to name nodes
     this.connectJumpNodesToNameNodes(generator.jumpNodes,generator.nameNodes)
-    return {ultimateRoot, mapNodeIdsToOriginalLineNumbers}
+
+    //Stage 6: Return the new root with debug information
+    return {ultimateRoot, debugInfo:{mapNodeIdsToOriginalLineNumbers, mapFromReducedLineNumbersToOriginalLineNumbers}}
   }
 
   //Assumes input string is well-formed
@@ -318,7 +340,7 @@ return
         let i = 1
         for (let childNode of childNodes){
           childNodesAsObjects.push(H1.importInternal(childNode,generator, lineNumberOffset + i, mapNodeIdsToReducedLines))
-          i = i + 1
+          i = i + childNode.split('\n').length
         }
         node = generator.createNode({type:nodeType, nodes: childNodesAsObjects})
         break

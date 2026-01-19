@@ -14,7 +14,7 @@ class Parser{
     this.jumpNodes = []
     let importObject = H1.Import(parserDefinition, this) 
     this.parserRoot = importObject.ultimateRoot
-    this.debugInformation = importObject.mapNodeIdsToOriginalLineNumbers
+    this.debugInfo = importObject.debugInfo
   }
 
   parse(input){

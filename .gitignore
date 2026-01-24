@@ -20,3 +20,4 @@ output2.txt
 Makefile
 src/copydemofilestowebroot.sh
 .env
+src/classes/test.js
